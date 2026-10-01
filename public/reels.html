@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0">
+
+  <title>Reels • Pulse Social</title>
+
+  <link rel="stylesheet" href="/css/style.css">
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: #050505;
+      color: white;
+      font-family: Inter, Arial, sans-serif;
+    }
+
+    .reels-header {
+      height: 65px;
+      background: rgba(10,10,10,.95);
+      border-bottom: 1px solid #222;
+      display: flex;
+      align-items: center;
+      padding: 0 22px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 50;
+    }
+
+    .logo {
+      color: #1877f2;
+      text-decoration: none;
+      font-size: 27px;
+      font-weight: 800;
+    }
+
+    .back {
+      color: white;
+      text-decoration: none;
+      margin-left: 25px;
+      font-weight: 600;
+    }
+
+    .reels-container {
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
+      padding-top: 85px;
+      padding-bottom: 40px;
+    }
+
+    .create-reel {
+      background: #111;
+      border: 1px solid #252525;
+      border-radius: 15px;
+      padding: 18px;
+      margin: 0 12px 20px;
+    }
+
+    .create-reel h2 {
+      margin-top: 0;
+    }
+
+    .reel-caption {
+      width: 100%;
+      min-height: 75px;
+      resize: vertical;
+      background: #181818;
+      color: white;
+      border: 1px solid #333;
+      border-radius: 10px;
+      padding: 12px;
+      outline: none;
+    }
+
+    .reel-actions {
+      margin-top: 12px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .upload-label {
+      background: #222;
+      border: 1px solid #333;
+      padding: 11px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    #reelFile {
+      display: none;
+    }
+
+    .publish {
+      border: none;
+      background: #1877f2;
+      color: white;
+      padding: 11px 18px;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .publish:disabled {
+      opacity: .6;
+    }
+
+    .reel-preview {
+      display: none;
+      margin-top: 15px;
+    }
+
+    .reel-preview video {
+      width: 100%;
+      max-height: 500px;
+      object-fit: contain;
+      border-radius: 12px;
+      background: #000;
+    }
+
+    .reel {
+      min-height: 700px;
+      background: #111;
+      border-radius: 15px;
+      overflow: hidden;
+      margin: 20px 12px;
+      position: relative;
+      scroll-snap-align: start;
+    }
+
+    .reel-media {
+      width: 100%;
+      height: 700px;
+      background: #000;
+      object-fit: cover;
+      display: block;
+    }
+
+    .reel-info {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 80px;
+      padding: 22px 18px;
+      background: linear-gradient(
+        transparent,
+        rgba(0,0,0,.85)
+      );
+      padding-top: 80px;
+    }
+
+    .creator {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .creator img {
+      width: 42px;
+      height: 42px;
+      object-fit: cover;
+      border-radius: 50%;
+      border: 2px solid white;
+    }
+
+    .creator-name {
+      font-weight: 800;
+    }
+
+    .verified {
+      color: #1877f2;
+      margin-left: 3px;
+    }
+
+    .caption {
+      font-size: 15px;
+      line-height: 1.45;
+    }
+
+    .reel-buttons {
+      position: absolute;
+      right: 13px;
+      bottom: 85px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .reel-button {
+      border: none;
+      background: rgba(0,0,0,.55);
+      color: white;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 21px;
+    }
+
+    .reel-count {
+      font-size: 11px;
+      display: block;
+      margin-top: 2px;
+    }
+
+    .follow-button {
+      background: #1877f2;
+      border: none;
+      color: white;
+      border-radius: 8px;
+      padding: 7px 12px;
+      cursor: pointer;
+      font-weight: 700;
+      margin-left: 8px;
+    }
+
+    .follow-button.following {
+      background: #333;
+    }
+
+    .empty {
+      margin: 20px 12px;
+      padding: 50px 20px;
+      text-align: center;
+      background: #111;
+      border-radius: 15px;
+      color: #aaa;
+    }
+
+    .comments {
+      position: fixed;
+      inset: auto 0 0 0;
+      max-width: 600px;
+      margin: auto;
+      background: #151515;
+      border-radius: 20px 20px 0 0;
+      padding: 20px;
+      z-index: 100;
+      display: none;
+      max-height: 70vh;
+    }
+
+    .comments h3 {
+      margin-top: 0;
+    }
+
+    .comment-list {
+      overflow-y: auto;
+      max-height: 45vh;
+    }
+
+    .comment {
+      padding: 10px 0;
+      border-bottom: 1px solid #292929;
+    }
+
+    .comment strong {
+      display: block;
+      margin-bottom: 3px;
+    }
+
+    .comment-form {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .comment-form input {
+      flex: 1;
+      background: #222;
+      border: 1px solid #333;
+      color: white;
+      padding: 11px;
+      border-radius: 9px;
+    }
+
+    .comment-form button,
+    .close-comments {
+      border: none;
+      background: #1877f2;
+      color: white;
+      border-radius: 9px;
+      padding: 10px 14px;
+      cursor: pointer;
+    }
+
+    .close-comments {
+      float: right;
+    }
+
+    @media (max-width: 600px) {
+
+      .reels-container {
+        padding-top: 75px;
+      }
+
+      .reel {
+        border-radius: 0;
+        margin: 10px 0;
+        min-height: calc(100vh - 75px);
+      }
+
+      .reel-media {
+        height: calc(100vh - 75px);
+      }
+
+      .reel-info {
+        right: 70px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header class="reels-header">
+  <a href="/feed.html" class="logo">Pulse</a>
+  <a href="/feed.html" class="back">← Feed</a>
+</header>
+
+<main class="reels-container">
+
+  <section class="create-reel">
+
+    <h2>Create a Reel</h2>
+
+    <textarea
+      id="reelCaption"
+      class="reel-caption"
+      maxlength="1000"
+      placeholder="Write a caption..."></textarea>
+
+    <div class="reel-actions">
+
+      <label
+        class="upload-label"
+        for="reelFile">
+        🎬 Choose Video
+      </label>
+
+      <input
+        id="reelFile"
+        type="file"
+        accept="video/*">
+
+      <button
+        id="publishReel"
+        class="publish">
+        Publish Reel
+      </button>
+
+    </div>
+
+    <div
+      id="reelPreview"
+      class="reel-preview">
+    </div>
+
+  </section>
+
+  <section id="reels">
+    <div class="empty">
+      Loading reels...
+    </div>
+  </section>
+
+</main>
+
+<div id="commentsBox" class="comments">
+
+  <button
+    class="close-comments"
+    onclick="closeComments()">
+    Close
+  </button>
+
+  <h3>Comments</h3>
+
+  <div
+    id="commentList"
+    class="comment-list">
+  </div>
+
+  <form
+    id="commentForm"
+    class="comment-form">
+
+    <input
+      id="commentInput"
+      placeholder="Write a comment..."
+      required>
+
+    <button>
+      Send
+    </button>
+
+  </form>
+
+</div>
+
+<script>
+
+  const $ = id =>
+    document.getElementById(id);
+
+  let selectedVideo = null;
+  let activeReelId = null;
+
+  async function api(url, options = {}) {
+
+    const config = {
+      credentials: "include",
+      ...options
+    };
+
+    if (
+      config.body &&
+      !(config.body instanceof FormData)
+    ) {
+
+      config.headers = {
+        "Content-Type": "application/json",
+        ...(config.headers || {})
+      };
+    }
+
+    const response =
+      await fetch(url, config);
+
+    let data = {};
+
+    try {
+      data = await response.json();
+    } catch {}
+
+    if (!response.ok) {
+
+      throw new Error(
+        data.error ||
+        data.message ||
+        "Request failed"
+      );
+    }
+
+    return data;
+  }
+
+  async function checkLogin() {
+
+    try {
+
+      const data =
+        await api("/api/me");
+
+      if (!data.loggedIn) {
+
+        location.href =
+          "/login.html";
+
+        return false;
+      }
+
+      return true;
+
+    } catch {
+
+      location.href =
+        "/login.html";
+
+      return false;
+    }
+  }
+
+  $("reelFile")
+    .addEventListener("change", event => {
+
+      selectedVideo =
+        event.target.files[0];
+
+      if (!selectedVideo) {
+
+        $("reelPreview").style.display =
+          "none";
+
+        return;
+      }
+
+      if (!selectedVideo.type.startsWith("video/")) {
+
+        alert("Please choose a video.");
+
+        event.target.value = "";
+        selectedVideo = null;
+
+        return;
+      }
+
+      const url =
+        URL.createObjectURL(selectedVideo);
+
+      $("reelPreview").innerHTML = `
+        <video
+          src="${url}"
+          controls
+          playsinline>
+        </video>
+      `;
+
+      $("reelPreview").style.display =
+        "block";
+    });
+
+  async function publishReel() {
+
+    if (!selectedVideo) {
+
+      alert("Choose a video first.");
+      return;
+    }
+
+    const form =
+      new FormData();
+
+    form.append(
+      "video",
+      selectedVideo
+    );
+
+    const caption =
+      $("reelCaption").value.trim();
+
+    if (caption) {
+      form.append("caption", caption);
+    }
+
+    $("publishReel").disabled =
+      true;
+
+    $("publishReel").textContent =
+      "Publishing...";
+
+    try {
+
+      await api("/api/reels", {
+        method: "POST",
+        body: form
+      });
+
+      $("reelCaption").value = "";
+      $("reelFile").value = "";
+      selectedVideo = null;
+
+      $("reelPreview").style.display =
+        "none";
+
+      await loadReels();
+
+      alert("Reel published!");
+
+    } catch (error) {
+
+      alert(error.message);
+
+    } finally {
+
+      $("publishReel").disabled =
+        false;
+
+      $("publishReel").textContent =
+        "Publish Reel";
+    }
+  }
+
+  async function loadReels() {
+
+    const container =
+      $("reels");
+
+    try {
+
+      const data =
+        await api("/api/reels");
+
+      const reels =
+        Array.isArray(data)
+          ? data
+          : data.reels || [];
+
+      if (!reels.length) {
+
+        container.innerHTML = `
+          <div class="empty">
+            <h2>No reels yet</h2>
+            <p>Upload the first reel on Pulse.</p>
+          </div>
+        `;
+
+        return;
+      }
+
+      container.innerHTML = "";
+
+      reels.forEach(reel => {
+
+        container.appendChild(
+          createReel(reel)
+        );
+
+      });
+
+    } catch (error) {
+
+      container.innerHTML = `
+        <div class="empty">
+          Unable to load reels.
+          <br><br>
+          ${escapeHTML(error.message)}
+        </div>
+      `;
+    }
+  }
+
+  function createReel(reel) {
+
+    const article =
+      document.createElement("article");
+
+    article.className = "reel";
+
+    const user =
+      reel.user ||
+      reel.author ||
+      {};
+
+    const name =
+      user.name ||
+      reel.name ||
+      user.username ||
+      "User";
+
+    const username =
+      user.username ||
+      reel.username ||
+      "";
+
+    const avatar =
+      user.profilePicture ||
+      user.avatar ||
+      reel.profilePicture ||
+      "/images/default-avatar.png";
+
+    const video =
+      reel.videoUrl ||
+      reel.video ||
+      reel.mediaUrl ||
+      "";
+
+    const caption =
+      reel.caption ||
+      reel.text ||
+      "";
+
+    const verified =
+      user.verified ||
+      reel.verified;
+
+    const liked =
+      reel.liked ||
+      reel.isLiked;
+
+    const likeCount =
+      reel.likeCount ||
+      reel.likesCount ||
+      0;
+
+    const commentCount =
+      reel.commentCount ||
+      reel.commentsCount ||
+      0;
+
+    const following =
+      reel.following ||
+      user.following ||
+      false;
+
+    article.innerHTML = `
+
+      <video
+        class="reel-media"
+        src="${video}"
+        controls
+        playsinline
+        loop
+        preload="metadata">
+      </video>
+
+      <div class="reel-info">
+
+        <div class="creator">
+
+          <img
+            src="${avatar}"
+            alt="">
+
+          <span class="creator-name">
+            ${escapeHTML(name)}
+
+            ${
+              verified
+                ? `<span class="verified">✓</span>`
+                : ""
+            }
+          </span>
+
+          ${
+            username
+              ? `
+                <button
+                  class="follow-button ${
+                    following ? "following" : ""
+                  }"
+                  data-follow="${user.id || reel.userId || ""}">
+                  ${following ? "Following" : "Follow"}
+                </button>
+              `
+              : ""
+          }
+
+        </div>
+
+        ${
+          caption
+            ? `
+              <div class="caption">
+                ${formatText(caption)}
+              </div>
+            `
+            : ""
+        }
+
+      </div>
+
+      <div class="reel-buttons">
+
+        <button
+          class="reel-button like-btn"
+          data-id="${reel.id}">
+          ${liked ? "❤️" : "🤍"}
+          <span class="reel-count">
+            ${likeCount}
+          </span>
+        </button>
+
+        <button
+          class="reel-button comment-btn"
+          data-id="${reel.id}">
+          💬
+          <span class="reel-count">
+            ${commentCount}
+          </span>
+        </button>
+
+        <button
+          class="reel-button share-btn"
+          data-id="${reel.id}">
+          ↗️
+        </button>
+
+        ${
+          reel.isOwner
+            ? `
+              <button
+                class="reel-button delete-btn"
+                data-id="${reel.id}">
+                🗑️
+              </button>
+            `
+            : ""
+        }
+
+      </div>
+    `;
+
+    const likeButton =
+      article.querySelector(".like-btn");
+
+    likeButton.addEventListener(
+      "click",
+      async () => {
+
+        try {
+
+          await api(
+            `/api/reels/${reel.id}/like`,
+            { method: "POST" }
+          );
+
+          await loadReels();
+
+        } catch (error) {
+
+          alert(error.message);
+        }
+      }
+    );
+
+    const commentButton =
+      article.querySelector(".comment-btn");
+
+    commentButton.addEventListener(
+      "click",
+      () => openComments(reel.id)
+    );
+
+    const shareButton =
+      article.querySelector(".share-btn");
+
+    shareButton.addEventListener(
+      "click",
+      () => shareReel(reel)
+    );
+
+    const followButton =
+      article.querySelector(".follow-button");
+
+    if (followButton) {
+
+      followButton.addEventListener(
+        "click",
+        async () => {
+
+          const id =
+            followButton.dataset.follow;
+
+          if (!id) return;
+
+          try {
+
+            await api(
+              `/api/users/${id}/follow`,
+              { method: "POST" }
+            );
+
+            await loadReels();
+
+          } catch (error) {
+
+            alert(error.message);
+          }
+        }
+      );
+    }
+
+    const deleteButton =
+      article.querySelector(".delete-btn");
+
+    if (deleteButton) {
+
+      deleteButton.addEventListener(
+        "click",
+        async () => {
+
+          if (!confirm("Delete this reel?")) {
+            return;
+          }
+
+          try {
+
+            await api(
+              `/api/reels/${reel.id}`,
+              { method: "DELETE" }
+            );
+
+            await loadReels();
+
+          } catch (error) {
+
+            alert(error.message);
+          }
+        }
+      );
+    }
+
+    return article;
+  }
+
+  async function openComments(id) {
+
+    activeReelId = id;
+
+    $("commentsBox").style.display =
+      "block";
+
+    $("commentList").innerHTML =
+      "Loading comments...";
+
+    try {
+
+      const data =
+        await api(
+          `/api/reels/${id}/comments`
+        );
+
+      const comments =
+        Array.isArray(data)
+          ? data
+          : data.comments || [];
+
+      if (!comments.length) {
+
+        $("commentList").innerHTML =
+          "<p>No comments yet.</p>";
+
+        return;
+      }
+
+      $("commentList").innerHTML =
+        comments.map(comment => {
+
+          const user =
+            comment.user ||
+            comment.author ||
+            {};
+
+          return `
+            <div class="comment">
+
+              <strong>
+                ${escapeHTML(
+                  user.name ||
+                  comment.username ||
+                  "User"
+                )}
+              </strong>
+
+              <div>
+                ${escapeHTML(
+                  comment.text || ""
+                )}
+              </div>
+
+            </div>
+          `;
+
+        }).join("");
+
+    } catch (error) {
+
+      $("commentList").innerHTML =
+        `Unable to load comments.`;
+    }
+  }
+
+  $("commentForm")
+    .addEventListener("submit", async event => {
+
+      event.preventDefault();
+
+      if (!activeReelId) return;
+
+      const input =
+        $("commentInput");
+
+      const text =
+        input.value.trim();
+
+      if (!text) return;
+
+      try {
+
+        await api(
+          `/api/reels/${activeReelId}/comments`,
+          {
+            method: "POST",
+            body: JSON.stringify({ text })
+          }
+        );
+
+        input.value = "";
+
+        await openComments(
+          activeReelId
+        );
+
+        await loadReels();
+
+      } catch (error) {
+
+        alert(error.message);
+      }
+    });
+
+  function closeComments() {
+
+    $("commentsBox").style.display =
+      "none";
+
+    activeReelId = null;
+  }
+
+  async function shareReel(reel) {
+
+    const url =
+      `${location.origin}/reels.html#${reel.id}`;
+
+    try {
+
+      if (navigator.share) {
+
+        await navigator.share({
+          title: "Pulse Reel",
+          text:
+            reel.caption ||
+            "Check out this reel on Pulse.",
+          url
+        });
+
+      } else {
+
+        await navigator.clipboard.writeText(url);
+
+        alert("Reel link copied!");
+      }
+
+    } catch {}
+  }
+
+  function formatText(text) {
+
+    return escapeHTML(text)
+      .replace(
+        /(@[a-zA-Z0-9_]+)/g,
+        '<span style="color:#60a5fa">$1</span>'
+      )
+      .replace(
+        /(#[a-zA-Z0-9_]+)/g,
+        '<span style="color:#60a5fa">$1</span>'
+      );
+  }
+
+  function escapeHTML(value) {
+
+    return String(value || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  $("publishReel")
+    .addEventListener(
+      "click",
+      publishReel
+    );
+
+  (async function init() {
+
+    if (await checkLogin()) {
+      await loadReels();
+    }
+
+  })();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Sign up • Pulse Social</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+
+      font-family:
+        Inter,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Arial,
+        sans-serif;
+
+      background:
+        linear-gradient(
+          135deg,
+          #eef4ff,
+          #f8fafc,
+          #eaf2ff
+        );
+
+      color: #1c1e21;
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: center;
+
+      padding: 24px;
+    }
+
+    .page {
+      width: 100%;
+
+      max-width: 1080px;
+
+      display: grid;
+
+      grid-template-columns:
+        1fr 1fr;
+
+      gap: 70px;
+
+      align-items: center;
+    }
+
+    /* BRAND */
+
+    .brand-section {
+      padding: 20px;
+    }
+
+    .logo {
+      width: 68px;
+      height: 68px;
+
+      border-radius: 18px;
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: center;
+
+      background:
+        linear-gradient(
+          135deg,
+          #1877f2,
+          #6c5ce7
+        );
+
+      color: white;
+
+      font-size: 34px;
+
+      font-weight: 900;
+
+      box-shadow:
+        0 12px 30px
+        rgba(24, 119, 242, 0.25);
+
+      margin-bottom: 24px;
+    }
+
+    .brand-section h1 {
+      font-size: 58px;
+
+      line-height: 1;
+
+      letter-spacing: -3px;
+
+      color: #1877f2;
+
+      margin-bottom: 18px;
+    }
+
+    .brand-section h2 {
+      font-size: 30px;
+
+      line-height: 1.2;
+
+      max-width: 500px;
+
+      margin-bottom: 16px;
+    }
+
+    .brand-section p {
+      color: #65676b;
+
+      font-size: 18px;
+
+      line-height: 1.6;
+
+      max-width: 500px;
+    }
+
+    .features {
+      margin-top: 30px;
+
+      display: grid;
+
+      gap: 14px;
+    }
+
+    .feature {
+      display: flex;
+
+      align-items: center;
+
+      gap: 12px;
+
+      color: #4b4f56;
+
+      font-size: 15px;
+
+      font-weight: 600;
+    }
+
+    .feature-icon {
+      width: 36px;
+      height: 36px;
+
+      border-radius: 50%;
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: center;
+
+      background: #e7f3ff;
+
+      color: #1877f2;
+    }
+
+    /* CARD */
+
+    .card {
+      background: white;
+
+      border-radius: 18px;
+
+      padding: 30px;
+
+      box-shadow:
+        0 15px 45px
+        rgba(0, 0, 0, 0.12);
+
+      border: 1px solid #e4e6eb;
+    }
+
+    .card-header {
+      text-align: center;
+
+      margin-bottom: 22px;
+    }
+
+    .card-header h2 {
+      font-size: 27px;
+
+      margin-bottom: 7px;
+    }
+
+    .card-header p {
+      color: #65676b;
+
+      font-size: 14px;
+    }
+
+    .form-row {
+      display: grid;
+
+      grid-template-columns:
+        1fr 1fr;
+
+      gap: 12px;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    label {
+      display: block;
+
+      margin-bottom: 7px;
+
+      font-size: 14px;
+
+      font-weight: 700;
+
+      color: #4b4f56;
+    }
+
+    input {
+      width: 100%;
+
+      height: 48px;
+
+      border: 1px solid #ccd0d5;
+
+      border-radius: 10px;
+
+      padding: 0 14px;
+
+      font-size: 15px;
+
+      outline: none;
+
+      transition:
+        border-color 0.2s,
+        box-shadow 0.2s;
+
+      background: white;
+    }
+
+    input:focus {
+      border-color: #1877f2;
+
+      box-shadow:
+        0 0 0 3px
+        rgba(24, 119, 242, 0.12);
+    }
+
+    .hint {
+      display: block;
+
+      margin-top: 5px;
+
+      color: #8a8d91;
+
+      font-size: 11px;
+    }
+
+    .password-wrapper {
+      position: relative;
+    }
+
+    .password-wrapper input {
+      padding-right: 65px;
+    }
+
+    .show-password {
+      position: absolute;
+
+      right: 11px;
+
+      top: 50%;
+
+      transform: translateY(-50%);
+
+      border: 0;
+
+      background: transparent;
+
+      color: #1877f2;
+
+      font-weight: 700;
+
+      font-size: 12px;
+
+      cursor: pointer;
+    }
+
+    .signup-button {
+      width: 100%;
+
+      height: 50px;
+
+      border: 0;
+
+      border-radius: 10px;
+
+      background: #1877f2;
+
+      color: white;
+
+      font-size: 17px;
+
+      font-weight: 700;
+
+      cursor: pointer;
+
+      transition:
+        background 0.2s,
+        transform 0.1s;
+    }
+
+    .signup-button:hover {
+      background: #166fe5;
+    }
+
+    .signup-button:active {
+      transform: scale(0.99);
+    }
+
+    .signup-button:disabled {
+      opacity: 0.65;
+
+      cursor: not-allowed;
+    }
+
+    .error {
+      display: none;
+
+      background: #fff0f0;
+
+      border: 1px solid #ffc9c9;
+
+      color: #c62828;
+
+      border-radius: 9px;
+
+      padding: 12px;
+
+      margin-bottom: 16px;
+
+      font-size: 14px;
+
+      line-height: 1.4;
+    }
+
+    .success {
+      display: none;
+
+      background: #ecfdf3;
+
+      border: 1px solid #bbf7d0;
+
+      color: #15803d;
+
+      border-radius: 9px;
+
+      padding: 12px;
+
+      margin-bottom: 16px;
+
+      font-size: 14px;
+    }
+
+    .divider {
+      display: flex;
+
+      align-items: center;
+
+      gap: 12px;
+
+      margin: 22px 0;
+
+      color: #65676b;
+
+      font-size: 13px;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: "";
+
+      flex: 1;
+
+      height: 1px;
+
+      background: #dddfe2;
+    }
+
+    .login-link {
+      display: flex;
+
+      align-items: center;
+
+      justify-content: center;
+
+      height: 48px;
+
+      width: 100%;
+
+      border-radius: 10px;
+
+      border: 1px solid #1877f2;
+
+      color: #1877f2;
+
+      text-decoration: none;
+
+      font-weight: 700;
+
+      font-size: 15px;
+    }
+
+    .login-link:hover {
+      background: #f0f7ff;
+    }
+
+    .terms {
+      margin-top: 16px;
+
+      color: #8a8d91;
+
+      font-size: 11px;
+
+      line-height: 1.5;
+
+      text-align: center;
+    }
+
+    .footer {
+      text-align: center;
+
+      color: #8a8d91;
+
+      font-size: 12px;
+
+      margin-top: 20px;
+    }
+
+    /* MOBILE */
+
+    @media (max-width: 800px) {
+      body {
+        padding: 18px;
+      }
+
+      .page {
+        display: block;
+
+        max-width: 520px;
+      }
+
+      .brand-section {
+        text-align: center;
+
+        padding:
+          10px 5px 25px;
+      }
+
+      .logo {
+        margin:
+          0 auto 18px;
+      }
+
+      .brand-section h1 {
+        font-size: 44px;
+      }
+
+      .brand-section h2 {
+        font-size: 23px;
+
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .brand-section p {
+        font-size: 15px;
+
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .features {
+        display: none;
+      }
+
+      .card {
+        padding: 23px;
+
+        border-radius: 15px;
+      }
+    }
+
+    @media (max-width: 500px) {
+      .form-row {
+        grid-template-columns: 1fr;
+
+        gap: 0;
+      }
+    }
+
+    @media (max-width: 400px) {
+      .brand-section h1 {
+        font-size: 38px;
+      }
+
+      .brand-section h2 {
+        font-size: 20px;
+      }
+
+      .card {
+        padding:
+          20px 16px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="page">
+
+    <!-- BRAND -->
+
+    <section class="brand-section">
+
+      <div class="logo">
+        P
+      </div>
+
+      <h1>Pulse</h1>
+
+      <h2>
+        Your people.
+        Your community.
+        Your Pulse.
+      </h2>
+
+      <p>
+        Create your account and
+        start connecting with people,
+        sharing posts and building
+        your community.
+      </p>
+
+      <div class="features">
+
+        <div class="feature">
+          <div class="feature-icon">
+            👥
+          </div>
+
+          <span>
+            Connect with friends
+          </span>
+        </div>
+
+        <div class="feature">
+          <div class="feature-icon">
+            📸
+          </div>
+
+          <span>
+            Share photos and posts
+          </span>
+        </div>
+
+        <div class="feature">
+          <div class="feature-icon">
+            💬
+          </div>
+
+          <span>
+            Chat with your community
+          </span>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- SIGNUP CARD -->
+
+    <section>
+
+      <div class="card">
+
+        <div class="card-header">
+
+          <h2>
+            Create an account
+          </h2>
+
+          <p>
+            It's quick and easy.
+          </p>
+
+        </div>
+
+        <div
+          id="error"
+          class="error"
+        ></div>
+
+        <div
+          id="success"
+          class="success"
+        ></div>
+
+        <form id="signupForm">
+
+          <div class="form-row">
+
+            <div class="form-group">
+
+              <label for="name">
+                Full name
+              </label>
+
+              <input
+                type="text"
+                id="name"
+                name="name"
+                placeholder="Your name"
+                autocomplete="name"
+                maxlength="100"
+                required
+              >
+
+            </div>
+
+            <div class="form-group">
+
+              <label for="username">
+                Username
+              </label>
+
+              <input
+                type="text"
+                id="username"
+                name="username"
+                placeholder="username"
+                autocomplete="username"
+                maxlength="30"
+                pattern="[A-Za-z0-9_]+"
+                required
+              >
+
+              <small class="hint">
+                Letters, numbers and _
+              </small>
+
+            </div>
+
+          </div>
+
+          <div class="form-group">
+
+            <label for="email">
+              Email
+            </label>
+
+            <input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="you@example.com"
+              autocomplete="email"
+              maxlength="150"
+            >
+
+          </div>
+
+          <div class="form-group">
+
+            <label for="password">
+              Password
+            </label>
+
+            <div class="password-wrapper">
+
+              <input
+                type="password"
+                id="password"
+                name="password"
+                placeholder="At least 6 characters"
+                autocomplete="new-password"
+                minlength="6"
+                required
+              >
+
+              <button
+                type="button"
+                class="show-password"
+                id="showPassword"
+              >
+                Show
+              </button>
+
+            </div>
+
+          </div>
+
+          <div class="form-group">
+
+            <label for="confirmPassword">
+              Confirm password
+            </label>
+
+            <div class="password-wrapper">
+
+              <input
+                type="password"
+                id="confirmPassword"
+                name="confirmPassword"
+                placeholder="Enter password again"
+                autocomplete="new-password"
+                minlength="6"
+                required
+              >
+
+              <button
+                type="button"
+                class="show-password"
+                id="showConfirmPassword"
+              >
+                Show
+              </button>
+
+            </div>
+
+          </div>
+
+          <button
+            type="submit"
+            class="signup-button"
+            id="signupButton"
+          >
+            Create Account
+          </button>
+
+        </form>
+
+        <div class="terms">
+          By creating an account, you agree
+          to use Pulse Social responsibly and
+          respectfully.
+        </div>
+
+        <div class="divider">
+          OR
+        </div>
+
+        <a
+          href="/login.html"
+          class="login-link"
+        >
+          Already have an account? Log In
+        </a>
+
+      </div>
+
+      <div class="footer">
+        © 2026 Pulse Social
+      </div>
+
+    </section>
+
+  </main>
+
+  <script>
+    const signupForm =
+      document.getElementById(
+        "signupForm"
+      );
+
+    const signupButton =
+      document.getElementById(
+        "signupButton"
+      );
+
+    const nameInput =
+      document.getElementById(
+        "name"
+      );
+
+    const usernameInput =
+      document.getElementById(
+        "username"
+      );
+
+    const emailInput =
+      document.getElementById(
+        "email"
+      );
+
+    const passwordInput =
+      document.getElementById(
+        "password"
+      );
+
+    const confirmPasswordInput =
+      document.getElementById(
+        "confirmPassword"
+      );
+
+    const showPassword =
+      document.getElementById(
+        "showPassword"
+      );
+
+    const showConfirmPassword =
+      document.getElementById(
+        "showConfirmPassword"
+      );
+
+    const errorBox =
+      document.getElementById(
+        "error"
+      );
+
+    const successBox =
+      document.getElementById(
+        "success"
+      );
+
+    function showError(message) {
+      errorBox.textContent =
+        message;
+
+      errorBox.style.display =
+        "block";
+
+      successBox.style.display =
+        "none";
+    }
+
+    function showSuccess(message) {
+      successBox.textContent =
+        message;
+
+      successBox.style.display =
+        "block";
+
+      errorBox.style.display =
+        "none";
+    }
+
+    function togglePassword(
+      input,
+      button
+    ) {
+      const visible =
+        input.type ===
+        "text";
+
+      input.type =
+        visible
+          ? "password"
+          : "text";
+
+      button.textContent =
+        visible
+          ? "Show"
+          : "Hide";
+    }
+
+    showPassword.addEventListener(
+      "click",
+      () => {
+        togglePassword(
+          passwordInput,
+          showPassword
+        );
+      }
+    );
+
+    showConfirmPassword.addEventListener(
+      "click",
+      () => {
+        togglePassword(
+          confirmPasswordInput,
+          showConfirmPassword
+        );
+      }
+    );
+
+    usernameInput.addEventListener(
+      "input",
+      () => {
+        usernameInput.value =
+          usernameInput.value
+            .toLowerCase()
+            .replace(
+              /[^a-z0-9_]/g,
+              ""
+            );
+      }
+    );
+
+    signupForm.addEventListener(
+      "submit",
+      async (event) => {
+        event.preventDefault();
+
+        errorBox.style.display =
+          "none";
+
+        successBox.style.display =
+          "none";
+
+        const name =
+          nameInput.value.trim();
+
+        const username =
+          usernameInput.value
+            .trim()
+            .toLowerCase();
+
+        const email =
+          emailInput.value
+            .trim()
+            .toLowerCase();
+
+        const password =
+          passwordInput.value;
+
+        const confirmPassword =
+          confirmPasswordInput.value;
+
+        if (!name) {
+          showError(
+            "Please enter your name."
+          );
+          return;
+        }
+
+        if (
+          username.length < 3
+        ) {
+          showError(
+            "Username must contain at least 3 characters."
+          );
+          return;
+        }
+
+        if (
+          !/^[a-z0-9_]+$/.test(
+            username
+          )
+        ) {
+          showError(
+            "Username can only contain letters, numbers and underscores."
+          );
+          return;
+        }
+
+        if (
+          password.length < 6
+        ) {
+          showError(
+            "Password must be at least 6 characters."
+          );
+          return;
+        }
+
+        if (
+          password !==
+          confirmPassword
+        ) {
+          showError(
+            "Passwords do not match."
+          );
+          return;
+        }
+
+        signupButton.disabled =
+          true;
+
+        signupButton.textContent =
+          "Creating account...";
+
+        try {
+          const response =
+            await fetch(
+              "/api/register",
+              {
+                method: "POST",
+
+                credentials:
+                  "include",
+
+                headers: {
+                  "Content-Type":
+                    "application/json"
+                },
+
+                body:
+                  JSON.stringify({
+                    name,
+                    username,
+                    email,
+                    password
+                  })
+              }
+            );
+
+          const data =
+            await response.json();
+
+          if (
+            !response.ok ||
+            !data.success
+          ) {
+            throw new Error(
+              data.message ||
+              "Unable to create account."
+            );
+          }
+
+          showSuccess(
+            "Account created successfully. Redirecting..."
+          );
+
+          setTimeout(
+            () => {
+              window.location.href =
+                "/feed.html";
+            },
+            600
+          );
+
+        } catch (error) {
+          console.error(
+            "SIGNUP ERROR:",
+            error
+          );
+
+          showError(
+            error.message ||
+            "Unable to create account."
+          );
+
+          signupButton.disabled =
+            false;
+
+          signupButton.textContent =
+            "Create Account";
+        }
+      }
+    );
+
+    /* If already logged in */
+
+    fetch(
+      "/api/me",
+      {
+        credentials:
+          "include"
+      }
+    )
+      .then(
+        (response) =>
+          response.json()
+      )
+      .then(
+        (data) => {
+          if (
+            data.success &&
+            data.loggedIn
+          ) {
+            window.location.href =
+              "/feed.html";
+          }
+        }
+      )
+      .catch(
+        () => {}
+      );
+  </script>
+
+</body>
+</html>

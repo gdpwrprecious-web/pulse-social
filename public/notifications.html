@@ -1,0 +1,1649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notifications • Pulse</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --blue: #1877f2;
+      --blue-dark: #166fe5;
+      --bg: #f0f2f5;
+      --white: #ffffff;
+      --text: #1c1e21;
+      --muted: #65676b;
+      --border: #dddfe2;
+      --hover: #f2f2f2;
+      --red: #e41e3f;
+      --green: #42b72a;
+      --shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    }
+
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* =========================
+       HEADER
+    ========================= */
+
+    .topbar {
+      height: 64px;
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 18px;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 1px 3px rgba(0,0,0,.08);
+    }
+
+    .left-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: var(--blue);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    .search-box {
+      width: 250px;
+      height: 42px;
+      background: var(--bg);
+      border-radius: 22px;
+      display: flex;
+      align-items: center;
+      padding: 0 14px;
+      gap: 8px;
+    }
+
+    .search-box span {
+      font-size: 18px;
+      color: var(--muted);
+    }
+
+    .search-box input {
+      border: none;
+      outline: none;
+      background: transparent;
+      width: 100%;
+      font-size: 14px;
+    }
+
+    .nav-icons {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: none;
+      background: #e4e6eb;
+      cursor: pointer;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      color: var(--text);
+      position: relative;
+    }
+
+    .nav-btn:hover {
+      background: #d8dadf;
+    }
+
+    .nav-btn.active {
+      background: #e7f3ff;
+      color: var(--blue);
+    }
+
+    .badge {
+      position: absolute;
+      top: -3px;
+      right: -3px;
+      min-width: 19px;
+      height: 19px;
+      padding: 0 5px;
+      border-radius: 10px;
+      background: var(--red);
+      color: white;
+      font-size: 11px;
+      font-weight: bold;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid white;
+    }
+
+    .profile-mini {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #ddd;
+      cursor: pointer;
+      border: 1px solid var(--border);
+    }
+
+    /* =========================
+       LAYOUT
+    ========================= */
+
+    .page {
+      max-width: 1000px;
+      margin: 28px auto;
+      padding: 0 16px;
+    }
+
+    .notification-card {
+      background: var(--white);
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 20px 22px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+    }
+
+    .card-header h1 {
+      font-size: 24px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .mark-btn {
+      border: none;
+      background: transparent;
+      color: var(--blue);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 9px 10px;
+      border-radius: 6px;
+    }
+
+    .mark-btn:hover {
+      background: #e7f3ff;
+    }
+
+    /* =========================
+       FILTERS
+    ========================= */
+
+    .filters {
+      display: flex;
+      gap: 8px;
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+    }
+
+    .filter {
+      border: none;
+      background: transparent;
+      padding: 9px 15px;
+      border-radius: 18px;
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .filter:hover {
+      background: var(--hover);
+    }
+
+    .filter.active {
+      background: #e7f3ff;
+      color: var(--blue);
+    }
+
+    /* =========================
+       NOTIFICATIONS
+    ========================= */
+
+    .notifications {
+      min-height: 300px;
+    }
+
+    .notification {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 20px;
+      cursor: pointer;
+      position: relative;
+      transition: background .15s ease;
+    }
+
+    .notification:hover {
+      background: var(--hover);
+    }
+
+    .notification.unread {
+      background: #e7f3ff;
+    }
+
+    .notification.unread:hover {
+      background: #dcefff;
+    }
+
+    .notification-avatar {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+      background: #ddd;
+    }
+
+    .notification-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: #e4e6eb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 23px;
+      flex-shrink: 0;
+    }
+
+    .notification-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .notification-text {
+      font-size: 15px;
+      line-height: 1.4;
+      color: var(--text);
+    }
+
+    .notification-text strong {
+      font-weight: 700;
+    }
+
+    .notification-time {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .unread-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--blue);
+      flex-shrink: 0;
+    }
+
+    .empty {
+      padding: 70px 20px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .empty-icon {
+      font-size: 55px;
+      margin-bottom: 15px;
+      opacity: .7;
+    }
+
+    .empty h2 {
+      color: var(--text);
+      font-size: 20px;
+      margin-bottom: 7px;
+    }
+
+    .empty p {
+      font-size: 14px;
+    }
+
+    .loading {
+      padding: 60px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .spinner {
+      width: 30px;
+      height: 30px;
+      border: 3px solid #ddd;
+      border-top-color: var(--blue);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+      margin: 0 auto 12px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* =========================
+       TOAST
+    ========================= */
+
+    .toast {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      background: #1c1e21;
+      color: white;
+      padding: 13px 18px;
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      display: none;
+      z-index: 5000;
+      font-size: 14px;
+    }
+
+    /* =========================
+       SEARCH RESULTS
+    ========================= */
+
+    .search-results {
+      position: fixed;
+      top: 58px;
+      left: 18px;
+      width: 300px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 8px 25px rgba(0,0,0,.2);
+      z-index: 2000;
+      display: none;
+      overflow: hidden;
+    }
+
+    .search-result {
+      padding: 10px 13px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+    }
+
+    .search-result:hover {
+      background: var(--hover);
+    }
+
+    .search-result img {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .search-result strong {
+      display: block;
+      font-size: 14px;
+    }
+
+    .search-result span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    /* =========================
+       MOBILE
+    ========================= */
+
+    @media (max-width: 700px) {
+      .topbar {
+        height: 58px;
+        padding: 0 10px;
+      }
+
+      .logo {
+        width: 38px;
+        height: 38px;
+      }
+
+      .search-box {
+        width: 42px;
+        height: 40px;
+        padding: 0;
+        justify-content: center;
+      }
+
+      .search-box input {
+        display: none;
+      }
+
+      .nav-icons {
+        gap: 3px;
+      }
+
+      .nav-btn {
+        width: 39px;
+        height: 39px;
+        font-size: 18px;
+      }
+
+      .profile-mini {
+        width: 39px;
+        height: 39px;
+      }
+
+      .page {
+        margin: 12px auto;
+        padding: 0 8px;
+      }
+
+      .notification-card {
+        border-radius: 7px;
+      }
+
+      .card-header {
+        padding: 16px;
+      }
+
+      .card-header h1 {
+        font-size: 21px;
+      }
+
+      .mark-btn {
+        font-size: 12px;
+        padding: 7px;
+      }
+
+      .notification {
+        padding: 12px 13px;
+        gap: 10px;
+      }
+
+      .notification-avatar,
+      .notification-icon {
+        width: 46px;
+        height: 46px;
+      }
+
+      .notification-text {
+        font-size: 14px;
+      }
+
+      .notification-time {
+        font-size: 12px;
+      }
+
+      .search-results {
+        left: 8px;
+        right: 8px;
+        width: auto;
+      }
+    }
+
+    @media (max-width: 430px) {
+      .nav-btn.home {
+        display: none;
+      }
+
+      .notification {
+        align-items: flex-start;
+      }
+
+      .notification-avatar,
+      .notification-icon {
+        width: 43px;
+        height: 43px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- HEADER -->
+  <header class="topbar">
+
+    <div class="left-header">
+
+      <a href="/feed.html" class="logo">P</a>
+
+      <div class="search-box">
+        <span>🔍</span>
+        <input
+          id="searchInput"
+          type="text"
+          placeholder="Search Pulse"
+          autocomplete="off"
+        >
+      </div>
+
+    </div>
+
+    <nav class="nav-icons">
+
+      <a href="/feed.html" class="nav-btn home" title="Home">
+        🏠
+      </a>
+
+      <a href="/messages.html" class="nav-btn" title="Messages">
+        💬
+        <span class="badge" id="messageBadge">0</span>
+      </a>
+
+      <a
+        href="/notifications.html"
+        class="nav-btn active"
+        title="Notifications"
+      >
+        🔔
+        <span class="badge" id="notificationBadge">0</span>
+      </a>
+
+      <img
+        id="profileMini"
+        class="profile-mini"
+        src=""
+        alt="Profile"
+        title="Profile"
+      >
+
+    </nav>
+
+  </header>
+
+  <!-- SEARCH RESULTS -->
+  <div id="searchResults" class="search-results"></div>
+
+  <!-- PAGE -->
+  <main class="page">
+
+    <section class="notification-card">
+
+      <div class="card-header">
+
+        <h1>Notifications</h1>
+
+        <div class="header-actions">
+          <button
+            class="mark-btn"
+            id="markAllBtn"
+          >
+            Mark all as read
+          </button>
+        </div>
+
+      </div>
+
+      <div class="filters">
+
+        <button
+          class="filter active"
+          data-filter="all"
+        >
+          All
+        </button>
+
+        <button
+          class="filter"
+          data-filter="unread"
+        >
+          Unread
+        </button>
+
+      </div>
+
+      <div id="notifications" class="notifications">
+
+        <div class="loading">
+          <div class="spinner"></div>
+          Loading notifications...
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <div id="toast" class="toast"></div>
+
+<script>
+/* =========================================================
+   PULSE SOCIAL — NOTIFICATIONS
+========================================================= */
+
+const notificationsContainer =
+  document.getElementById("notifications");
+
+const markAllBtn =
+  document.getElementById("markAllBtn");
+
+const notificationBadge =
+  document.getElementById("notificationBadge");
+
+const messageBadge =
+  document.getElementById("messageBadge");
+
+const profileMini =
+  document.getElementById("profileMini");
+
+const toast =
+  document.getElementById("toast");
+
+const searchInput =
+  document.getElementById("searchInput");
+
+const searchResults =
+  document.getElementById("searchResults");
+
+let allNotifications = [];
+let currentFilter = "all";
+let currentUser = null;
+
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
+function escapeHTML(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+
+function showToast(message) {
+  toast.textContent = message;
+  toast.style.display = "block";
+
+  clearTimeout(window.toastTimer);
+
+  window.toastTimer = setTimeout(() => {
+    toast.style.display = "none";
+  }, 2500);
+}
+
+
+function getProfileImage(user) {
+  if (!user) {
+    return "/images/default-avatar.png";
+  }
+
+  return user.profilePicture ||
+         user.avatar ||
+         "/images/default-avatar.png";
+}
+
+
+function formatTime(dateString) {
+
+  if (!dateString) {
+    return "";
+  }
+
+  const date = new Date(dateString);
+
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  const now = new Date();
+  const diff = Math.floor((now - date) / 1000);
+
+  if (diff < 60) {
+    return "Just now";
+  }
+
+  if (diff < 3600) {
+    return Math.floor(diff / 60) + "m";
+  }
+
+  if (diff < 86400) {
+    return Math.floor(diff / 3600) + "h";
+  }
+
+  if (diff < 604800) {
+    return Math.floor(diff / 86400) + "d";
+  }
+
+  return date.toLocaleDateString();
+}
+
+
+function getNotificationType(notification) {
+
+  return (
+    notification.type ||
+    notification.kind ||
+    notification.action ||
+    ""
+  ).toLowerCase();
+}
+
+
+/* =========================================================
+   NOTIFICATION TEXT
+========================================================= */
+
+function notificationMessage(notification) {
+
+  const type = getNotificationType(notification);
+
+  const actor =
+    notification.actor ||
+    notification.fromUser ||
+    notification.user ||
+    notification.sender ||
+    {};
+
+  const actorName =
+    actor.name ||
+    notification.actorName ||
+    notification.fromName ||
+    notification.userName ||
+    "Someone";
+
+  if (notification.message) {
+    return notification.message;
+  }
+
+  if (type.includes("like")) {
+    return `<strong>${escapeHTML(actorName)}</strong> liked your post.`;
+  }
+
+  if (type.includes("comment")) {
+    return `<strong>${escapeHTML(actorName)}</strong> commented on your post.`;
+  }
+
+  if (type.includes("follow")) {
+    return `<strong>${escapeHTML(actorName)}</strong> started following you.`;
+  }
+
+  if (type.includes("message")) {
+    return `<strong>${escapeHTML(actorName)}</strong> sent you a message.`;
+  }
+
+  if (type.includes("mention")) {
+    return `<strong>${escapeHTML(actorName)}</strong> mentioned you in a post.`;
+  }
+
+  if (type.includes("friend")) {
+    return `<strong>${escapeHTML(actorName)}</strong> connected with you.`;
+  }
+
+  return notification.text ||
+    `<strong>${escapeHTML(actorName)}</strong> interacted with you.`;
+}
+
+
+/* =========================================================
+   NOTIFICATION ICON
+========================================================= */
+
+function notificationIcon(notification) {
+
+  const type = getNotificationType(notification);
+
+  if (type.includes("like")) {
+    return "❤️";
+  }
+
+  if (type.includes("comment")) {
+    return "💬";
+  }
+
+  if (type.includes("follow")) {
+    return "👤";
+  }
+
+  if (type.includes("message")) {
+    return "✉️";
+  }
+
+  if (type.includes("mention")) {
+    return "🔵";
+  }
+
+  return "🔔";
+}
+
+
+/* =========================================================
+   LOAD CURRENT USER
+========================================================= */
+
+async function loadCurrentUser() {
+
+  try {
+
+    const response = await fetch("/api/me");
+
+    const data = await response.json();
+
+    if (!data.loggedIn) {
+      window.location.href = "/login.html";
+      return;
+    }
+
+    currentUser =
+      data.user ||
+      data;
+
+    const image =
+      getProfileImage(currentUser);
+
+    profileMini.src = image;
+
+    profileMini.onclick = () => {
+
+      if (currentUser.username) {
+        window.location.href =
+          "/profile.html?username=" +
+          encodeURIComponent(currentUser.username);
+      } else {
+        window.location.href = "/profile.html";
+      }
+
+    };
+
+  } catch (error) {
+
+    console.error("Current user error:", error);
+
+    window.location.href = "/login.html";
+  }
+}
+
+
+/* =========================================================
+   LOAD NOTIFICATIONS
+========================================================= */
+
+async function loadNotifications() {
+
+  notificationsContainer.innerHTML = `
+    <div class="loading">
+      <div class="spinner"></div>
+      Loading notifications...
+    </div>
+  `;
+
+  try {
+
+    const response =
+      await fetch("/api/notifications");
+
+    const data =
+      await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.message ||
+        "Unable to load notifications."
+      );
+    }
+
+    if (Array.isArray(data)) {
+      allNotifications = data;
+    } else {
+      allNotifications =
+        data.notifications ||
+        data.data ||
+        [];
+    }
+
+    renderNotifications();
+
+    updateNotificationBadge();
+
+  } catch (error) {
+
+    console.error(
+      "Notification loading error:",
+      error
+    );
+
+    notificationsContainer.innerHTML = `
+      <div class="empty">
+        <div class="empty-icon">⚠️</div>
+        <h2>Unable to load notifications</h2>
+        <p>${escapeHTML(error.message)}</p>
+      </div>
+    `;
+  }
+}
+
+
+/* =========================================================
+   RENDER
+========================================================= */
+
+function renderNotifications() {
+
+  let notifications =
+    [...allNotifications];
+
+  if (currentFilter === "unread") {
+
+    notifications =
+      notifications.filter(notification => {
+
+        return !(
+          notification.read === true ||
+          notification.isRead === true ||
+          notification.readAt
+        );
+
+      });
+
+  }
+
+  notifications.sort((a, b) => {
+
+    const aTime =
+      new Date(
+        a.createdAt ||
+        a.timestamp ||
+        a.date ||
+        0
+      ).getTime();
+
+    const bTime =
+      new Date(
+        b.createdAt ||
+        b.timestamp ||
+        b.date ||
+        0
+      ).getTime();
+
+    return bTime - aTime;
+  });
+
+
+  if (!notifications.length) {
+
+    notificationsContainer.innerHTML = `
+      <div class="empty">
+
+        <div class="empty-icon">
+          ${currentFilter === "unread" ? "✓" : "🔔"}
+        </div>
+
+        <h2>
+          ${
+            currentFilter === "unread"
+              ? "You're all caught up"
+              : "No notifications yet"
+          }
+        </h2>
+
+        <p>
+          ${
+            currentFilter === "unread"
+              ? "You don't have any unread notifications."
+              : "When people interact with you, you'll see it here."
+          }
+        </p>
+
+      </div>
+    `;
+
+    return;
+  }
+
+
+  notificationsContainer.innerHTML =
+    notifications
+      .map(renderNotification)
+      .join("");
+}
+
+
+/* =========================================================
+   RENDER SINGLE NOTIFICATION
+========================================================= */
+
+function renderNotification(notification) {
+
+  const isRead =
+    notification.read === true ||
+    notification.isRead === true ||
+    Boolean(notification.readAt);
+
+  const actor =
+    notification.actor ||
+    notification.fromUser ||
+    notification.user ||
+    notification.sender ||
+    null;
+
+  const actorImage =
+    notification.actorProfilePicture ||
+    notification.fromProfilePicture ||
+    notification.avatar ||
+    (actor && getProfileImage(actor));
+
+  const hasActorImage =
+    actorImage &&
+    !actorImage.endsWith("default-avatar.png");
+
+  const imageHTML = hasActorImage
+    ? `
+      <img
+        class="notification-avatar"
+        src="${escapeHTML(actorImage)}"
+        alt="User"
+        onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+      >
+      <div
+        class="notification-icon"
+        style="display:none"
+      >
+        ${notificationIcon(notification)}
+      </div>
+    `
+    : `
+      <div class="notification-icon">
+        ${notificationIcon(notification)}
+      </div>
+    `;
+
+
+  const date =
+    notification.createdAt ||
+    notification.timestamp ||
+    notification.date;
+
+
+  return `
+    <article
+      class="notification ${isRead ? "" : "unread"}"
+      data-id="${escapeHTML(notification.id || "")}"
+      onclick="openNotification('${escapeHTML(notification.id || "")}')"
+    >
+
+      ${imageHTML}
+
+      <div class="notification-content">
+
+        <div class="notification-text">
+          ${notificationMessage(notification)}
+        </div>
+
+        <div class="notification-time">
+          ${formatTime(date)}
+        </div>
+
+      </div>
+
+      ${
+        !isRead
+          ? `<div class="unread-dot"></div>`
+          : ""
+      }
+
+    </article>
+  `;
+}
+
+
+/* =========================================================
+   OPEN NOTIFICATION
+========================================================= */
+
+async function openNotification(id) {
+
+  if (!id) {
+    return;
+  }
+
+  const notification =
+    allNotifications.find(
+      item => String(item.id) === String(id)
+    );
+
+  if (!notification) {
+    return;
+  }
+
+  const isRead =
+    notification.read === true ||
+    notification.isRead === true ||
+    Boolean(notification.readAt);
+
+  if (!isRead) {
+
+    try {
+
+      await fetch("/api/notifications/read", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          id
+        })
+      });
+
+      notification.read = true;
+      notification.isRead = true;
+      notification.readAt =
+        new Date().toISOString();
+
+      updateNotificationBadge();
+
+    } catch (error) {
+
+      console.error(
+        "Read notification error:",
+        error
+      );
+    }
+  }
+
+
+  const type =
+    getNotificationType(notification);
+
+  const postId =
+    notification.postId ||
+    notification.targetId;
+
+  const username =
+    notification.username ||
+    notification.actorUsername ||
+    (
+      notification.actor &&
+      notification.actor.username
+    );
+
+
+  if (
+    postId &&
+    (
+      type.includes("like") ||
+      type.includes("comment") ||
+      type.includes("mention")
+    )
+  ) {
+
+    window.location.href =
+      "/feed.html#post-" +
+      encodeURIComponent(postId);
+
+    return;
+  }
+
+
+  if (
+    username &&
+    (
+      type.includes("follow") ||
+      type.includes("friend")
+    )
+  ) {
+
+    window.location.href =
+      "/profile.html?username=" +
+      encodeURIComponent(username);
+
+    return;
+  }
+
+
+  if (type.includes("message")) {
+
+    const userId =
+      notification.senderId ||
+      notification.actorId ||
+      notification.userId;
+
+    if (userId) {
+
+      window.location.href =
+        "/messages.html?user=" +
+        encodeURIComponent(userId);
+
+      return;
+    }
+  }
+
+  renderNotifications();
+}
+
+
+/* =========================================================
+   MARK ALL READ
+========================================================= */
+
+markAllBtn.addEventListener(
+  "click",
+  async () => {
+
+    try {
+
+      const response =
+        await fetch(
+          "/api/notifications/read",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type":
+                "application/json"
+            },
+            body: JSON.stringify({
+              all: true
+            })
+          }
+        );
+
+      const data =
+        await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message ||
+          "Unable to mark notifications as read."
+        );
+      }
+
+
+      allNotifications.forEach(
+        notification => {
+
+          notification.read = true;
+          notification.isRead = true;
+          notification.readAt =
+            new Date().toISOString();
+
+        }
+      );
+
+      updateNotificationBadge();
+
+      renderNotifications();
+
+      showToast(
+        "All notifications marked as read."
+      );
+
+    } catch (error) {
+
+      console.error(
+        "Mark all read error:",
+        error
+      );
+
+      showToast(error.message);
+    }
+
+  }
+);
+
+
+/* =========================================================
+   FILTERS
+========================================================= */
+
+document
+  .querySelectorAll(".filter")
+  .forEach(button => {
+
+    button.addEventListener(
+      "click",
+      () => {
+
+        document
+          .querySelectorAll(".filter")
+          .forEach(btn =>
+            btn.classList.remove("active")
+          );
+
+        button.classList.add("active");
+
+        currentFilter =
+          button.dataset.filter;
+
+        renderNotifications();
+
+      }
+    );
+
+  });
+
+
+/* =========================================================
+   NOTIFICATION BADGE
+========================================================= */
+
+function updateNotificationBadge() {
+
+  const unread =
+    allNotifications.filter(
+      notification => {
+
+        return !(
+          notification.read === true ||
+          notification.isRead === true ||
+          notification.readAt
+        );
+
+      }
+    ).length;
+
+
+  if (unread > 0) {
+
+    notificationBadge.style.display =
+      "flex";
+
+    notificationBadge.textContent =
+      unread > 99
+        ? "99+"
+        : unread;
+
+  } else {
+
+    notificationBadge.style.display =
+      "none";
+
+  }
+}
+
+
+/* =========================================================
+   MESSAGE BADGE
+========================================================= */
+
+async function loadUnreadMessages() {
+
+  try {
+
+    const response =
+      await fetch(
+        "/api/messages/unread-count"
+      );
+
+    if (!response.ok) {
+      return;
+    }
+
+    const data =
+      await response.json();
+
+    const count =
+      Number(
+        data.count ??
+        data.unread ??
+        data.unreadCount ??
+        0
+      );
+
+
+    if (count > 0) {
+
+      messageBadge.style.display =
+        "flex";
+
+      messageBadge.textContent =
+        count > 99 ? "99+" : count;
+
+    } else {
+
+      messageBadge.style.display =
+        "none";
+
+    }
+
+  } catch (error) {
+
+    console.error(
+      "Unread message error:",
+      error
+    );
+
+  }
+}
+
+
+/* =========================================================
+   SEARCH
+========================================================= */
+
+let searchTimer = null;
+
+searchInput.addEventListener(
+  "input",
+  () => {
+
+    clearTimeout(searchTimer);
+
+    const query =
+      searchInput.value.trim();
+
+    if (!query) {
+
+      searchResults.style.display =
+        "none";
+
+      searchResults.innerHTML =
+        "";
+
+      return;
+    }
+
+    searchTimer =
+      setTimeout(
+        () => searchUsers(query),
+        300
+      );
+
+  }
+);
+
+
+async function searchUsers(query) {
+
+  try {
+
+    const response =
+      await fetch(
+        "/api/search?q=" +
+        encodeURIComponent(query)
+      );
+
+    if (!response.ok) {
+      return;
+    }
+
+    const data =
+      await response.json();
+
+    const users =
+      Array.isArray(data)
+        ? data
+        : (
+            data.users ||
+            data.results ||
+            []
+          );
+
+
+    if (!users.length) {
+
+      searchResults.innerHTML = `
+        <div style="
+          padding:15px;
+          color:#65676b;
+          font-size:14px;
+        ">
+          No users found
+        </div>
+      `;
+
+      searchResults.style.display =
+        "block";
+
+      return;
+    }
+
+
+    searchResults.innerHTML =
+      users.slice(0, 8)
+        .map(user => {
+
+          const image =
+            getProfileImage(user);
+
+          return `
+            <div
+              class="search-result"
+              onclick="openSearchUser('${escapeHTML(user.username || "")}')"
+            >
+
+              <img
+                src="${escapeHTML(image)}"
+                alt=""
+              >
+
+              <div>
+
+                <strong>
+                  ${escapeHTML(
+                    user.name ||
+                    user.username ||
+                    "User"
+                  )}
+                </strong>
+
+                <span>
+                  @${escapeHTML(
+                    user.username || ""
+                  )}
+                </span>
+
+              </div>
+
+            </div>
+          `;
+
+        })
+        .join("");
+
+
+    searchResults.style.display =
+      "block";
+
+  } catch (error) {
+
+    console.error(
+      "Search error:",
+      error
+    );
+
+  }
+}
+
+
+function openSearchUser(username) {
+
+  if (!username) {
+    return;
+  }
+
+  window.location.href =
+    "/profile.html?username=" +
+    encodeURIComponent(username);
+}
+
+
+document.addEventListener(
+  "click",
+  event => {
+
+    if (
+      !searchResults.contains(event.target) &&
+      !searchInput.contains(event.target)
+    ) {
+
+      searchResults.style.display =
+        "none";
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+   INITIALIZE
+========================================================= */
+
+async function initialize() {
+
+  await loadCurrentUser();
+
+  await loadNotifications();
+
+  await loadUnreadMessages();
+
+}
+
+initialize();
+
+
+/* =========================================================
+   AUTO REFRESH
+========================================================= */
+
+setInterval(
+  async () => {
+
+    await loadNotifications();
+
+    await loadUnreadMessages();
+
+  },
+  30000
+);
+</script>
+
+</body>
+</html>

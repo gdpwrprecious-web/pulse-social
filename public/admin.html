@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verification Admin - Pulse Social</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f0f2f5;
+      color: #1c1e21;
+    }
+
+    .topbar {
+      height: 64px;
+      background: #1877f2;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 25px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,.15);
+    }
+
+    .brand {
+      font-size: 23px;
+      font-weight: 700;
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .top-btn {
+      border: none;
+      background: rgba(255,255,255,.15);
+      color: white;
+      padding: 9px 14px;
+      border-radius: 7px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .top-btn:hover {
+      background: rgba(255,255,255,.25);
+    }
+
+    .container {
+      width: min(1100px, calc(100% - 30px));
+      margin: 30px auto;
+    }
+
+    .page-header {
+      background: white;
+      border-radius: 12px;
+      padding: 25px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.08);
+    }
+
+    .page-header h1 {
+      font-size: 28px;
+      margin-bottom: 7px;
+    }
+
+    .page-header p {
+      color: #65676b;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .stat {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.08);
+    }
+
+    .stat-label {
+      color: #65676b;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .stat-number {
+      font-size: 30px;
+      font-weight: 700;
+    }
+
+    .requests {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .request-card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.08);
+    }
+
+    .request-top {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .avatar {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #e4e6eb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      font-weight: 700;
+      color: #65676b;
+      flex-shrink: 0;
+    }
+
+    .user-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .user-name {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .username {
+      color: #65676b;
+      margin-top: 3px;
+    }
+
+    .verified-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 19px;
+      height: 19px;
+      border-radius: 50%;
+      background: #1877f2;
+      color: white;
+      font-size: 12px;
+      font-weight: bold;
+      margin-left: 5px;
+    }
+
+    .status {
+      padding: 6px 11px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: capitalize;
+    }
+
+    .status.pending {
+      background: #fff4cc;
+      color: #8a6500;
+    }
+
+    .status.approved {
+      background: #d9f7df;
+      color: #188038;
+    }
+
+    .status.rejected {
+      background: #ffe0e0;
+      color: #c5221f;
+    }
+
+    .reason-box {
+      background: #f5f6f7;
+      border-radius: 9px;
+      padding: 15px;
+      margin: 18px 0;
+    }
+
+    .reason-title {
+      font-size: 13px;
+      color: #65676b;
+      margin-bottom: 7px;
+      font-weight: 700;
+    }
+
+    .reason {
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .request-date {
+      color: #65676b;
+      font-size: 13px;
+      margin-bottom: 15px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      border-top: 1px solid #e4e6eb;
+      padding-top: 15px;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 7px;
+      padding: 10px 18px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .btn-approve {
+      background: #42b72a;
+      color: white;
+    }
+
+    .btn-approve:hover {
+      background: #36a420;
+    }
+
+    .btn-reject {
+      background: #e41e3f;
+      color: white;
+    }
+
+    .btn-reject:hover {
+      background: #c91835;
+    }
+
+    .btn-profile {
+      background: #e4e6eb;
+      color: #1c1e21;
+    }
+
+    .btn-profile:hover {
+      background: #d8dadf;
+    }
+
+    .empty {
+      background: white;
+      border-radius: 12px;
+      padding: 50px 20px;
+      text-align: center;
+      color: #65676b;
+      box-shadow: 0 1px 3px rgba(0,0,0,.08);
+    }
+
+    .empty-icon {
+      font-size: 45px;
+      margin-bottom: 12px;
+    }
+
+    .loading {
+      background: white;
+      border-radius: 12px;
+      padding: 40px;
+      text-align: center;
+      color: #65676b;
+    }
+
+    .error {
+      background: #ffe0e0;
+      color: #b42318;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      display: none;
+    }
+
+    .toast {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      background: #1c1e21;
+      color: white;
+      padding: 13px 18px;
+      border-radius: 9px;
+      display: none;
+      z-index: 999;
+      box-shadow: 0 5px 20px rgba(0,0,0,.2);
+    }
+
+    .toast.success {
+      background: #188038;
+    }
+
+    .toast.error {
+      background: #d93025;
+    }
+
+    @media (max-width: 700px) {
+      .topbar {
+        padding: 0 15px;
+      }
+
+      .brand {
+        font-size: 19px;
+      }
+
+      .container {
+        width: calc(100% - 20px);
+        margin: 15px auto;
+      }
+
+      .stats {
+        grid-template-columns: 1fr;
+      }
+
+      .request-top {
+        align-items: flex-start;
+      }
+
+      .status {
+        margin-left: auto;
+      }
+
+      .actions {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+      }
+
+      .top-btn span {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="topbar">
+    <div class="brand">Pulse Social</div>
+
+    <div class="top-actions">
+      <button class="top-btn" onclick="goToFeed()">🏠 <span>Feed</span></button>
+      <button class="top-btn" onclick="logout()">Logout</button>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <section class="page-header">
+      <h1>Verification Requests</h1>
+      <p>Review and manage user verification requests.</p>
+    </section>
+
+    <div id="errorBox" class="error"></div>
+
+    <section class="stats">
+      <div class="stat">
+        <div class="stat-label">Pending</div>
+        <div class="stat-number" id="pendingCount">0</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-label">Approved</div>
+        <div class="stat-number" id="approvedCount">0</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-label">Rejected</div>
+        <div class="stat-number" id="rejectedCount">0</div>
+      </div>
+    </section>
+
+    <section id="requests" class="requests">
+      <div class="loading">Loading verification requests...</div>
+    </section>
+
+  </main>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    let requests = [];
+
+    function showToast(message, type = "") {
+      const toast = document.getElementById("toast");
+
+      toast.textContent = message;
+      toast.className = "toast " + type;
+      toast.style.display = "block";
+
+      setTimeout(() => {
+        toast.style.display = "none";
+      }, 3000);
+    }
+
+    function showError(message) {
+      const box = document.getElementById("errorBox");
+
+      box.textContent = message;
+      box.style.display = "block";
+    }
+
+    function hideError() {
+      document.getElementById("errorBox").style.display = "none";
+    }
+
+    function escapeHTML(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function formatDate(date) {
+      if (!date) return "Unknown date";
+
+      const d = new Date(date);
+
+      if (Number.isNaN(d.getTime())) {
+        return "Unknown date";
+      }
+
+      return d.toLocaleString();
+    }
+
+    function getUser(request) {
+      return request.user || request.applicant || request.account || {};
+    }
+
+    function getStatus(request) {
+      return String(request.status || "pending").toLowerCase();
+    }
+
+    function getAvatar(user) {
+      if (user.profilePicture) {
+        return `<img class="avatar" src="${escapeHTML(user.profilePicture)}" alt="Profile picture">`;
+      }
+
+      const name = user.name || user.username || "U";
+      const letter = name.charAt(0).toUpperCase();
+
+      return `<div class="avatar">${escapeHTML(letter)}</div>`;
+    }
+
+    function renderStats() {
+      let pending = 0;
+      let approved = 0;
+      let rejected = 0;
+
+      requests.forEach(request => {
+        const status = getStatus(request);
+
+        if (status === "pending") pending++;
+        if (status === "approved") approved++;
+        if (status === "rejected") rejected++;
+      });
+
+      document.getElementById("pendingCount").textContent = pending;
+      document.getElementById("approvedCount").textContent = approved;
+      document.getElementById("rejectedCount").textContent = rejected;
+    }
+
+    function renderRequests() {
+      const container = document.getElementById("requests");
+
+      if (!requests.length) {
+        container.innerHTML = `
+          <div class="empty">
+            <div class="empty-icon">✓</div>
+            <h2>No verification requests</h2>
+            <p>There are currently no verification requests to review.</p>
+          </div>
+        `;
+
+        return;
+      }
+
+      container.innerHTML = requests.map(request => {
+        const user = getUser(request);
+        const status = getStatus(request);
+
+        const name = user.name || user.username || "Unknown user";
+        const username = user.username ? "@" + user.username : "";
+        const reason = request.reason || request.message || "No reason provided.";
+
+        const userId = user.id || request.userId || "";
+        const profileUrl = user.username
+          ? `/profile.html?username=${encodeURIComponent(user.username)}`
+          : "#";
+
+        let actions = "";
+
+        if (status === "pending") {
+          actions = `
+            <div class="actions">
+              <button class="btn btn-approve"
+                onclick="approveRequest('${escapeHTML(request.id)}')">
+                ✓ Approve Verification
+              </button>
+
+              <button class="btn btn-reject"
+                onclick="rejectRequest('${escapeHTML(request.id)}')">
+                ✕ Reject
+              </button>
+
+              ${
+                user.username
+                  ? `<button class="btn btn-profile" onclick="window.location.href='${profileUrl}'">
+                       View Profile
+                     </button>`
+                  : ""
+              }
+            </div>
+          `;
+        } else {
+          actions = `
+            <div class="actions">
+              ${
+                user.username
+                  ? `<button class="btn btn-profile" onclick="window.location.href='${profileUrl}'">
+                       View Profile
+                     </button>`
+                  : ""
+              }
+            </div>
+          `;
+        }
+
+        return `
+          <article class="request-card">
+
+            <div class="request-top">
+
+              ${getAvatar(user)}
+
+              <div class="user-info">
+                <div class="user-name">
+                  ${escapeHTML(name)}
+
+                  ${
+                    user.verified === true || user.isVerified === true
+                      ? `<span class="verified-badge">✓</span>`
+                      : ""
+                  }
+                </div>
+
+                <div class="username">
+                  ${escapeHTML(username)}
+                </div>
+              </div>
+
+              <span class="status ${escapeHTML(status)}">
+                ${escapeHTML(status)}
+              </span>
+
+            </div>
+
+            <div class="reason-box">
+              <div class="reason-title">Verification Request</div>
+              <div class="reason">${escapeHTML(reason)}</div>
+            </div>
+
+            <div class="request-date">
+              Requested: ${escapeHTML(formatDate(request.createdAt))}
+            </div>
+
+            ${actions}
+
+          </article>
+        `;
+      }).join("");
+    }
+
+    async function loadRequests() {
+      hideError();
+
+      const container = document.getElementById("requests");
+
+      container.innerHTML = `
+        <div class="loading">
+          Loading verification requests...
+        </div>
+      `;
+
+      try {
+        const response = await fetch("/api/admin/verification/requests", {
+          credentials: "include"
+        });
+
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+          throw new Error(
+            data.message ||
+            data.error ||
+            "Unable to load verification requests."
+          );
+        }
+
+        /*
+          Supports:
+
+          {
+            success: true,
+            requests: [...]
+          }
+
+          or
+
+          {
+            success: true,
+            data: [...]
+          }
+        */
+
+        if (Array.isArray(data.requests)) {
+          requests = data.requests;
+        } else if (Array.isArray(data.data)) {
+          requests = data.data;
+        } else if (data.data && Array.isArray(data.data.requests)) {
+          requests = data.data.requests;
+        } else {
+          requests = [];
+        }
+
+        renderStats();
+        renderRequests();
+
+      } catch (error) {
+        console.error("Verification load error:", error);
+
+        container.innerHTML = `
+          <div class="empty">
+            <div class="empty-icon">⚠️</div>
+            <h2>Unable to load requests</h2>
+            <p>${escapeHTML(error.message)}</p>
+          </div>
+        `;
+
+        showError(error.message);
+      }
+    }
+
+    async function approveRequest(requestId) {
+      if (!requestId) return;
+
+      const confirmed = confirm(
+        "Approve this user for verification?"
+      );
+
+      if (!confirmed) return;
+
+      try {
+        const response = await fetch(
+          `/api/admin/verification/${encodeURIComponent(requestId)}/approve`,
+          {
+            method: "POST",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json"
+            }
+          }
+        );
+
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+          throw new Error(
+            data.message ||
+            data.error ||
+            "Unable to approve verification."
+          );
+        }
+
+        showToast(
+          data.message || "User has been verified.",
+          "success"
+        );
+
+        await loadRequests();
+
+      } catch (error) {
+        console.error("Approve verification error:", error);
+        showToast(error.message, "error");
+      }
+    }
+
+    async function rejectRequest(requestId) {
+      if (!requestId) return;
+
+      const reason = prompt(
+        "Optional rejection reason:"
+      );
+
+      if (reason === null) {
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `/api/admin/verification/${encodeURIComponent(requestId)}/reject`,
+          {
+            method: "POST",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              reason: reason.trim()
+            })
+          }
+        );
+
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+          throw new Error(
+            data.message ||
+            data.error ||
+            "Unable to reject verification."
+          );
+        }
+
+        showToast(
+          data.message || "Verification request rejected.",
+          "success"
+        );
+
+        await loadRequests();
+
+      } catch (error) {
+        console.error("Reject verification error:", error);
+        showToast(error.message, "error");
+      }
+    }
+
+    function goToFeed() {
+      window.location.href = "/feed.html";
+    }
+
+    async function logout() {
+      try {
+        await fetch("/api/logout", {
+          method: "POST",
+          credentials: "include"
+        });
+      } catch (error) {
+        console.error(error);
+      }
+
+      window.location.href = "/login.html";
+    }
+
+    async function checkAdmin() {
+      try {
+        const response = await fetch("/api/me", {
+          credentials: "include"
+        });
+
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok || data.loggedIn === false) {
+          window.location.href = "/login.html";
+          return false;
+        }
+
+        return true;
+
+      } catch (error) {
+        console.error("Session check error:", error);
+        window.location.href = "/login.html";
+        return false;
+      }
+    }
+
+    async function init() {
+      const loggedIn = await checkAdmin();
+
+      if (!loggedIn) {
+        return;
+      }
+
+      await loadRequests();
+    }
+
+    init();
+  </script>
+
+</body>
+</html>

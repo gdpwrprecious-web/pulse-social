@@ -1,0 +1,14 @@
+[
+  {
+    "id": "follow_62e2655bfa10db9e9bed23a4mupob2uy",
+    "followerId": "user_745c064df341946c298f05aemupnbnkc",
+    "followingId": "user_37915857dfd7c4c76f377affmupn8o8y",
+    "createdAt": "2026-10-01T15:12:42.298Z"
+  },
+  {
+    "id": "follow_b3dad6baba9060d4df9ab893mupoczq5",
+    "followerId": "user_37915857dfd7c4c76f377affmupn8o8y",
+    "followingId": "user_745c064df341946c298f05aemupnbnkc",
+    "createdAt": "2026-10-01T15:14:11.549Z"
+  }
+]

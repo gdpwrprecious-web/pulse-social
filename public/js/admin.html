@@ -1,0 +1,2019 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard • Pulse Social</title>
+
+  <style>
+    :root {
+      --blue: #1877f2;
+      --blue-dark: #166fe5;
+      --green: #42b72a;
+      --red: #e41e3f;
+      --orange: #f59e0b;
+      --purple: #7c3aed;
+
+      --bg: #f0f2f5;
+      --card: #ffffff;
+      --text: #1c1e21;
+      --muted: #65676b;
+      --border: #dddfe2;
+
+      --sidebar: #ffffff;
+      --shadow: 0 2px 8px rgba(0,0,0,.08);
+      --radius: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    /* HEADER */
+
+    .topbar {
+      height: 64px;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 22px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: var(--blue);
+      color: white;
+      display: grid;
+      place-items: center;
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    .brand-text {
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .brand-text span {
+      color: var(--blue);
+    }
+
+    .admin-label {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .top-btn {
+      border: none;
+      background: #f0f2f5;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      font-size: 18px;
+    }
+
+    .top-btn:hover {
+      background: #e4e6eb;
+    }
+
+    .admin-user {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-left: 5px;
+    }
+
+    .avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: #e4e6eb;
+      object-fit: cover;
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+    }
+
+    .admin-name {
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    /* LAYOUT */
+
+    .layout {
+      display: flex;
+      min-height: calc(100vh - 64px);
+    }
+
+    /* SIDEBAR */
+
+    .sidebar {
+      width: 250px;
+      background: var(--sidebar);
+      border-right: 1px solid var(--border);
+      padding: 20px 12px;
+      position: sticky;
+      top: 64px;
+      height: calc(100vh - 64px);
+      overflow-y: auto;
+    }
+
+    .side-title {
+      padding: 8px 12px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--muted);
+      letter-spacing: .5px;
+    }
+
+    .nav-item {
+      width: 100%;
+      border: none;
+      background: transparent;
+      padding: 12px;
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-align: left;
+      color: var(--text);
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+
+    .nav-item:hover {
+      background: #f0f2f5;
+    }
+
+    .nav-item.active {
+      background: #e7f3ff;
+      color: var(--blue);
+    }
+
+    .nav-icon {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      font-size: 18px;
+    }
+
+    .nav-badge {
+      margin-left: auto;
+      min-width: 22px;
+      height: 22px;
+      padding: 0 6px;
+      border-radius: 11px;
+      background: var(--red);
+      color: white;
+      font-size: 11px;
+      display: grid;
+      place-items: center;
+    }
+
+    .sidebar-divider {
+      border: 0;
+      border-top: 1px solid var(--border);
+      margin: 15px 8px;
+    }
+
+    /* MAIN */
+
+    .main {
+      flex: 1;
+      min-width: 0;
+      padding: 25px;
+      max-width: 1500px;
+    }
+
+    .page-heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 22px;
+      gap: 15px;
+    }
+
+    .page-heading h1 {
+      font-size: 28px;
+      margin-bottom: 5px;
+    }
+
+    .page-heading p {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .refresh-btn {
+      border: none;
+      background: var(--blue);
+      color: white;
+      padding: 10px 16px;
+      border-radius: 7px;
+      font-weight: 700;
+    }
+
+    .refresh-btn:hover {
+      background: var(--blue-dark);
+    }
+
+    /* STATS */
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .stat-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .stat-icon {
+      width: 45px;
+      height: 45px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      font-size: 21px;
+      background: #e7f3ff;
+    }
+
+    .stat-card:nth-child(2) .stat-icon {
+      background: #e8f5e9;
+    }
+
+    .stat-card:nth-child(3) .stat-icon {
+      background: #fff4df;
+    }
+
+    .stat-card:nth-child(4) .stat-icon {
+      background: #f0e8ff;
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 15px;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 800;
+      margin-top: 4px;
+    }
+
+    /* PANELS */
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 18px;
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 17px 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .panel-title {
+      font-size: 17px;
+      font-weight: 800;
+    }
+
+    .panel-link {
+      color: var(--blue);
+      font-size: 13px;
+      font-weight: 700;
+      border: none;
+      background: none;
+    }
+
+    .panel-body {
+      padding: 18px;
+    }
+
+    /* SEARCH */
+
+    .search-box {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 15px;
+    }
+
+    .search-box input {
+      flex: 1;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 11px 12px;
+      outline: none;
+    }
+
+    .search-box input:focus {
+      border-color: var(--blue);
+    }
+
+    .search-box button {
+      border: none;
+      background: var(--blue);
+      color: white;
+      border-radius: 7px;
+      padding: 0 17px;
+      font-weight: 700;
+    }
+
+    /* USERS */
+
+    .user-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .user-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px;
+      border-radius: 9px;
+      background: #f7f8fa;
+    }
+
+    .user-row:hover {
+      background: #f0f2f5;
+    }
+
+    .user-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #e4e6eb;
+      flex-shrink: 0;
+    }
+
+    .user-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .user-name {
+      font-weight: 700;
+      font-size: 14px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .username {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 3px;
+    }
+
+    .verified {
+      color: var(--blue);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .user-actions {
+      display: flex;
+      gap: 5px;
+    }
+
+    .small-btn {
+      border: none;
+      border-radius: 6px;
+      padding: 7px 9px;
+      font-size: 12px;
+      font-weight: 700;
+      background: #e4e6eb;
+    }
+
+    .small-btn.primary {
+      color: white;
+      background: var(--blue);
+    }
+
+    .small-btn.danger {
+      color: white;
+      background: var(--red);
+    }
+
+    /* VERIFICATION */
+
+    .verification-box {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px;
+      background: #f7f8fa;
+      border-radius: 9px;
+      margin-bottom: 10px;
+    }
+
+    .verification-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: #e7f3ff;
+      color: var(--blue);
+      font-size: 20px;
+    }
+
+    .verification-info {
+      flex: 1;
+    }
+
+    .verification-info strong {
+      display: block;
+      font-size: 14px;
+    }
+
+    .verification-info span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 3px;
+    }
+
+    .verification-btn {
+      border: none;
+      background: var(--blue);
+      color: white;
+      border-radius: 7px;
+      padding: 8px 11px;
+      font-weight: 700;
+      font-size: 12px;
+    }
+
+    /* QUICK ACTIONS */
+
+    .quick-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .quick-action {
+      border: 1px solid var(--border);
+      background: white;
+      border-radius: 9px;
+      padding: 15px 10px;
+      text-align: center;
+      font-weight: 700;
+    }
+
+    .quick-action:hover {
+      background: #f7f8fa;
+    }
+
+    .quick-action .qa-icon {
+      font-size: 22px;
+      display: block;
+      margin-bottom: 7px;
+    }
+
+    /* ACTIVITY */
+
+    .activity {
+      margin-top: 18px;
+    }
+
+    .activity-list {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .activity-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 13px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .activity-row:last-child {
+      border-bottom: none;
+    }
+
+    .activity-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: #e7f3ff;
+    }
+
+    .activity-text {
+      flex: 1;
+      font-size: 13px;
+    }
+
+    .activity-time {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    /* LOADING */
+
+    .loading {
+      padding: 25px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .empty {
+      padding: 25px 10px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    /* TOAST */
+
+    .toast {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      background: #1c1e21;
+      color: white;
+      padding: 12px 17px;
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      transform: translateY(100px);
+      opacity: 0;
+      transition: .25s;
+      z-index: 999;
+      font-size: 14px;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .toast.success {
+      background: #2e7d32;
+    }
+
+    .toast.error {
+      background: #c62828;
+    }
+
+    /* MOBILE MENU */
+
+    .mobile-menu {
+      display: none;
+      border: none;
+      background: #f0f2f5;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      font-size: 20px;
+    }
+
+    @media (max-width: 1100px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 800px) {
+      .sidebar {
+        position: fixed;
+        left: -270px;
+        top: 64px;
+        z-index: 90;
+        transition: .25s;
+        box-shadow: 5px 0 20px rgba(0,0,0,.1);
+      }
+
+      .sidebar.open {
+        left: 0;
+      }
+
+      .mobile-menu {
+        display: block;
+      }
+
+      .brand-text {
+        font-size: 17px;
+      }
+
+      .admin-user .admin-name {
+        display: none;
+      }
+
+      .main {
+        padding: 16px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .topbar {
+        padding: 0 12px;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .stat-card {
+        padding: 13px;
+      }
+
+      .stat-value {
+        font-size: 23px;
+      }
+
+      .stat-icon {
+        width: 38px;
+        height: 38px;
+        font-size: 17px;
+      }
+
+      .page-heading {
+        align-items: flex-start;
+      }
+
+      .page-heading h1 {
+        font-size: 23px;
+      }
+
+      .refresh-btn {
+        padding: 8px 11px;
+        font-size: 12px;
+      }
+
+      .user-actions {
+        display: none;
+      }
+
+      .quick-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- HEADER -->
+  <header class="topbar">
+
+    <div class="brand">
+      <button class="mobile-menu" id="mobileMenuBtn">☰</button>
+
+      <div class="brand-logo">P</div>
+
+      <div>
+        <div class="brand-text">
+          <span>Pulse</span> Social
+        </div>
+        <div class="admin-label">Administration</div>
+      </div>
+    </div>
+
+    <div class="top-actions">
+
+      <button class="top-btn" title="Open notifications"
+        onclick="location.href='/notifications.html'">
+        🔔
+      </button>
+
+      <button class="top-btn" title="Open messages"
+        onclick="location.href='/messages.html'">
+        💬
+      </button>
+
+      <div class="admin-user">
+        <img id="adminAvatar"
+             class="avatar"
+             src=""
+             alt="Admin">
+
+        <div class="admin-name" id="adminName">
+          Admin
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+
+  <div class="layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+
+      <div class="side-title">
+        Administration
+      </div>
+
+      <button class="nav-item active" onclick="showSection('dashboard', this)">
+        <span class="nav-icon">📊</span>
+        Dashboard
+      </button>
+
+      <button class="nav-item" onclick="showSection('users', this)">
+        <span class="nav-icon">👥</span>
+        Users
+      </button>
+
+      <button class="nav-item" onclick="openVerification()">
+        <span class="nav-icon">🔵</span>
+        Verification
+        <span class="nav-badge" id="verificationBadge">0</span>
+      </button>
+
+      <button class="nav-item" onclick="location.href='/feed.html'">
+        <span class="nav-icon">📰</span>
+        View Feed
+      </button>
+
+      <button class="nav-item" onclick="location.href='/profile.html'">
+        <span class="nav-icon">👤</span>
+        My Profile
+      </button>
+
+      <hr class="sidebar-divider">
+
+      <div class="side-title">
+        Platform
+      </div>
+
+      <button class="nav-item" onclick="showSection('activity', this)">
+        <span class="nav-icon">📈</span>
+        Activity
+      </button>
+
+      <button class="nav-item" onclick="showSection('settings', this)">
+        <span class="nav-icon">⚙️</span>
+        Settings
+      </button>
+
+      <button class="nav-item" onclick="logout()">
+        <span class="nav-icon">🚪</span>
+        Log Out
+      </button>
+
+    </aside>
+
+
+    <!-- MAIN -->
+    <main class="main">
+
+      <!-- DASHBOARD -->
+      <section id="dashboardSection">
+
+        <div class="page-heading">
+          <div>
+            <h1>Dashboard</h1>
+            <p>Manage and monitor your Pulse Social platform.</p>
+          </div>
+
+          <button class="refresh-btn" onclick="loadDashboard()">
+            ↻ Refresh
+          </button>
+        </div>
+
+
+        <!-- STAT CARDS -->
+        <div class="stats-grid">
+
+          <div class="stat-card">
+            <div class="stat-top">
+              <div>
+                <div class="stat-label">Total Users</div>
+                <div class="stat-value" id="totalUsers">—</div>
+              </div>
+              <div class="stat-icon">👥</div>
+            </div>
+          </div>
+
+
+          <div class="stat-card">
+            <div class="stat-top">
+              <div>
+                <div class="stat-label">Total Posts</div>
+                <div class="stat-value" id="totalPosts">—</div>
+              </div>
+              <div class="stat-icon">📝</div>
+            </div>
+          </div>
+
+
+          <div class="stat-card">
+            <div class="stat-top">
+              <div>
+                <div class="stat-label">Comments</div>
+                <div class="stat-value" id="totalComments">—</div>
+              </div>
+              <div class="stat-icon">💬</div>
+            </div>
+          </div>
+
+
+          <div class="stat-card">
+            <div class="stat-top">
+              <div>
+                <div class="stat-label">Likes</div>
+                <div class="stat-value" id="totalLikes">—</div>
+              </div>
+              <div class="stat-icon">❤️</div>
+            </div>
+          </div>
+
+        </div>
+
+
+        <!-- CONTENT -->
+        <div class="content-grid">
+
+          <!-- USERS -->
+          <div class="panel">
+
+            <div class="panel-header">
+              <div class="panel-title">
+                User Management
+              </div>
+
+              <button class="panel-link" onclick="showSection('users')">
+                View all
+              </button>
+            </div>
+
+            <div class="panel-body">
+
+              <div class="search-box">
+                <input
+                  type="text"
+                  id="userSearch"
+                  placeholder="Search users..."
+                  onkeydown="if(event.key==='Enter') searchUsers()">
+
+                <button onclick="searchUsers()">
+                  Search
+                </button>
+              </div>
+
+              <div id="userList" class="user-list">
+                <div class="loading">
+                  Loading users...
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+
+          <!-- RIGHT COLUMN -->
+          <div>
+
+            <!-- VERIFICATION -->
+            <div class="panel">
+
+              <div class="panel-header">
+                <div class="panel-title">
+                  Verification
+                </div>
+
+                <button class="panel-link"
+                        onclick="openVerification()">
+                  Manage
+                </button>
+              </div>
+
+              <div class="panel-body">
+
+                <div class="verification-box">
+
+                  <div class="verification-icon">
+                    🔵
+                  </div>
+
+                  <div class="verification-info">
+                    <strong id="pendingVerification">
+                      0 pending requests
+                    </strong>
+
+                    <span>
+                      Review user verification requests.
+                    </span>
+                  </div>
+
+                  <button
+                    class="verification-btn"
+                    onclick="openVerification()">
+                    Review
+                  </button>
+
+                </div>
+
+              </div>
+            </div>
+
+
+            <!-- QUICK ACTIONS -->
+            <div class="panel" style="margin-top:18px;">
+
+              <div class="panel-header">
+                <div class="panel-title">
+                  Quick Actions
+                </div>
+              </div>
+
+              <div class="panel-body">
+
+                <div class="quick-grid">
+
+                  <button class="quick-action"
+                          onclick="showSection('users')">
+                    <span class="qa-icon">👥</span>
+                    Manage Users
+                  </button>
+
+                  <button class="quick-action"
+                          onclick="openVerification()">
+                    <span class="qa-icon">🔵</span>
+                    Verify Users
+                  </button>
+
+                  <button class="quick-action"
+                          onclick="location.href='/feed.html'">
+                    <span class="qa-icon">📰</span>
+                    View Feed
+                  </button>
+
+                  <button class="quick-action"
+                          onclick="location.href='/notifications.html'">
+                    <span class="qa-icon">🔔</span>
+                    Notifications
+                  </button>
+
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- ACTIVITY -->
+        <div class="panel activity">
+
+          <div class="panel-header">
+            <div class="panel-title">
+              Platform Overview
+            </div>
+          </div>
+
+          <div class="panel-body">
+
+            <div class="activity-list">
+
+              <div class="activity-row">
+                <div class="activity-icon">👥</div>
+
+                <div class="activity-text">
+                  <strong>Users</strong><br>
+                  Registered accounts on Pulse Social.
+                </div>
+
+                <div class="activity-time"
+                     id="activityUsers">
+                  —
+                </div>
+              </div>
+
+
+              <div class="activity-row">
+                <div class="activity-icon">📝</div>
+
+                <div class="activity-text">
+                  <strong>Posts</strong><br>
+                  Posts currently stored on the platform.
+                </div>
+
+                <div class="activity-time"
+                     id="activityPosts">
+                  —
+                </div>
+              </div>
+
+
+              <div class="activity-row">
+                <div class="activity-icon">🔵</div>
+
+                <div class="activity-text">
+                  <strong>Verified Users</strong><br>
+                  Accounts with verified status.
+                </div>
+
+                <div class="activity-time"
+                     id="activityVerified">
+                  —
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+
+      </section>
+
+
+      <!-- USERS SECTION -->
+      <section id="usersSection" style="display:none;">
+
+        <div class="page-heading">
+
+          <div>
+            <h1>Users</h1>
+            <p>Search and manage Pulse Social users.</p>
+          </div>
+
+          <button class="refresh-btn" onclick="loadUsers()">
+            ↻ Refresh
+          </button>
+
+        </div>
+
+        <div class="panel">
+
+          <div class="panel-body">
+
+            <div class="search-box">
+
+              <input
+                type="text"
+                id="allUserSearch"
+                placeholder="Search by name or username..."
+                onkeydown="if(event.key==='Enter') searchAllUsers()">
+
+              <button onclick="searchAllUsers()">
+                Search
+              </button>
+
+            </div>
+
+            <div id="allUsersList" class="user-list">
+              <div class="loading">
+                Loading users...
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ACTIVITY SECTION -->
+      <section id="activitySection" style="display:none;">
+
+        <div class="page-heading">
+          <div>
+            <h1>Activity</h1>
+            <p>Platform activity overview.</p>
+          </div>
+        </div>
+
+        <div class="panel">
+
+          <div class="panel-body">
+
+            <div class="activity-list">
+
+              <div class="activity-row">
+                <div class="activity-icon">👥</div>
+                <div class="activity-text">
+                  Registered Users
+                </div>
+                <strong id="activityUsers2">—</strong>
+              </div>
+
+              <div class="activity-row">
+                <div class="activity-icon">📝</div>
+                <div class="activity-text">
+                  Posts
+                </div>
+                <strong id="activityPosts2">—</strong>
+              </div>
+
+              <div class="activity-row">
+                <div class="activity-icon">💬</div>
+                <div class="activity-text">
+                  Comments
+                </div>
+                <strong id="activityComments2">—</strong>
+              </div>
+
+              <div class="activity-row">
+                <div class="activity-icon">❤️</div>
+                <div class="activity-text">
+                  Likes
+                </div>
+                <strong id="activityLikes2">—</strong>
+              </div>
+
+              <div class="activity-row">
+                <div class="activity-icon">🔵</div>
+                <div class="activity-text">
+                  Verified Users
+                </div>
+                <strong id="activityVerified2">—</strong>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+
+      </section>
+
+
+      <!-- SETTINGS -->
+      <section id="settingsSection" style="display:none;">
+
+        <div class="page-heading">
+          <div>
+            <h1>Settings</h1>
+            <p>Pulse Social administration settings.</p>
+          </div>
+        </div>
+
+        <div class="panel">
+
+          <div class="panel-body">
+
+            <div class="activity-row">
+              <div class="activity-icon">🛡️</div>
+
+              <div class="activity-text">
+                <strong>Admin Access</strong><br>
+                Verification and platform administration are
+                controlled by the server.
+              </div>
+            </div>
+
+            <div class="activity-row">
+              <div class="activity-icon">🔵</div>
+
+              <div class="activity-text">
+                <strong>Verification Management</strong><br>
+                Review and approve verification requests.
+              </div>
+
+              <button class="small-btn primary"
+                      onclick="openVerification()">
+                Open
+              </button>
+            </div>
+
+            <div class="activity-row">
+              <div class="activity-icon">🚪</div>
+
+              <div class="activity-text">
+                <strong>Sign Out</strong><br>
+                End your current administrator session.
+              </div>
+
+              <button class="small-btn danger"
+                      onclick="logout()">
+                Log Out
+              </button>
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+    </main>
+
+  </div>
+
+
+  <div class="toast" id="toast"></div>
+
+
+  <script>
+
+    let currentUser = null;
+
+
+    /* =====================================================
+       HELPERS
+    ===================================================== */
+
+    function escapeHTML(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+
+    function getInitials(name) {
+      const parts = String(name || "User")
+        .trim()
+        .split(/\s+/);
+
+      return parts
+        .slice(0, 2)
+        .map(x => x.charAt(0).toUpperCase())
+        .join("");
+    }
+
+
+    function showToast(message, type = "") {
+
+      const toast = document.getElementById("toast");
+
+      toast.textContent = message;
+      toast.className = "toast show " + type;
+
+      setTimeout(() => {
+        toast.className = "toast";
+      }, 3000);
+    }
+
+
+    function getArray(data, key) {
+
+      if (Array.isArray(data)) {
+        return data;
+      }
+
+      if (Array.isArray(data?.[key])) {
+        return data[key];
+      }
+
+      if (Array.isArray(data?.data)) {
+        return data.data;
+      }
+
+      if (Array.isArray(data?.data?.[key])) {
+        return data.data[key];
+      }
+
+      return [];
+    }
+
+
+    /* =====================================================
+       AUTH
+    ===================================================== */
+
+    async function checkAdmin() {
+
+      try {
+
+        const response = await fetch("/api/me", {
+          credentials: "same-origin"
+        });
+
+        const data = await response.json();
+
+        if (!data.success || !data.user) {
+          location.href = "/login.html";
+          return false;
+        }
+
+        currentUser = data.user;
+
+        document.getElementById("adminName").textContent =
+          currentUser.name ||
+          currentUser.username ||
+          "Admin";
+
+        const avatar = document.getElementById("adminAvatar");
+
+        if (currentUser.profilePicture) {
+
+          avatar.src = currentUser.profilePicture;
+
+        } else {
+
+          avatar.src =
+            "data:image/svg+xml;charset=UTF-8," +
+            encodeURIComponent(`
+              <svg xmlns="http://www.w3.org/2000/svg"
+                   width="100"
+                   height="100">
+                <rect width="100" height="100"
+                      fill="#e4e6eb"/>
+                <text x="50"
+                      y="57"
+                      text-anchor="middle"
+                      font-size="38"
+                      font-family="Arial"
+                      fill="#65676b">
+                  ${getInitials(currentUser.name)}
+                </text>
+              </svg>
+            `);
+
+        }
+
+        return true;
+
+      } catch (error) {
+
+        console.error(error);
+
+        location.href = "/login.html";
+
+        return false;
+      }
+    }
+
+
+    async function logout() {
+
+      try {
+
+        await fetch("/api/logout", {
+          method: "POST",
+          credentials: "same-origin"
+        });
+
+      } catch (error) {
+        console.error(error);
+      }
+
+      location.href = "/login.html";
+    }
+
+
+    /* =====================================================
+       DASHBOARD STATS
+    ===================================================== */
+
+    async function loadStats() {
+
+      try {
+
+        const response = await fetch("/api/stats", {
+          credentials: "same-origin"
+        });
+
+        const data = await response.json();
+
+        const stats =
+          data.stats ||
+          data.data ||
+          data;
+
+        const users =
+          stats.users ??
+          stats.totalUsers ??
+          0;
+
+        const posts =
+          stats.posts ??
+          stats.totalPosts ??
+          0;
+
+        const comments =
+          stats.comments ??
+          stats.totalComments ??
+          0;
+
+        const likes =
+          stats.likes ??
+          stats.totalLikes ??
+          0;
+
+        const verified =
+          stats.verifiedUsers ??
+          stats.verified ??
+          0;
+
+
+        document.getElementById("totalUsers").textContent =
+          Number(users).toLocaleString();
+
+        document.getElementById("totalPosts").textContent =
+          Number(posts).toLocaleString();
+
+        document.getElementById("totalComments").textContent =
+          Number(comments).toLocaleString();
+
+        document.getElementById("totalLikes").textContent =
+          Number(likes).toLocaleString();
+
+
+        document.getElementById("activityUsers").textContent =
+          Number(users).toLocaleString();
+
+        document.getElementById("activityPosts").textContent =
+          Number(posts).toLocaleString();
+
+        document.getElementById("activityVerified").textContent =
+          Number(verified).toLocaleString();
+
+
+        document.getElementById("activityUsers2").textContent =
+          Number(users).toLocaleString();
+
+        document.getElementById("activityPosts2").textContent =
+          Number(posts).toLocaleString();
+
+        document.getElementById("activityComments2").textContent =
+          Number(comments).toLocaleString();
+
+        document.getElementById("activityLikes2").textContent =
+          Number(likes).toLocaleString();
+
+        document.getElementById("activityVerified2").textContent =
+          Number(verified).toLocaleString();
+
+      } catch (error) {
+
+        console.error("Stats error:", error);
+
+        document.getElementById("totalUsers").textContent = "0";
+        document.getElementById("totalPosts").textContent = "0";
+        document.getElementById("totalComments").textContent = "0";
+        document.getElementById("totalLikes").textContent = "0";
+      }
+    }
+
+
+    /* =====================================================
+       USER RENDERING
+    ===================================================== */
+
+    function renderUser(user) {
+
+      const verified =
+        user.verified === true ||
+        user.isVerified === true ||
+        user.verified === "true" ||
+        user.isVerified === "true";
+
+
+      const picture =
+        user.profilePicture ||
+        "";
+
+
+      const avatarHTML = picture
+
+        ? `<img class="user-avatar"
+                src="${escapeHTML(picture)}"
+                alt="${escapeHTML(user.name || user.username)}">`
+
+        : `<div class="user-avatar"
+                style="display:grid;place-items:center;font-weight:700;">
+              ${escapeHTML(getInitials(user.name || user.username))}
+           </div>`;
+
+
+      return `
+        <div class="user-row">
+
+          ${avatarHTML}
+
+          <div class="user-info">
+
+            <div class="user-name">
+              ${escapeHTML(user.name || user.username || "User")}
+
+              ${verified
+                ? `<span class="verified">✓</span>`
+                : ""}
+            </div>
+
+            <div class="username">
+              @${escapeHTML(user.username || "")}
+            </div>
+
+          </div>
+
+          <div class="user-actions">
+
+            <button
+              class="small-btn"
+              onclick="viewProfile('${escapeHTML(user.username || "")}')">
+              Profile
+            </button>
+
+            ${verified
+              ? `<span class="small-btn"
+                        style="color:#1877f2;background:#e7f3ff;">
+                    ✓ Verified
+                 </span>`
+              : ""}
+
+          </div>
+
+        </div>
+      `;
+    }
+
+
+    /* =====================================================
+       LOAD USERS
+    ===================================================== */
+
+    async function loadUsers() {
+
+      const list = document.getElementById("userList");
+
+      list.innerHTML =
+        `<div class="loading">Loading users...</div>`;
+
+
+      try {
+
+        const response = await fetch("/api/search?q=", {
+          credentials: "same-origin"
+        });
+
+        const data = await response.json();
+
+        let users = getArray(data, "users");
+
+
+        if (!users.length && currentUser) {
+          users = [currentUser];
+        }
+
+
+        list.innerHTML = users.length
+
+          ? users.slice(0, 8).map(renderUser).join("")
+
+          : `<div class="empty">
+               No users found.
+             </div>`;
+
+      } catch (error) {
+
+        console.error(error);
+
+        list.innerHTML =
+          `<div class="empty">
+             Unable to load users.
+           </div>`;
+      }
+    }
+
+
+    async function searchUsers() {
+
+      const input =
+        document.getElementById("userSearch");
+
+      const query =
+        input.value.trim();
+
+      if (!query) {
+
+        loadUsers();
+        return;
+      }
+
+
+      const list =
+        document.getElementById("userList");
+
+      list.innerHTML =
+        `<div class="loading">Searching...</div>`;
+
+
+      try {
+
+        const response = await fetch(
+          "/api/search?q=" +
+          encodeURIComponent(query),
+          {
+            credentials: "same-origin"
+          }
+        );
+
+        const data = await response.json();
+
+        const users =
+          getArray(data, "users");
+
+
+        list.innerHTML = users.length
+
+          ? users.map(renderUser).join("")
+
+          : `<div class="empty">
+               No users found for
+               "${escapeHTML(query)}".
+             </div>`;
+
+      } catch (error) {
+
+        console.error(error);
+
+        list.innerHTML =
+          `<div class="empty">
+             Search failed.
+           </div>`;
+      }
+    }
+
+
+    async function searchAllUsers() {
+
+      const input =
+        document.getElementById("allUserSearch");
+
+      const query =
+        input.value.trim();
+
+
+      const list =
+        document.getElementById("allUsersList");
+
+      if (!query) {
+
+        list.innerHTML =
+          `<div class="empty">
+             Enter a name or username to search.
+           </div>`;
+
+        return;
+      }
+
+
+      list.innerHTML =
+        `<div class="loading">Searching...</div>`;
+
+
+      try {
+
+        const response = await fetch(
+          "/api/search?q=" +
+          encodeURIComponent(query),
+          {
+            credentials: "same-origin"
+          }
+        );
+
+        const data = await response.json();
+
+        const users =
+          getArray(data, "users");
+
+
+        list.innerHTML = users.length
+
+          ? users.map(renderUser).join("")
+
+          : `<div class="empty">
+               No users found.
+             </div>`;
+
+      } catch (error) {
+
+        console.error(error);
+
+        list.innerHTML =
+          `<div class="empty">
+             Unable to search users.
+           </div>`;
+      }
+    }
+
+
+    function viewProfile(username) {
+
+      if (!username) return;
+
+      location.href =
+        "/profile.html?username=" +
+        encodeURIComponent(username);
+    }
+
+
+    /* =====================================================
+       VERIFICATION
+    ===================================================== */
+
+    async function loadVerificationCount() {
+
+      try {
+
+        const response = await fetch(
+          "/api/admin/verification/requests",
+          {
+            credentials: "same-origin"
+          }
+        );
+
+        if (!response.ok) {
+          return;
+        }
+
+        const data = await response.json();
+
+        const requests =
+          getArray(data, "requests");
+
+
+        const pending =
+          requests.filter(
+            request =>
+              String(request.status || "pending")
+                .toLowerCase() === "pending"
+          ).length;
+
+
+        document.getElementById(
+          "verificationBadge"
+        ).textContent = pending;
+
+
+        document.getElementById(
+          "pendingVerification"
+        ).textContent =
+          `${pending} pending request${pending === 1 ? "" : "s"}`;
+
+      } catch (error) {
+
+        console.error(
+          "Verification count error:",
+          error
+        );
+      }
+    }
+
+
+    function openVerification() {
+
+      location.href =
+        "/admin-verification.html";
+    }
+
+
+    /* =====================================================
+       DASHBOARD
+    ===================================================== */
+
+    async function loadDashboard() {
+
+      await Promise.all([
+        loadStats(),
+        loadUsers(),
+        loadVerificationCount()
+      ]);
+    }
+
+
+    /* =====================================================
+       SECTION SWITCHING
+    ===================================================== */
+
+    function hideSections() {
+
+      document.getElementById(
+        "dashboardSection"
+      ).style.display = "none";
+
+      document.getElementById(
+        "usersSection"
+      ).style.display = "none";
+
+      document.getElementById(
+        "activitySection"
+      ).style.display = "none";
+
+      document.getElementById(
+        "settingsSection"
+      ).style.display = "none";
+    }
+
+
+    function showSection(section, button) {
+
+      hideSections();
+
+      if (section === "dashboard") {
+
+        document.getElementById(
+          "dashboardSection"
+        ).style.display = "block";
+
+        loadDashboard();
+
+      } else if (section === "users") {
+
+        document.getElementById(
+          "usersSection"
+        ).style.display = "block";
+
+        loadUsersFull();
+
+      } else if (section === "activity") {
+
+        document.getElementById(
+          "activitySection"
+        ).style.display = "block";
+
+        loadStats();
+
+      } else if (section === "settings") {
+
+        document.getElementById(
+          "settingsSection"
+        ).style.display = "block";
+      }
+
+
+      document
+        .querySelectorAll(".nav-item")
+        .forEach(item => {
+          item.classList.remove("active");
+        });
+
+
+      if (button) {
+        button.classList.add("active");
+      }
+
+
+      document
+        .getElementById("sidebar")
+        .classList.remove("open");
+    }
+
+
+    async function loadUsersFull() {
+
+      const list =
+        document.getElementById("allUsersList");
+
+      list.innerHTML =
+        `<div class="loading">Loading users...</div>`;
+
+
+      try {
+
+        const response = await fetch(
+          "/api/search?q=",
+          {
+            credentials: "same-origin"
+          }
+        );
+
+        const data = await response.json();
+
+        let users =
+          getArray(data, "users");
+
+
+        if (!users.length && currentUser) {
+          users = [currentUser];
+        }
+
+
+        list.innerHTML = users.length
+
+          ? users.map(renderUser).join("")
+
+          : `<div class="empty">
+               No users available.
+             </div>`;
+
+      } catch (error) {
+
+        console.error(error);
+
+        list.innerHTML =
+          `<div class="empty">
+             Unable to load users.
+           </div>`;
+      }
+    }
+
+
+    /* =====================================================
+       MOBILE MENU
+    ===================================================== */
+
+    document
+      .getElementById("mobileMenuBtn")
+      .addEventListener("click", () => {
+
+        document
+          .getElementById("sidebar")
+          .classList.toggle("open");
+
+      });
+
+
+    /* =====================================================
+       START
+    ===================================================== */
+
+    async function init() {
+
+      const authenticated =
+        await checkAdmin();
+
+      if (!authenticated) {
+        return;
+      }
+
+      await loadDashboard();
+    }
+
+
+    init();
+
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stories • Pulse Social</title>
+
+  <link rel="stylesheet" href="/css/style.css">
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: #f0f2f5;
+      color: #111827;
+      font-family: Inter, Arial, sans-serif;
+    }
+
+    .stories-header {
+      height: 70px;
+      background: #fff;
+      border-bottom: 1px solid #ddd;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .logo {
+      font-size: 27px;
+      font-weight: 800;
+      color: #1877f2;
+      text-decoration: none;
+    }
+
+    .back {
+      margin-left: 25px;
+      text-decoration: none;
+      color: #374151;
+      font-weight: 600;
+    }
+
+    .page {
+      max-width: 900px;
+      margin: 30px auto;
+      padding: 0 16px;
+    }
+
+    .page-title {
+      font-size: 30px;
+      font-weight: 800;
+      margin-bottom: 20px;
+    }
+
+    .create-story {
+      background: #fff;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.08);
+      margin-bottom: 25px;
+    }
+
+    .create-story h2 {
+      margin-top: 0;
+    }
+
+    .story-input {
+      width: 100%;
+      min-height: 90px;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      padding: 14px;
+      resize: vertical;
+      font-size: 15px;
+      outline: none;
+    }
+
+    .story-input:focus {
+      border-color: #1877f2;
+    }
+
+    .upload-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-top: 15px;
+      flex-wrap: wrap;
+    }
+
+    .file-label {
+      background: #eef2ff;
+      color: #2563eb;
+      padding: 11px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    #storyFile {
+      display: none;
+    }
+
+    .post-btn {
+      border: none;
+      background: #1877f2;
+      color: white;
+      padding: 11px 20px;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .post-btn:disabled {
+      opacity: .6;
+      cursor: not-allowed;
+    }
+
+    .preview {
+      margin-top: 15px;
+      display: none;
+    }
+
+    .preview img,
+    .preview video {
+      width: 100%;
+      max-height: 400px;
+      object-fit: contain;
+      border-radius: 14px;
+      background: #111;
+    }
+
+    .stories-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 15px;
+    }
+
+    .story-card {
+      height: 300px;
+      border-radius: 16px;
+      overflow: hidden;
+      position: relative;
+      cursor: pointer;
+      background: #111827;
+      box-shadow: 0 3px 12px rgba(0,0,0,.12);
+    }
+
+    .story-card img,
+    .story-card video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .story-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        transparent 45%,
+        rgba(0,0,0,.75)
+      );
+    }
+
+    .story-user {
+      position: absolute;
+      left: 12px;
+      bottom: 13px;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+    }
+
+    .story-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 2px solid #1877f2;
+      object-fit: cover;
+    }
+
+    .empty {
+      background: white;
+      border-radius: 15px;
+      padding: 40px;
+      text-align: center;
+      color: #6b7280;
+    }
+
+    .viewer {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.94);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .viewer-content {
+      max-width: 600px;
+      width: 100%;
+      height: 90vh;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .viewer img,
+    .viewer video {
+      max-width: 100%;
+      max-height: 90vh;
+      border-radius: 15px;
+    }
+
+    .close-viewer {
+      position: absolute;
+      top: -10px;
+      right: 0;
+      width: 42px;
+      height: 42px;
+      border: none;
+      border-radius: 50%;
+      background: rgba(255,255,255,.15);
+      color: white;
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    .viewer-caption {
+      position: absolute;
+      bottom: 10px;
+      left: 15px;
+      right: 15px;
+      color: white;
+      text-align: center;
+      font-size: 16px;
+    }
+
+    .loader {
+      text-align: center;
+      padding: 30px;
+      color: #6b7280;
+    }
+
+    @media (max-width: 600px) {
+      .stories-header {
+        padding: 0 15px;
+      }
+
+      .page {
+        margin-top: 20px;
+      }
+
+      .stories-list {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .story-card {
+        height: 260px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header class="stories-header">
+  <a href="/feed.html" class="logo">Pulse</a>
+  <a href="/feed.html" class="back">← Feed</a>
+</header>
+
+<main class="page">
+
+  <h1 class="page-title">Stories</h1>
+
+  <section class="create-story">
+
+    <h2>Create a story</h2>
+
+    <textarea
+      id="storyText"
+      class="story-input"
+      maxlength="500"
+      placeholder="Write something for your story..."></textarea>
+
+    <div class="upload-row">
+
+      <label class="file-label" for="storyFile">
+        📷 Add Photo / Video
+      </label>
+
+      <input
+        id="storyFile"
+        type="file"
+        accept="image/*,video/*">
+
+      <button
+        id="postStory"
+        class="post-btn">
+        Share Story
+      </button>
+
+    </div>
+
+    <div id="preview" class="preview"></div>
+
+  </section>
+
+  <section>
+
+    <h2>Recent Stories</h2>
+
+    <div id="stories" class="stories-list">
+      <div class="loader">Loading stories...</div>
+    </div>
+
+  </section>
+
+</main>
+
+<div id="viewer" class="viewer">
+
+  <div class="viewer-content">
+
+    <button
+      id="closeViewer"
+      class="close-viewer">
+      ×
+    </button>
+
+    <div id="viewerMedia"></div>
+
+    <div
+      id="viewerCaption"
+      class="viewer-caption">
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+  const $ = id => document.getElementById(id);
+
+  let selectedFile = null;
+
+  async function api(url, options = {}) {
+
+    const config = {
+      credentials: "include",
+      ...options
+    };
+
+    if (
+      config.body &&
+      !(config.body instanceof FormData)
+    ) {
+      config.headers = {
+        "Content-Type": "application/json",
+        ...(config.headers || {})
+      };
+    }
+
+    const response = await fetch(url, config);
+
+    let data;
+
+    try {
+      data = await response.json();
+    } catch {
+      data = {};
+    }
+
+    if (!response.ok) {
+      throw new Error(
+        data.error ||
+        data.message ||
+        "Request failed"
+      );
+    }
+
+    return data;
+  }
+
+  async function checkLogin() {
+
+    try {
+
+      const data = await api("/api/me");
+
+      if (!data.loggedIn) {
+        location.href = "/login.html";
+        return false;
+      }
+
+      return true;
+
+    } catch {
+      location.href = "/login.html";
+      return false;
+    }
+  }
+
+  $("storyFile").addEventListener("change", event => {
+
+    selectedFile = event.target.files[0];
+
+    if (!selectedFile) {
+      $("preview").style.display = "none";
+      $("preview").innerHTML = "";
+      return;
+    }
+
+    const url = URL.createObjectURL(selectedFile);
+
+    if (selectedFile.type.startsWith("video/")) {
+
+      $("preview").innerHTML = `
+        <video
+          src="${url}"
+          controls>
+        </video>
+      `;
+
+    } else {
+
+      $("preview").innerHTML = `
+        <img
+          src="${url}"
+          alt="Story preview">
+      `;
+
+    }
+
+    $("preview").style.display = "block";
+  });
+
+  async function createStory() {
+
+    const text = $("storyText").value.trim();
+
+    if (!text && !selectedFile) {
+      alert("Add some text or a photo/video.");
+      return;
+    }
+
+    const form = new FormData();
+
+    if (text) {
+      form.append("text", text);
+    }
+
+    if (selectedFile) {
+      form.append("media", selectedFile);
+    }
+
+    $("postStory").disabled = true;
+    $("postStory").textContent = "Sharing...";
+
+    try {
+
+      await api("/api/stories", {
+        method: "POST",
+        body: form
+      });
+
+      $("storyText").value = "";
+      $("storyFile").value = "";
+      selectedFile = null;
+
+      $("preview").style.display = "none";
+      $("preview").innerHTML = "";
+
+      await loadStories();
+
+      alert("Story shared!");
+
+    } catch (error) {
+
+      alert(error.message);
+
+    } finally {
+
+      $("postStory").disabled = false;
+      $("postStory").textContent = "Share Story";
+    }
+  }
+
+  async function loadStories() {
+
+    const container = $("stories");
+
+    container.innerHTML =
+      `<div class="loader">Loading stories...</div>`;
+
+    try {
+
+      const data = await api("/api/stories");
+
+      const stories =
+        Array.isArray(data)
+          ? data
+          : data.stories || [];
+
+      if (!stories.length) {
+
+        container.innerHTML = `
+          <div class="empty">
+            No active stories yet.
+            <br>
+            Be the first to share one!
+          </div>
+        `;
+
+        return;
+      }
+
+      container.innerHTML = "";
+
+      stories.forEach(story => {
+
+        const card =
+          document.createElement("article");
+
+        card.className = "story-card";
+
+        const user =
+          story.user ||
+          story.author ||
+          {};
+
+        const username =
+          user.username ||
+          story.username ||
+          "User";
+
+        const name =
+          user.name ||
+          story.name ||
+          username;
+
+        const avatar =
+          user.profilePicture ||
+          user.avatar ||
+          story.profilePicture ||
+          "/images/default-avatar.png";
+
+        const media =
+          story.mediaUrl ||
+          story.media ||
+          story.url ||
+          "";
+
+        let mediaHTML = "";
+
+        if (media) {
+
+          if (
+            story.mediaType === "video" ||
+            /\.(mp4|webm|mov|m4v)$/i.test(media)
+          ) {
+
+            mediaHTML = `
+              <video
+                src="${media}"
+                muted
+                playsinline>
+              </video>
+            `;
+
+          } else {
+
+            mediaHTML = `
+              <img
+                src="${media}"
+                alt="Story">
+            `;
+          }
+
+        } else {
+
+          mediaHTML = `
+            <div style="
+              width:100%;
+              height:100%;
+              display:flex;
+              align-items:center;
+              justify-content:center;
+              padding:20px;
+              text-align:center;
+              color:white;
+              font-size:22px;
+              font-weight:700;
+              background:linear-gradient(
+                135deg,
+                #1877f2,
+                #7c3aed
+              );
+            ">
+              ${escapeHTML(story.text || "")}
+            </div>
+          `;
+        }
+
+        card.innerHTML = `
+          ${mediaHTML}
+
+          <div class="story-overlay"></div>
+
+          <div class="story-user">
+            <img
+              class="story-avatar"
+              src="${avatar}"
+              alt="">
+
+            <span>${escapeHTML(name)}</span>
+          </div>
+        `;
+
+        card.addEventListener("click", () => {
+          openStory(story);
+        });
+
+        container.appendChild(card);
+      });
+
+    } catch (error) {
+
+      container.innerHTML = `
+        <div class="empty">
+          Unable to load stories.
+          <br><br>
+          ${escapeHTML(error.message)}
+        </div>
+      `;
+    }
+  }
+
+  function openStory(story) {
+
+    const media =
+      story.mediaUrl ||
+      story.media ||
+      story.url ||
+      "";
+
+    const type =
+      story.mediaType ||
+      "";
+
+    let html = "";
+
+    if (media && (
+      type === "video" ||
+      /\.(mp4|webm|mov|m4v)$/i.test(media)
+    )) {
+
+      html = `
+        <video
+          src="${media}"
+          controls
+          autoplay
+          playsinline>
+        </video>
+      `;
+
+    } else if (media) {
+
+      html = `
+        <img
+          src="${media}"
+          alt="Story">
+      `;
+
+    } else {
+
+      html = `
+        <div style="
+          color:white;
+          font-size:25px;
+          text-align:center;
+          padding:30px;
+        ">
+          ${escapeHTML(story.text || "")}
+        </div>
+      `;
+    }
+
+    $("viewerMedia").innerHTML = html;
+
+    $("viewerCaption").textContent =
+      story.text || "";
+
+    $("viewer").style.display = "flex";
+
+    if (story.id) {
+      api(`/api/stories/${story.id}/view`, {
+        method: "POST"
+      }).catch(() => {});
+    }
+  }
+
+  $("closeViewer").addEventListener("click", () => {
+    $("viewer").style.display = "none";
+    $("viewerMedia").innerHTML = "";
+  });
+
+  $("viewer").addEventListener("click", event => {
+
+    if (event.target === $("viewer")) {
+      $("viewer").style.display = "none";
+      $("viewerMedia").innerHTML = "";
+    }
+  });
+
+  $("postStory").addEventListener(
+    "click",
+    createStory
+  );
+
+  function escapeHTML(value) {
+
+    return String(value || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  (async function init() {
+
+    if (await checkLogin()) {
+      await loadStories();
+    }
+
+  })();
+</script>
+
+</body>
+</html>

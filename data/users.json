@@ -1,0 +1,39 @@
+[
+  {
+    "id": "user_37915857dfd7c4c76f377affmupn8o8y",
+    "username": "djpaddington",
+    "email": "gdpwrprecious@gmail.com",
+    "name": "Godpower Precious",
+    "displayName": "Godpower Precious",
+    "passwordHash": "$2b$12$SYBCL1pht/NlpqOfoQf1DuVM2Wuhrncu43b1XbPTaUT4tagfzUJzS",
+    "role": "user",
+    "profilePicture": "/uploads/profiles/1790865829595-b7eee95c3a46b295.jpg",
+    "bio": "Love to code",
+    "verified": true,
+    "verificationStatus": "approved",
+    "followersCount": 0,
+    "followingCount": 0,
+    "postsCount": 0,
+    "createdAt": "2026-10-01T14:42:50.434Z"
+  },
+  {
+    "id": "user_745c064df341946c298f05aemupnbnkc",
+    "username": "fave",
+    "email": "godpower@gmail.co",
+    "name": "Fave",
+    "displayName": "Fave",
+    "passwordHash": "$2b$12$71AobkLf28kZhqpNH8uUve5ggvMjYTJG84KtIiF5VKENn7PV6Ujt6",
+    "role": "user",
+    "profilePicture": "/uploads/profiles/profile-1790867471658-eb880307e5.jpg",
+    "bio": "",
+    "verified": true,
+    "verificationStatus": "approved",
+    "followersCount": 0,
+    "followingCount": 0,
+    "postsCount": 0,
+    "createdAt": "2026-10-01T14:45:09.516Z",
+    "avatar": "/uploads/profiles/profile-1790867471658-eb880307e5.jpg",
+    "updatedAt": "2026-10-01T15:12:18.759Z",
+    "isVerified": true
+  }
+]

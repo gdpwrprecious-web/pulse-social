@@ -1,0 +1,21 @@
+[
+  {
+    "id": "verification_ca6fd78f6e80f1b8a695f114mupnafab",
+    "userId": "user_37915857dfd7c4c76f377affmupn8o8y",
+    "reason": "Because i feel i should be verified",
+    "status": "approved",
+    "createdAt": "2026-10-01T14:44:12.131Z",
+    "reviewedAt": "2026-10-01T14:45:23.025Z",
+    "reviewedBy": "user_745c064df341946c298f05aemupnbnkc"
+  },
+  {
+    "id": "verification_1bb186c33ee5fce4b009ae4fmupoa10g",
+    "userId": "user_745c064df341946c298f05aemupnbnkc",
+    "reason": "because i feel of i have meet the criteria",
+    "status": "approved",
+    "createdAt": "2026-10-01T15:11:53.248Z",
+    "updatedAt": "2026-10-01T15:12:18.759Z",
+    "reviewedAt": "2026-10-01T15:12:18.759Z",
+    "reviewedBy": "user_745c064df341946c298f05aemupnbnkc"
+  }
+]

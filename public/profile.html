@@ -1,0 +1,3522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Profile • Pulse Social</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --blue: #1877f2;
+      --blue-dark: #0d65d9;
+      --green: #16a34a;
+      --bg: #f0f2f5;
+      --card: #ffffff;
+      --text: #050505;
+      --muted: #65676b;
+      --border: #dddfe2;
+      --hover: #f2f2f2;
+      --danger: #e41e3f;
+      --shadow: 0 1px 2px rgba(0,0,0,.1);
+    }
+
+    body {
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    button,
+    input,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    img {
+      max-width: 100%;
+      display: block;
+    }
+
+    /* =========================
+       TOPBAR
+    ========================= */
+
+    .topbar {
+      height: 64px;
+      background: white;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      gap: 18px;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-width: 210px;
+    }
+
+    .brand-logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #1877f2, #42b72a);
+      display: grid;
+      place-items: center;
+      color: white;
+      font-size: 23px;
+      font-weight: 900;
+    }
+
+    .brand-name {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -.5px;
+    }
+
+    .search-box {
+      width: 300px;
+      height: 42px;
+      border-radius: 22px;
+      background: #f0f2f5;
+      display: flex;
+      align-items: center;
+      padding: 0 15px;
+      gap: 9px;
+    }
+
+    .search-box span {
+      font-size: 18px;
+      color: var(--muted);
+    }
+
+    .search-box input {
+      border: 0;
+      outline: 0;
+      background: transparent;
+      width: 100%;
+      font-size: 14px;
+    }
+
+    .top-nav {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .top-nav a,
+    .top-action {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: #f0f2f5;
+      font-size: 19px;
+      transition: .2s;
+    }
+
+    .top-nav a:hover,
+    .top-action:hover {
+      background: #e4e6eb;
+      transform: translateY(-1px);
+    }
+
+    .top-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #ddd;
+      cursor: pointer;
+      margin-left: 4px;
+    }
+
+    /* =========================
+       LAYOUT
+    ========================= */
+
+    .page {
+      max-width: 1250px;
+      margin: 20px auto 80px;
+      padding: 0 16px;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 270px minmax(0, 680px) 270px;
+      gap: 18px;
+      align-items: start;
+    }
+
+    /* =========================
+       SIDEBAR
+    ========================= */
+
+    .sidebar {
+      position: sticky;
+      top: 84px;
+    }
+
+    .side-card {
+      background: white;
+      border-radius: 12px;
+      padding: 12px;
+      box-shadow: var(--shadow);
+      margin-bottom: 14px;
+    }
+
+    .side-profile {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 9px;
+      border-radius: 9px;
+      margin-bottom: 5px;
+    }
+
+    .side-profile:hover {
+      background: var(--hover);
+    }
+
+    .side-profile img {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .side-profile strong {
+      display: block;
+      font-size: 14px;
+    }
+
+    .side-profile small {
+      color: var(--muted);
+    }
+
+    .side-link {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      padding: 11px;
+      border-radius: 9px;
+      background: transparent;
+      font-weight: 600;
+      text-align: left;
+    }
+
+    .side-link:hover {
+      background: var(--hover);
+    }
+
+    .side-icon {
+      width: 28px;
+      text-align: center;
+      font-size: 19px;
+    }
+
+    .side-footer {
+      padding: 10px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    /* =========================
+       PROFILE HEADER
+    ========================= */
+
+    .profile-card {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      margin-bottom: 14px;
+    }
+
+    .cover {
+      height: 245px;
+      background:
+        linear-gradient(135deg, rgba(24,119,242,.8), rgba(22,163,74,.7)),
+        linear-gradient(135deg, #1877f2, #16a34a);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cover::before {
+      content: "";
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.08);
+      right: -180px;
+      top: -280px;
+    }
+
+    .cover::after {
+      content: "";
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.07);
+      left: -130px;
+      bottom: -200px;
+    }
+
+    .cover-upload {
+      position: absolute;
+      right: 18px;
+      bottom: 15px;
+      background: rgba(0,0,0,.55);
+      color: white;
+      padding: 9px 13px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      z-index: 2;
+    }
+
+    .cover-upload input {
+      display: none;
+    }
+
+    .profile-info {
+      position: relative;
+      padding: 0 24px 22px;
+    }
+
+    .profile-avatar-wrap {
+      position: relative;
+      width: 150px;
+      height: 150px;
+      margin-top: -75px;
+      z-index: 5;
+    }
+
+    .profile-avatar {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      border: 5px solid white;
+      object-fit: cover;
+      background: #ddd;
+    }
+
+    .avatar-edit {
+      position: absolute;
+      right: 7px;
+      bottom: 8px;
+      width: 39px;
+      height: 39px;
+      border-radius: 50%;
+      background: #e4e6eb;
+      display: grid;
+      place-items: center;
+      border: 3px solid white;
+      cursor: pointer;
+    }
+
+    .avatar-edit input {
+      display: none;
+    }
+
+    .profile-main {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 15px;
+      margin-top: 8px;
+    }
+
+    .profile-name-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      flex-wrap: wrap;
+    }
+
+    .profile-name {
+      font-size: 28px;
+      font-weight: 800;
+      line-height: 1.15;
+    }
+
+    .verified {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: inline-grid;
+      place-items: center;
+      background: var(--blue);
+      color: white;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .username {
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .bio {
+      margin-top: 11px;
+      max-width: 550px;
+      line-height: 1.45;
+      color: #333;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .profile-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 10px 17px;
+      border-radius: 8px;
+      font-weight: 700;
+      background: #e4e6eb;
+      transition: .2s;
+    }
+
+    .btn:hover {
+      filter: brightness(.96);
+    }
+
+    .btn-primary {
+      background: var(--blue);
+      color: white;
+    }
+
+    .btn-green {
+      background: var(--green);
+      color: white;
+    }
+
+    .btn-outline {
+      background: white;
+      border: 1px solid var(--border);
+    }
+
+    .btn-danger {
+      background: #ffe5ea;
+      color: var(--danger);
+    }
+
+    .profile-stats {
+      display: flex;
+      gap: 25px;
+      margin-top: 20px;
+      border-top: 1px solid var(--border);
+      padding-top: 15px;
+    }
+
+    .stat {
+      cursor: pointer;
+    }
+
+    .stat strong {
+      font-size: 17px;
+    }
+
+    .stat span {
+      color: var(--muted);
+      margin-left: 4px;
+      font-size: 14px;
+    }
+
+    /* =========================
+       INFO CARD
+    ========================= */
+
+    .info-card,
+    .posts-card,
+    .post {
+      background: white;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .info-card {
+      padding: 18px;
+      margin-bottom: 14px;
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: 800;
+      margin-bottom: 14px;
+    }
+
+    .info-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .info-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #333;
+      padding: 7px 0;
+    }
+
+    .info-item-icon {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      background: #f0f2f5;
+      display: grid;
+      place-items: center;
+    }
+
+    .info-item small {
+      display: block;
+      color: var(--muted);
+      margin-bottom: 2px;
+    }
+
+    /* =========================
+       POSTS
+    ========================= */
+
+    .posts-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 14px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      padding: 5px;
+    }
+
+    .post-tab {
+      flex: 1;
+      padding: 12px;
+      border-radius: 8px;
+      background: transparent;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .post-tab.active {
+      color: var(--blue);
+      background: #eef5ff;
+    }
+
+    .post {
+      margin-bottom: 14px;
+      overflow: hidden;
+    }
+
+    .post-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 13px 15px 7px;
+    }
+
+    .post-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #ddd;
+    }
+
+    .post-author {
+      flex: 1;
+    }
+
+    .post-author strong {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 14px;
+    }
+
+    .post-author small {
+      display: block;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .post-menu {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      background: transparent;
+      font-size: 20px;
+    }
+
+    .post-menu:hover {
+      background: var(--hover);
+    }
+
+    .post-body {
+      padding: 7px 15px 12px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .post-body a {
+      color: var(--blue);
+      font-weight: 600;
+    }
+
+    .post-image {
+      width: 100%;
+      max-height: 650px;
+      object-fit: cover;
+      cursor: pointer;
+      background: #f0f2f5;
+    }
+
+    .post-stats {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      padding: 9px 15px;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+
+    .post-actions {
+      display: flex;
+      padding: 4px 8px;
+    }
+
+    .post-action {
+      flex: 1;
+      background: transparent;
+      padding: 9px;
+      border-radius: 7px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .post-action:hover {
+      background: var(--hover);
+    }
+
+    .post-action.liked {
+      color: var(--blue);
+    }
+
+    /* =========================
+       RIGHT SIDEBAR
+    ========================= */
+
+    .right-title {
+      font-size: 17px;
+      font-weight: 800;
+      margin: 5px 0 10px;
+    }
+
+    .suggestion {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 8px;
+      border-radius: 9px;
+    }
+
+    .suggestion:hover {
+      background: var(--hover);
+    }
+
+    .suggestion img {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .suggestion-main {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .suggestion-main strong {
+      display: block;
+      font-size: 13px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .suggestion-main small {
+      color: var(--muted);
+    }
+
+    .mini-follow {
+      background: #e7f3ff;
+      color: var(--blue);
+      padding: 7px 9px;
+      border-radius: 7px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    /* =========================
+       EMPTY / LOADING
+    ========================= */
+
+    .loading,
+    .empty {
+      text-align: center;
+      padding: 45px 20px;
+      color: var(--muted);
+    }
+
+    .loader {
+      width: 35px;
+      height: 35px;
+      border: 4px solid #ddd;
+      border-top-color: var(--blue);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+      margin: 0 auto 12px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* =========================
+       EDIT MODAL
+    ========================= */
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.65);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      z-index: 5000;
+    }
+
+    .modal.show {
+      display: flex;
+    }
+
+    .modal-card {
+      width: min(600px, 100%);
+      max-height: 90vh;
+      overflow-y: auto;
+      background: white;
+      border-radius: 14px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.3);
+    }
+
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 17px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .modal-head h2 {
+      font-size: 20px;
+    }
+
+    .close-modal {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      background: #f0f2f5;
+      font-size: 18px;
+    }
+
+    .modal-body {
+      padding: 18px;
+    }
+
+    .field {
+      margin-bottom: 15px;
+    }
+
+    .field label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 7px;
+      font-size: 14px;
+    }
+
+    .field input,
+    .field textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 11px 12px;
+      outline: none;
+      background: white;
+    }
+
+    .field textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    .field input:focus,
+    .field textarea:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 2px rgba(24,119,242,.1);
+    }
+
+    .modal-footer {
+      padding: 14px 18px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    /* =========================
+       COMMENTS MODAL
+    ========================= */
+
+    .comments-list {
+      max-height: 350px;
+      overflow-y: auto;
+      display: grid;
+      gap: 10px;
+    }
+
+    .comment {
+      display: flex;
+      gap: 9px;
+    }
+
+    .comment img {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .comment-bubble {
+      background: #f0f2f5;
+      padding: 8px 11px;
+      border-radius: 12px;
+      flex: 1;
+    }
+
+    .comment-bubble strong {
+      font-size: 13px;
+    }
+
+    .comment-bubble p {
+      margin-top: 2px;
+      font-size: 14px;
+      white-space: pre-wrap;
+    }
+
+    .comment-form {
+      display: flex;
+      gap: 8px;
+      margin-top: 15px;
+    }
+
+    .comment-form input {
+      flex: 1;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 10px 14px;
+      outline: none;
+    }
+
+    /* =========================
+       IMAGE MODAL
+    ========================= */
+
+    .image-modal {
+      background: rgba(0,0,0,.9);
+    }
+
+    .image-modal img {
+      max-width: 95vw;
+      max-height: 90vh;
+      object-fit: contain;
+      border-radius: 5px;
+    }
+
+    .image-close {
+      position: fixed;
+      right: 22px;
+      top: 20px;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.15);
+      color: white;
+      font-size: 25px;
+    }
+
+    /* =========================
+       TOAST
+    ========================= */
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 25px;
+      transform: translate(-50%, 100px);
+      background: #1c1e21;
+      color: white;
+      padding: 12px 18px;
+      border-radius: 9px;
+      opacity: 0;
+      transition: .3s;
+      z-index: 9000;
+      font-size: 14px;
+      box-shadow: 0 8px 30px rgba(0,0,0,.2);
+    }
+
+    .toast.show {
+      transform: translate(-50%, 0);
+      opacity: 1;
+    }
+
+    /* =========================
+       MOBILE NAV
+    ========================= */
+
+    .mobile-nav {
+      display: none;
+    }
+
+    /* =========================
+       RESPONSIVE
+    ========================= */
+
+    @media (max-width: 1100px) {
+      .main-grid {
+        grid-template-columns: 220px minmax(0, 1fr);
+      }
+
+      .right-sidebar {
+        display: none;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .topbar {
+        height: 58px;
+        padding: 0 10px;
+        gap: 8px;
+      }
+
+      .brand {
+        min-width: auto;
+      }
+
+      .brand-name {
+        display: none;
+      }
+
+      .brand-logo {
+        width: 39px;
+        height: 39px;
+      }
+
+      .search-box {
+        flex: 1;
+        width: auto;
+        height: 39px;
+      }
+
+      .top-nav a:nth-child(1),
+      .top-nav a:nth-child(2),
+      .top-nav a:nth-child(3) {
+        display: none;
+      }
+
+      .top-nav {
+        margin-left: 0;
+      }
+
+      .page {
+        margin-top: 0;
+        padding: 0;
+        margin-bottom: 70px;
+      }
+
+      .main-grid {
+        display: block;
+      }
+
+      .left-sidebar {
+        display: none;
+      }
+
+      .profile-card,
+      .info-card,
+      .posts-tabs,
+      .post {
+        border-radius: 0;
+        box-shadow: none;
+      }
+
+      .cover {
+        height: 185px;
+      }
+
+      .profile-info {
+        padding: 0 15px 18px;
+      }
+
+      .profile-avatar-wrap {
+        width: 120px;
+        height: 120px;
+        margin-top: -60px;
+      }
+
+      .profile-avatar {
+        width: 120px;
+        height: 120px;
+      }
+
+      .profile-main {
+        display: block;
+      }
+
+      .profile-name {
+        font-size: 24px;
+      }
+
+      .profile-actions {
+        margin-top: 15px;
+      }
+
+      .profile-actions .btn {
+        flex: 1;
+      }
+
+      .profile-stats {
+        gap: 17px;
+        overflow-x: auto;
+      }
+
+      .stat {
+        white-space: nowrap;
+      }
+
+      .mobile-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 62px;
+        background: white;
+        border-top: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        z-index: 3000;
+      }
+
+      .mobile-nav a {
+        display: grid;
+        place-items: center;
+        gap: 2px;
+        color: var(--muted);
+        font-size: 19px;
+      }
+
+      .mobile-nav a span {
+        font-size: 10px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- =========================
+       TOPBAR
+  ========================== -->
+
+  <header class="topbar">
+
+    <a href="/feed.html" class="brand">
+      <div class="brand-logo">P</div>
+      <div class="brand-name">Pulse</div>
+    </a>
+
+    <div class="search-box">
+      <span>🔍</span>
+      <input
+        id="globalSearch"
+        type="search"
+        placeholder="Search Pulse"
+        autocomplete="off"
+      >
+    </div>
+
+    <nav class="top-nav">
+      <a href="/feed.html" title="Home">🏠</a>
+      <a href="/messages.html" title="Messages">💬</a>
+      <a href="/notifications.html" title="Notifications">🔔</a>
+
+      <img
+        id="topAvatar"
+        class="top-avatar"
+        src="/images/default-avatar.png"
+        alt="Profile"
+        onclick="goMyProfile()"
+      >
+    </nav>
+
+  </header>
+
+
+  <!-- =========================
+       PAGE
+  ========================== -->
+
+  <main class="page">
+
+    <div class="main-grid">
+
+      <!-- =========================
+           LEFT SIDEBAR
+      ========================== -->
+
+      <aside class="sidebar left-sidebar">
+
+        <div class="side-card">
+
+          <a href="/profile.html" class="side-profile">
+            <img id="sideAvatar" src="/images/default-avatar.png">
+            <div>
+              <strong id="sideName">Loading...</strong>
+              <small id="sideUsername">@...</small>
+            </div>
+          </a>
+
+          <a href="/feed.html" class="side-link">
+            <span class="side-icon">🏠</span>
+            Home
+          </a>
+
+          <a href="/profile.html" class="side-link">
+            <span class="side-icon">👤</span>
+            My Profile
+          </a>
+
+          <a href="/messages.html" class="side-link">
+            <span class="side-icon">💬</span>
+            Messages
+          </a>
+
+          <a href="/notifications.html" class="side-link">
+            <span class="side-icon">🔔</span>
+            Notifications
+          </a>
+
+          <a href="/verification.html" class="side-link">
+            <span class="side-icon">✓</span>
+            Verification
+          </a>
+
+          <a href="/feed.html?mode=following" class="side-link">
+            <span class="side-icon">👥</span>
+            Following
+          </a>
+
+          <button class="side-link" onclick="logout()">
+            <span class="side-icon">🚪</span>
+            Logout
+          </button>
+
+        </div>
+
+        <div class="side-footer">
+          <div>About · Privacy · Terms · Help</div>
+          <div>© 2026 Pulse Social</div>
+        </div>
+
+      </aside>
+
+
+      <!-- =========================
+           MAIN PROFILE
+      ========================== -->
+
+      <section>
+
+        <div id="profileContainer">
+
+          <div class="loading">
+            <div class="loader"></div>
+            Loading profile...
+          </div>
+
+        </div>
+
+        <!-- POSTS -->
+
+        <div class="posts-tabs">
+
+          <button
+            id="postsTab"
+            class="post-tab active"
+            onclick="switchProfileTab('posts')"
+          >
+            📝 Posts
+          </button>
+
+          <button
+            id="aboutTab"
+            class="post-tab"
+            onclick="switchProfileTab('about')"
+          >
+            ℹ️ About
+          </button>
+
+        </div>
+
+        <div id="postsSection">
+          <div class="loading">
+            <div class="loader"></div>
+            Loading posts...
+          </div>
+        </div>
+
+        <div id="aboutSection" style="display:none;">
+          <div class="info-card" id="aboutCard"></div>
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           RIGHT SIDEBAR
+      ========================== -->
+
+      <aside class="sidebar right-sidebar">
+
+        <div class="side-card">
+
+          <div class="right-title">
+            People you may know
+          </div>
+
+          <div id="suggestions">
+            <div class="loading" style="padding:25px;">
+              Loading...
+            </div>
+          </div>
+
+        </div>
+
+        <div class="side-card">
+
+          <div class="right-title">
+            Pulse Social
+          </div>
+
+          <p style="font-size:13px;color:#65676b;line-height:1.5;">
+            Connect with people, share moments and discover what's happening
+            around your community.
+          </p>
+
+        </div>
+
+      </aside>
+
+    </div>
+
+  </main>
+
+
+  <!-- =========================
+       MOBILE NAV
+  ========================== -->
+
+  <nav class="mobile-nav">
+
+    <a href="/feed.html">
+      🏠
+      <span>Home</span>
+    </a>
+
+    <a href="/feed.html?mode=following">
+      👥
+      <span>Following</span>
+    </a>
+
+    <a href="/messages.html">
+      💬
+      <span>Messages</span>
+    </a>
+
+    <a href="/notifications.html">
+      🔔
+      <span>Alerts</span>
+    </a>
+
+    <a href="/profile.html">
+      👤
+      <span>Profile</span>
+    </a>
+
+  </nav>
+
+
+  <!-- =========================
+       EDIT PROFILE MODAL
+  ========================== -->
+
+  <div class="modal" id="editModal">
+
+    <div class="modal-card">
+
+      <div class="modal-head">
+
+        <h2>Edit Profile</h2>
+
+        <button
+          class="close-modal"
+          onclick="closeModal('editModal')"
+        >
+          ✕
+        </button>
+
+      </div>
+
+      <form id="editForm">
+
+        <div class="modal-body">
+
+          <div class="field">
+
+            <label>Name</label>
+
+            <input
+              id="editName"
+              type="text"
+              maxlength="80"
+              required
+            >
+
+          </div>
+
+          <div class="field">
+
+            <label>Username</label>
+
+            <input
+              id="editUsername"
+              type="text"
+              maxlength="30"
+              disabled
+            >
+
+          </div>
+
+          <div class="field">
+
+            <label>Email</label>
+
+            <input
+              id="editEmail"
+              type="email"
+              disabled
+            >
+
+          </div>
+
+          <div class="field">
+
+            <label>Bio</label>
+
+            <textarea
+              id="editBio"
+              maxlength="500"
+              placeholder="Tell people about yourself..."
+            ></textarea>
+
+          </div>
+
+        </div>
+
+        <div class="modal-footer">
+
+          <button
+            type="button"
+            class="btn"
+            onclick="closeModal('editModal')"
+          >
+            Cancel
+          </button>
+
+          <button
+            type="submit"
+            class="btn btn-primary"
+          >
+            Save Changes
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+
+  </div>
+
+
+  <!-- =========================
+       COMMENTS MODAL
+  ========================== -->
+
+  <div class="modal" id="commentsModal">
+
+    <div class="modal-card">
+
+      <div class="modal-head">
+
+        <h2>Comments</h2>
+
+        <button
+          class="close-modal"
+          onclick="closeModal('commentsModal')"
+        >
+          ✕
+        </button>
+
+      </div>
+
+      <div class="modal-body">
+
+        <div id="commentsList" class="comments-list">
+
+          <div class="loading">
+            Loading comments...
+          </div>
+
+        </div>
+
+        <form
+          id="commentForm"
+          class="comment-form"
+        >
+
+          <input
+            id="commentInput"
+            type="text"
+            placeholder="Write a comment..."
+            maxlength="500"
+            required
+          >
+
+          <button
+            class="btn btn-primary"
+            type="submit"
+          >
+            Send
+          </button>
+
+        </form>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =========================
+       IMAGE MODAL
+  ========================== -->
+
+  <div
+    class="modal image-modal"
+    id="imageModal"
+    onclick="closeModal('imageModal')"
+  >
+
+    <button
+      class="image-close"
+      onclick="closeModal('imageModal')"
+    >
+      ✕
+    </button>
+
+    <img
+      id="imageModalImg"
+      src=""
+      alt="Post image"
+      onclick="event.stopPropagation()"
+    >
+
+  </div>
+
+
+  <!-- TOAST -->
+
+  <div id="toast" class="toast"></div>
+
+
+<script>
+
+  /* =========================================================
+     PULSE SOCIAL — ULTIMATE PROFILE
+  ========================================================= */
+
+  const DEFAULT_AVATAR = "/images/default-avatar.png";
+
+  let currentUser = null;
+  let profileUser = null;
+  let profilePosts = [];
+  let activePostId = null;
+
+
+  /* =========================================================
+     API
+  ========================================================= */
+
+  async function api(url, options = {}) {
+
+    const config = {
+      credentials: "include",
+      ...options,
+      headers: {
+        ...(options.body instanceof FormData
+          ? {}
+          : { "Content-Type": "application/json" }),
+        ...(options.headers || {})
+      }
+    };
+
+    const response = await fetch(url, config);
+
+    let data = {};
+
+    try {
+      data = await response.json();
+    } catch {
+      data = {};
+    }
+
+    if (!response.ok) {
+
+      throw new Error(
+        data.error ||
+        data.message ||
+        `Request failed (${response.status})`
+      );
+
+    }
+
+    return data;
+  }
+
+
+  /* =========================================================
+     HELPERS
+  ========================================================= */
+
+  function escapeHTML(value) {
+
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+
+  }
+
+
+  function avatarUrl(user) {
+
+    if (!user) return DEFAULT_AVATAR;
+
+    return (
+      user.profilePicture ||
+      user.profileImage ||
+      user.avatar ||
+      DEFAULT_AVATAR
+    );
+
+  }
+
+
+  function verifiedBadge(user) {
+
+    if (!user) return "";
+
+    if (
+      user.verified === true ||
+      user.isVerified === true ||
+      user.verificationStatus === "approved"
+    ) {
+
+      return `<span
+        class="verified"
+        title="Verified account"
+      >✓</span>`;
+
+    }
+
+    return "";
+
+  }
+
+
+  function formatDate(dateValue) {
+
+    if (!dateValue) return "Just now";
+
+    const date = new Date(dateValue);
+
+    if (Number.isNaN(date.getTime())) {
+      return "Just now";
+    }
+
+    const now = Date.now();
+    const diff = Math.max(0, now - date.getTime());
+
+    const minute = 60 * 1000;
+    const hour = 60 * minute;
+    const day = 24 * hour;
+
+    if (diff < minute) {
+      return "Just now";
+    }
+
+    if (diff < hour) {
+      return `${Math.floor(diff / minute)}m`;
+    }
+
+    if (diff < day) {
+      return `${Math.floor(diff / hour)}h`;
+    }
+
+    if (diff < 7 * day) {
+      return `${Math.floor(diff / day)}d`;
+    }
+
+    return date.toLocaleDateString();
+
+  }
+
+
+  function formatText(text) {
+
+    let safe = escapeHTML(text || "");
+
+    safe = safe.replace(
+      /(^|\s)@([a-zA-Z0-9_]+)/g,
+      '$1<a href="/profile.html?username=$2">@$2</a>'
+    );
+
+    safe = safe.replace(
+      /(^|\s)#([a-zA-Z0-9_]+)/g,
+      '$1<a href="/feed.html?tag=$2">#$2</a>'
+    );
+
+    return safe;
+
+  }
+
+
+  function getUsernameFromURL() {
+
+    const params = new URLSearchParams(location.search);
+
+    return (
+      params.get("username") ||
+      params.get("user") ||
+      ""
+    ).trim();
+
+  }
+
+
+  function showToast(message) {
+
+    const toast = document.getElementById("toast");
+
+    toast.textContent = message;
+    toast.classList.add("show");
+
+    clearTimeout(window.__toastTimer);
+
+    window.__toastTimer = setTimeout(() => {
+      toast.classList.remove("show");
+    }, 2800);
+
+  }
+
+
+  function openModal(id) {
+
+    document.getElementById(id)?.classList.add("show");
+
+  }
+
+
+  function closeModal(id) {
+
+    document.getElementById(id)?.classList.remove("show");
+
+  }
+
+
+  /* =========================================================
+     LOAD CURRENT USER
+  ========================================================= */
+
+  async function loadMe() {
+
+    try {
+
+      const data = await api("/api/me");
+
+      if (!data.loggedIn || !data.user) {
+
+        location.href = "/login.html";
+        return false;
+
+      }
+
+      currentUser = data.user;
+
+      updateCurrentUserUI();
+
+      return true;
+
+    } catch (error) {
+
+      console.error(error);
+
+      location.href = "/login.html";
+
+      return false;
+
+    }
+
+  }
+
+
+  function updateCurrentUserUI() {
+
+    if (!currentUser) return;
+
+    const avatar = avatarUrl(currentUser);
+
+    document.getElementById("topAvatar").src = avatar;
+    document.getElementById("sideAvatar").src = avatar;
+
+    document.getElementById("sideName").textContent =
+      currentUser.name ||
+      currentUser.username ||
+      "User";
+
+    document.getElementById("sideUsername").textContent =
+      "@" + (currentUser.username || "");
+
+  }
+
+
+  /* =========================================================
+     LOAD PROFILE
+  ========================================================= */
+
+  async function loadProfile() {
+
+    const username = getUsernameFromURL();
+
+    try {
+
+      let data;
+
+      if (username) {
+
+        data = await api(
+          `/api/users/${encodeURIComponent(username)}`
+        );
+
+      } else {
+
+        data = {
+          success: true,
+          user: currentUser
+        };
+
+      }
+
+      profileUser =
+        data.user ||
+        data.profile ||
+        data;
+
+      if (!profileUser || !profileUser.username) {
+        throw new Error("Profile not found.");
+      }
+
+      renderProfile(profileUser);
+
+      await Promise.all([
+        loadProfilePosts(),
+        loadSuggestions()
+      ]);
+
+    } catch (error) {
+
+      console.error(error);
+
+      document.getElementById("profileContainer").innerHTML = `
+        <div class="profile-card">
+          <div class="empty">
+            <div style="font-size:45px;margin-bottom:10px;">😕</div>
+            <h2>Profile not found</h2>
+            <p style="margin-top:7px;">
+              ${escapeHTML(error.message)}
+            </p>
+            <button
+              class="btn btn-primary"
+              style="margin-top:16px;"
+              onclick="location.href='/feed.html'"
+            >
+              Go Home
+            </button>
+          </div>
+        </div>
+      `;
+
+      document.getElementById("postsSection").innerHTML = "";
+
+    }
+
+  }
+
+
+  /* =========================================================
+     RENDER PROFILE
+  ========================================================= */
+
+  function renderProfile(user) {
+
+    const isMe =
+      currentUser &&
+      String(currentUser.id) === String(user.id);
+
+    const following =
+      user.isFollowing === true ||
+      user.following === true;
+
+    const followersCount =
+      Number(
+        user.followersCount ??
+        user.followerCount ??
+        user.followers ??
+        0
+      );
+
+    const followingCount =
+      Number(
+        user.followingCount ??
+        user.following ??
+        0
+      );
+
+    const postsCount =
+      Number(
+        user.postsCount ??
+        user.postCount ??
+        0
+      );
+
+    const bio =
+      user.bio ||
+      "No bio yet.";
+
+    document.title =
+      `${user.name || user.username} • Pulse Social`;
+
+    document.getElementById("profileContainer").innerHTML = `
+
+      <div class="profile-card">
+
+        <div class="cover">
+
+          ${
+            isMe
+              ? `
+                <label class="cover-upload">
+                  📷 Change cover
+                  <input
+                    id="coverInput"
+                    type="file"
+                    accept="image/*"
+                    onchange="handleCoverUpload(this)"
+                  >
+                </label>
+              `
+              : ""
+          }
+
+        </div>
+
+        <div class="profile-info">
+
+          <div class="profile-avatar-wrap">
+
+            <img
+              class="profile-avatar"
+              id="profileAvatar"
+              src="${escapeHTML(avatarUrl(user))}"
+              alt="${escapeHTML(user.name || user.username)}"
+              onerror="this.src='${DEFAULT_AVATAR}'"
+            >
+
+            ${
+              isMe
+                ? `
+                  <label class="avatar-edit" title="Change profile picture">
+                    📷
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onchange="handleAvatarUpload(this)"
+                    >
+                  </label>
+                `
+                : ""
+            }
+
+          </div>
+
+          <div class="profile-main">
+
+            <div>
+
+              <div class="profile-name-row">
+
+                <h1 class="profile-name">
+                  ${escapeHTML(
+                    user.name ||
+                    user.username ||
+                    "User"
+                  )}
+                </h1>
+
+                ${verifiedBadge(user)}
+
+              </div>
+
+              <div class="username">
+                @${escapeHTML(user.username)}
+              </div>
+
+              <div class="bio">
+                ${formatText(bio)}
+              </div>
+
+            </div>
+
+            <div class="profile-actions">
+
+              ${
+                isMe
+                  ? `
+                    <button
+                      class="btn btn-primary"
+                      onclick="openEditProfile()"
+                    >
+                      ✏️ Edit Profile
+                    </button>
+                  `
+                  : `
+                    <button
+                      id="followBtn"
+                      class="btn ${
+                        following
+                          ? "btn-outline"
+                          : "btn-primary"
+                      }"
+                      onclick="toggleFollow('${escapeHTML(user.id)}')"
+                    >
+                      ${
+                        following
+                          ? "Following"
+                          : "Follow"
+                      }
+                    </button>
+
+                    <button
+                      class="btn"
+                      onclick="messageUser()"
+                    >
+                      💬 Message
+                    </button>
+                  `
+              }
+
+            </div>
+
+          </div>
+
+          <div class="profile-stats">
+
+            <div
+              class="stat"
+              onclick="showFollowers()"
+            >
+              <strong id="followersCount">
+                ${followersCount}
+              </strong>
+              <span>Followers</span>
+            </div>
+
+            <div
+              class="stat"
+              onclick="showFollowing()"
+            >
+              <strong id="followingCount">
+                ${followingCount}
+              </strong>
+              <span>Following</span>
+            </div>
+
+            <div class="stat">
+              <strong>
+                ${postsCount}
+              </strong>
+              <span>Posts</span>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    `;
+
+    renderAbout(user);
+
+  }
+
+
+  /* =========================================================
+     ABOUT
+  ========================================================= */
+
+  function renderAbout(user) {
+
+    const joined =
+      user.createdAt
+        ? new Date(user.createdAt).toLocaleDateString(
+            undefined,
+            {
+              year: "numeric",
+              month: "long"
+            }
+          )
+        : "Recently";
+
+    document.getElementById("aboutCard").innerHTML = `
+
+      <div class="section-title">
+        About
+      </div>
+
+      <div class="info-list">
+
+        <div class="info-item">
+
+          <div class="info-item-icon">
+            👤
+          </div>
+
+          <div>
+            <small>Name</small>
+            ${escapeHTML(user.name || user.username)}
+          </div>
+
+        </div>
+
+        <div class="info-item">
+
+          <div class="info-item-icon">
+            @
+          </div>
+
+          <div>
+            <small>Username</small>
+            @${escapeHTML(user.username)}
+          </div>
+
+        </div>
+
+        ${
+          user.email && (
+            currentUser &&
+            String(currentUser.id) === String(user.id)
+          )
+            ? `
+              <div class="info-item">
+
+                <div class="info-item-icon">
+                  ✉️
+                </div>
+
+                <div>
+                  <small>Email</small>
+                  ${escapeHTML(user.email)}
+                </div>
+
+              </div>
+            `
+            : ""
+        }
+
+        <div class="info-item">
+
+          <div class="info-item-icon">
+            📅
+          </div>
+
+          <div>
+            <small>Joined Pulse</small>
+            ${escapeHTML(joined)}
+          </div>
+
+        </div>
+
+        <div class="info-item">
+
+          <div class="info-item-icon">
+            ✓
+          </div>
+
+          <div>
+            <small>Account status</small>
+
+            ${
+              user.verified === true ||
+              user.isVerified === true ||
+              user.verificationStatus === "approved"
+                ? "Verified"
+                : "Standard account"
+            }
+
+          </div>
+
+        </div>
+
+      </div>
+
+    `;
+
+  }
+
+
+  /* =========================================================
+     PROFILE POSTS
+  ========================================================= */
+
+  async function loadProfilePosts() {
+
+    const section =
+      document.getElementById("postsSection");
+
+    section.innerHTML = `
+      <div class="loading">
+        <div class="loader"></div>
+        Loading posts...
+      </div>
+    `;
+
+    try {
+
+      const data = await api(
+        `/api/users/${encodeURIComponent(profileUser.username)}/posts`
+      );
+
+      profilePosts =
+        Array.isArray(data)
+          ? data
+          : (
+              data.posts ||
+              data.items ||
+              []
+            );
+
+      renderProfilePosts();
+
+    } catch (error) {
+
+      console.error(error);
+
+      section.innerHTML = `
+        <div class="empty">
+          <div style="font-size:40px;">📭</div>
+          <h3 style="margin-top:8px;">
+            Unable to load posts
+          </h3>
+          <p style="margin-top:6px;">
+            ${escapeHTML(error.message)}
+          </p>
+
+          <button
+            class="btn btn-primary"
+            style="margin-top:15px;"
+            onclick="loadProfilePosts()"
+          >
+            Try Again
+          </button>
+        </div>
+      `;
+
+    }
+
+  }
+
+
+  function renderProfilePosts() {
+
+    const section =
+      document.getElementById("postsSection");
+
+    if (!profilePosts.length) {
+
+      section.innerHTML = `
+        <div class="post">
+          <div class="empty">
+            <div style="font-size:50px;margin-bottom:10px;">
+              📝
+            </div>
+
+            <h3>
+              No posts yet
+            </h3>
+
+            <p style="margin-top:6px;">
+              ${
+                currentUser &&
+                profileUser &&
+                String(currentUser.id) === String(profileUser.id)
+                  ? "Your posts will appear here."
+                  : "This user hasn't posted anything yet."
+              }
+            </p>
+          </div>
+        </div>
+      `;
+
+      return;
+
+    }
+
+    section.innerHTML =
+      profilePosts
+        .map(renderPost)
+        .join("");
+
+  }
+
+
+  /* =========================================================
+     POST RENDER
+  ========================================================= */
+
+  function renderPost(post) {
+
+    const user =
+      post.user ||
+      post.author ||
+      profileUser;
+
+    const liked =
+      post.liked === true ||
+      post.isLiked === true;
+
+    const likeCount =
+      Number(
+        post.likeCount ??
+        post.likesCount ??
+        post.likes ??
+        0
+      );
+
+    const commentCount =
+      Number(
+        post.commentCount ??
+        post.commentsCount ??
+        post.comments ??
+        0
+      );
+
+    const image =
+      post.image ||
+      post.imageUrl ||
+      post.mediaUrl ||
+      "";
+
+    const postId =
+      post.id ||
+      post._id;
+
+    const isOwner =
+      post.isOwner === true ||
+      (
+        currentUser &&
+        user &&
+        String(currentUser.id) === String(user.id)
+      );
+
+    const body =
+      post.text ||
+      post.content ||
+      "";
+
+    return `
+
+      <article
+        class="post"
+        id="post-${escapeHTML(postId)}"
+      >
+
+        <div class="post-head">
+
+          <img
+            class="post-avatar"
+            src="${escapeHTML(avatarUrl(user))}"
+            alt=""
+            onerror="this.src='${DEFAULT_AVATAR}'"
+          >
+
+          <div class="post-author">
+
+            <strong>
+
+              ${escapeHTML(
+                user?.name ||
+                user?.username ||
+                "User"
+              )}
+
+              ${verifiedBadge(user)}
+
+            </strong>
+
+            <small>
+              @${escapeHTML(
+                user?.username ||
+                ""
+              )}
+              ·
+              ${formatDate(
+                post.createdAt ||
+                post.date ||
+                post.timestamp
+              )}
+            </small>
+
+          </div>
+
+          ${
+            isOwner
+              ? `
+                <button
+                  class="post-menu"
+                  title="Delete post"
+                  onclick="deletePost('${escapeHTML(postId)}')"
+                >
+                  ⋯
+                </button>
+              `
+              : ""
+          }
+
+        </div>
+
+        ${
+          body
+            ? `
+              <div class="post-body">
+                ${formatText(body)}
+              </div>
+            `
+            : ""
+        }
+
+        ${
+          image
+            ? `
+              <img
+                class="post-image"
+                src="${escapeHTML(image)}"
+                alt="Post"
+                loading="lazy"
+                onclick="openImage('${escapeHTML(image)}')"
+                onerror="this.style.display='none'"
+              >
+            `
+            : ""
+        }
+
+        <div class="post-stats">
+
+          <span>
+            ${likeCount} ${
+              likeCount === 1
+                ? "Like"
+                : "Likes"
+            }
+          </span>
+
+          <span>
+            ${commentCount} ${
+              commentCount === 1
+                ? "Comment"
+                : "Comments"
+            }
+          </span>
+
+        </div>
+
+        <div class="post-actions">
+
+          <button
+            class="post-action ${liked ? "liked" : ""}"
+            onclick="toggleLike('${escapeHTML(postId)}')"
+          >
+            ${liked ? "👍 Liked" : "👍 Like"}
+          </button>
+
+          <button
+            class="post-action"
+            onclick="openComments('${escapeHTML(postId)}')"
+          >
+            💬 Comment
+          </button>
+
+          <button
+            class="post-action"
+            onclick="sharePost('${escapeHTML(postId)}')"
+          >
+            ↗ Share
+          </button>
+
+        </div>
+
+      </article>
+
+    `;
+
+  }
+
+
+  /* =========================================================
+     LIKE
+  ========================================================= */
+
+  async function toggleLike(postId) {
+
+    try {
+
+      await api(
+        `/api/posts/${encodeURIComponent(postId)}/like`,
+        {
+          method: "POST"
+        }
+      );
+
+      await loadProfilePosts();
+
+    } catch (error) {
+
+      showToast(error.message);
+
+    }
+
+  }
+
+
+  /* =========================================================
+     COMMENTS
+  ========================================================= */
+
+  async function openComments(postId) {
+
+    activePostId = postId;
+
+    openModal("commentsModal");
+
+    const list =
+      document.getElementById("commentsList");
+
+    list.innerHTML = `
+      <div class="loading">
+        <div class="loader"></div>
+        Loading comments...
+      </div>
+    `;
+
+    try {
+
+      const data = await api(
+        `/api/posts/${encodeURIComponent(postId)}/comments`
+      );
+
+      const comments =
+        Array.isArray(data)
+          ? data
+          : (
+              data.comments ||
+              data.items ||
+              []
+            );
+
+      if (!comments.length) {
+
+        list.innerHTML = `
+          <div class="empty" style="padding:25px;">
+            No comments yet.
+            <br>
+            Be the first to comment.
+          </div>
+        `;
+
+        return;
+
+      }
+
+      list.innerHTML =
+        comments.map(comment => {
+
+          const user =
+            comment.user ||
+            comment.author ||
+            {};
+
+          const owner =
+            currentUser &&
+            (
+              String(currentUser.id) ===
+              String(
+                comment.userId ||
+                user.id
+              )
+            );
+
+          return `
+
+            <div class="comment">
+
+              <img
+                src="${escapeHTML(avatarUrl(user))}"
+                onerror="this.src='${DEFAULT_AVATAR}'"
+              >
+
+              <div class="comment-bubble">
+
+                <strong>
+                  ${escapeHTML(
+                    user.name ||
+                    user.username ||
+                    "User"
+                  )}
+
+                  ${verifiedBadge(user)}
+
+                </strong>
+
+                <p>
+                  ${escapeHTML(
+                    comment.text ||
+                    comment.content ||
+                    ""
+                  )}
+                </p>
+
+                <small style="color:#65676b;">
+                  ${formatDate(
+                    comment.createdAt ||
+                    comment.timestamp
+                  )}
+
+                  ${
+                    owner
+                      ? `
+                        ·
+                        <button
+                          onclick="deleteComment('${escapeHTML(comment.id)}')"
+                          style="background:none;color:#e41e3f;font-size:11px;"
+                        >
+                          Delete
+                        </button>
+                      `
+                      : ""
+                  }
+
+                </small>
+
+              </div>
+
+            </div>
+
+          `;
+
+        }).join("");
+
+    } catch (error) {
+
+      list.innerHTML = `
+        <div class="empty">
+          Unable to load comments.
+          <br>
+          <small>
+            ${escapeHTML(error.message)}
+          </small>
+        </div>
+      `;
+
+    }
+
+  }
+
+
+  document
+    .getElementById("commentForm")
+    .addEventListener("submit", async event => {
+
+      event.preventDefault();
+
+      if (!activePostId) return;
+
+      const input =
+        document.getElementById("commentInput");
+
+      const text =
+        input.value.trim();
+
+      if (!text) return;
+
+      try {
+
+        await api(
+          `/api/posts/${encodeURIComponent(activePostId)}/comments`,
+          {
+            method: "POST",
+            body: JSON.stringify({ text })
+          }
+        );
+
+        input.value = "";
+
+        await openComments(activePostId);
+
+        await loadProfilePosts();
+
+      } catch (error) {
+
+        showToast(error.message);
+
+      }
+
+    });
+
+
+  async function deleteComment(commentId) {
+
+    if (!confirm("Delete this comment?")) return;
+
+    try {
+
+      await api(
+        `/api/comments/${encodeURIComponent(commentId)}`,
+        {
+          method: "DELETE"
+        }
+      );
+
+      await openComments(activePostId);
+
+      await loadProfilePosts();
+
+    } catch (error) {
+
+      showToast(error.message);
+
+    }
+
+  }
+
+
+  /* =========================================================
+     DELETE POST
+  ========================================================= */
+
+  async function deletePost(postId) {
+
+    if (!confirm("Delete this post?")) {
+      return;
+    }
+
+    try {
+
+      await api(
+        `/api/posts/${encodeURIComponent(postId)}`,
+        {
+          method: "DELETE"
+        }
+      );
+
+      showToast("Post deleted.");
+
+      await loadProfilePosts();
+
+    } catch (error) {
+
+      showToast(error.message);
+
+    }
+
+  }
+
+
+  /* =========================================================
+     FOLLOW
+  ========================================================= */
+
+  async function toggleFollow(userId) {
+
+    if (!userId) return;
+
+    const button =
+      document.getElementById("followBtn");
+
+    if (button) {
+      button.disabled = true;
+    }
+
+    try {
+
+      const data = await api(
+        `/api/users/${encodeURIComponent(userId)}/follow`,
+        {
+          method: "POST"
+        }
+      );
+
+      const following =
+        data.following === true ||
+        data.isFollowing === true;
+
+      if (button) {
+
+        button.textContent =
+          following
+            ? "Following"
+            : "Follow";
+
+        button.className =
+          `btn ${
+            following
+              ? "btn-outline"
+              : "btn-primary"
+          }`;
+
+        button.disabled = false;
+
+      }
+
+      profileUser.isFollowing = following;
+      profileUser.following = following;
+
+      if (following) {
+        showToast("Following @" + profileUser.username);
+      } else {
+        showToast("Unfollowed @" + profileUser.username);
+      }
+
+      updateFollowerCount(following);
+
+    } catch (error) {
+
+      if (button) {
+        button.disabled = false;
+      }
+
+      showToast(error.message);
+
+    }
+
+  }
+
+
+  function updateFollowerCount(following) {
+
+    const element =
+      document.getElementById("followersCount");
+
+    if (!element) return;
+
+    const current =
+      Number(element.textContent) || 0;
+
+    element.textContent =
+      Math.max(
+        0,
+        current + (following ? 1 : -1)
+      );
+
+  }
+
+
+  /* =========================================================
+     FOLLOWERS
+  ========================================================= */
+
+  async function showFollowers() {
+
+    if (!profileUser?.id) return;
+
+    try {
+
+      const data = await api(
+        `/api/users/${encodeURIComponent(profileUser.id)}/followers`
+      );
+
+      const users =
+        Array.isArray(data)
+          ? data
+          : (
+              data.users ||
+              data.followers ||
+              []
+            );
+
+      if (!users.length) {
+        showToast("No followers yet.");
+        return;
+      }
+
+      showUserList(
+        "Followers",
+        users
+      );
+
+    } catch (error) {
+
+      showToast(error.message);
+
+    }
+
+  }
+
+
+  /* =========================================================
+     FOLLOWING
+  ========================================================= */
+
+  async function showFollowing() {
+
+    if (!profileUser?.id) return;
+
+    try {
+
+      const data = await api(
+        `/api/users/${encodeURIComponent(profileUser.id)}/following`
+      );
+
+      const users =
+        Array.isArray(data)
+          ? data
+          : (
+              data.users ||
+              data.following ||
+              []
+            );
+
+      if (!users.length) {
+        showToast("Not following anyone yet.");
+        return;
+      }
+
+      showUserList(
+        "Following",
+        users
+      );
+
+    } catch (error) {
+
+      showToast(error.message);
+
+    }
+
+  }
+
+
+  function showUserList(title, users) {
+
+    const html = users.map(user => `
+
+      <div class="suggestion">
+
+        <img
+          src="${escapeHTML(avatarUrl(user))}"
+          onerror="this.src='${DEFAULT_AVATAR}'"
+        >
+
+        <div class="suggestion-main">
+
+          <strong>
+            ${escapeHTML(
+              user.name ||
+              user.username
+            )}
+
+            ${verifiedBadge(user)}
+
+          </strong>
+
+          <small>
+            @${escapeHTML(
+              user.username ||
+              ""
+            )}
+          </small>
+
+        </div>
+
+        <button
+          class="mini-follow"
+          onclick="location.href='/profile.html?username=${encodeURIComponent(user.username || "")}'"
+        >
+          View
+        </button>
+
+      </div>
+
+    `).join("");
+
+    document.getElementById("suggestions").innerHTML = `
+      <div class="right-title">
+        ${escapeHTML(title)}
+      </div>
+      ${html}
+    `;
+
+  }
+
+
+  /* =========================================================
+     SUGGESTIONS
+  ========================================================= */
+
+  async function loadSuggestions() {
+
+    const container =
+      document.getElementById("suggestions");
+
+    try {
+
+      const data = await api(
+        "/api/search?q=a"
+      );
+
+      let users =
+        Array.isArray(data)
+          ? data
+          : (
+              data.users ||
+              data.results ||
+              []
+            );
+
+      users = users
+        .filter(user =>
+          !currentUser ||
+          String(user.id) !==
+          String(currentUser.id)
+        )
+        .filter(user =>
+          !profileUser ||
+          String(user.id) !==
+          String(profileUser.id)
+        )
+        .slice(0, 5);
+
+      if (!users.length) {
+
+        container.innerHTML = `
+          <div class="empty" style="padding:20px;">
+            No suggestions right now.
+          </div>
+        `;
+
+        return;
+
+      }
+
+      container.innerHTML =
+        users.map(user => `
+
+          <div class="suggestion">
+
+            <img
+              src="${escapeHTML(avatarUrl(user))}"
+              onerror="this.src='${DEFAULT_AVATAR}'"
+            >
+
+            <div class="suggestion-main">
+
+              <strong>
+
+                ${escapeHTML(
+                  user.name ||
+                  user.username ||
+                  "User"
+                )}
+
+                ${verifiedBadge(user)}
+
+              </strong>
+
+              <small>
+                @${escapeHTML(
+                  user.username ||
+                  ""
+                )}
+              </small>
+
+            </div>
+
+            <button
+              class="mini-follow"
+              onclick="location.href='/profile.html?username=${encodeURIComponent(user.username || "")}'"
+            >
+              View
+            </button>
+
+          </div>
+
+        `).join("");
+
+    } catch (error) {
+
+      console.error(error);
+
+      container.innerHTML = `
+        <div class="empty" style="padding:20px;">
+          Suggestions unavailable.
+        </div>
+      `;
+
+    }
+
+  }
+
+
+  /* =========================================================
+     EDIT PROFILE
+  ========================================================= */
+
+  function openEditProfile() {
+
+    if (!profileUser) return;
+
+    document.getElementById("editName").value =
+      profileUser.name || "";
+
+    document.getElementById("editUsername").value =
+      profileUser.username || "";
+
+    document.getElementById("editEmail").value =
+      profileUser.email || "";
+
+    document.getElementById("editBio").value =
+      profileUser.bio || "";
+
+    openModal("editModal");
+
+  }
+
+
+  document
+    .getElementById("editForm")
+    .addEventListener("submit", async event => {
+
+      event.preventDefault();
+
+      const name =
+        document.getElementById("editName")
+          .value
+          .trim();
+
+      const bio =
+        document.getElementById("editBio")
+          .value
+          .trim();
+
+      if (!name) {
+
+        showToast("Name is required.");
+        return;
+
+      }
+
+      try {
+
+        const data = await api(
+          "/api/profile",
+          {
+            method: "PUT",
+            body: JSON.stringify({
+              name,
+              bio
+            })
+          }
+        );
+
+        const updated =
+          data.user ||
+          data.profile ||
+          data;
+
+        if (updated && updated.username) {
+
+          currentUser = {
+            ...currentUser,
+            ...updated
+          };
+
+          profileUser = {
+            ...profileUser,
+            ...updated
+          };
+
+        } else {
+
+          profileUser.name = name;
+          profileUser.bio = bio;
+
+          currentUser.name = name;
+          currentUser.bio = bio;
+
+        }
+
+        renderProfile(profileUser);
+        updateCurrentUserUI();
+
+        closeModal("editModal");
+
+        showToast("Profile updated.");
+
+      } catch (error) {
+
+        showToast(error.message);
+
+      }
+
+    });
+
+
+  /* =========================================================
+     PROFILE PICTURE
+  ========================================================= */
+
+  async function handleAvatarUpload(input) {
+
+    const file = input.files?.[0];
+
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+
+      showToast("Please choose an image.");
+
+      input.value = "";
+      return;
+
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+
+      showToast("Image must be smaller than 10MB.");
+
+      input.value = "";
+      return;
+
+    }
+
+    const formData = new FormData();
+
+    /*
+      IMPORTANT:
+      Your Pulse server expects the field:
+      profilePicture
+    */
+
+    formData.append(
+      "profilePicture",
+      file
+    );
+
+    try {
+
+      showToast("Uploading profile picture...");
+
+      const data = await api(
+        "/api/profile/picture",
+        {
+          method: "POST",
+          body: formData
+        }
+      );
+
+      const updated =
+        data.user ||
+        data.profile ||
+        data;
+
+      const newAvatar =
+        updated.profilePicture ||
+        updated.profileImage ||
+        updated.avatar ||
+        data.profilePicture ||
+        data.url;
+
+      if (newAvatar) {
+
+        profileUser.profilePicture =
+          newAvatar;
+
+        currentUser.profilePicture =
+          newAvatar;
+
+        document.getElementById(
+          "profileAvatar"
+        ).src = newAvatar;
+
+        updateCurrentUserUI();
+
+      }
+
+      showToast("Profile picture updated.");
+
+    } catch (error) {
+
+      showToast(error.message);
+
+    }
+
+    input.value = "";
+
+  }
+
+
+  /* =========================================================
+     COVER IMAGE
+     
+     Current server does not expose a dedicated
+     cover-photo endpoint, so this safely informs
+     the user instead of making a broken request.
+  ========================================================= */
+
+  async function handleCoverUpload(input) {
+
+    const file = input.files?.[0];
+
+    if (!file) return;
+
+    showToast(
+      "Cover photo upload needs the cover-photo API on the server."
+    );
+
+    input.value = "";
+
+  }
+
+
+  /* =========================================================
+     MESSAGE USER
+  ========================================================= */
+
+  function messageUser() {
+
+    if (!profileUser?.id) return;
+
+    location.href =
+      `/messages.html?user=${encodeURIComponent(profileUser.id)}`;
+
+  }
+
+
+  /* =========================================================
+     IMAGE VIEWER
+  ========================================================= */
+
+  function openImage(src) {
+
+    if (!src) return;
+
+    document.getElementById(
+      "imageModalImg"
+    ).src = src;
+
+    openModal("imageModal");
+
+  }
+
+
+  /* =========================================================
+     SHARE
+  ========================================================= */
+
+  async function sharePost(postId) {
+
+    const url =
+      `${location.origin}/profile.html?username=${encodeURIComponent(profileUser.username)}#post-${postId}`;
+
+    const title =
+      `${profileUser.name || profileUser.username} on Pulse`;
+
+    try {
+
+      if (navigator.share) {
+
+        await navigator.share({
+          title,
+          url
+        });
+
+      } else {
+
+        await navigator.clipboard.writeText(url);
+
+        showToast("Post link copied.");
+
+      }
+
+    } catch (error) {
+
+      if (error.name !== "AbortError") {
+
+        try {
+
+          await navigator.clipboard.writeText(url);
+
+          showToast("Post link copied.");
+
+        } catch {
+
+          showToast("Unable to share post.");
+
+        }
+
+      }
+
+    }
+
+  }
+
+
+  /* =========================================================
+     PROFILE TABS
+  ========================================================= */
+
+  function switchProfileTab(tab) {
+
+    const posts =
+      document.getElementById("postsSection");
+
+    const about =
+      document.getElementById("aboutSection");
+
+    const postsTab =
+      document.getElementById("postsTab");
+
+    const aboutTab =
+      document.getElementById("aboutTab");
+
+    if (tab === "about") {
+
+      posts.style.display = "none";
+      about.style.display = "block";
+
+      postsTab.classList.remove("active");
+      aboutTab.classList.add("active");
+
+    } else {
+
+      posts.style.display = "block";
+      about.style.display = "none";
+
+      postsTab.classList.add("active");
+      aboutTab.classList.remove("active");
+
+    }
+
+  }
+
+
+  /* =========================================================
+     GLOBAL SEARCH
+  ========================================================= */
+
+  document
+    .getElementById("globalSearch")
+    .addEventListener("keydown", event => {
+
+      if (event.key !== "Enter") return;
+
+      const query =
+        event.target.value.trim();
+
+      if (!query) return;
+
+      location.href =
+        `/feed.html?search=${encodeURIComponent(query)}`;
+
+    });
+
+
+  /* =========================================================
+     MY PROFILE
+  ========================================================= */
+
+  function goMyProfile() {
+
+    if (!currentUser?.username) return;
+
+    location.href =
+      `/profile.html?username=${encodeURIComponent(currentUser.username)}`;
+
+  }
+
+
+  /* =========================================================
+     LOGOUT
+  ========================================================= */
+
+  async function logout() {
+
+    try {
+
+      await api(
+        "/api/logout",
+        {
+          method: "POST"
+        }
+      );
+
+    } catch (error) {
+
+      console.error(error);
+
+    }
+
+    location.href = "/login.html";
+
+  }
+
+
+  /* =========================================================
+     ESC KEY
+  ========================================================= */
+
+  document.addEventListener("keydown", event => {
+
+    if (event.key === "Escape") {
+
+      document
+        .querySelectorAll(".modal.show")
+        .forEach(modal => {
+          modal.classList.remove("show");
+        });
+
+    }
+
+  });
+
+
+  /* =========================================================
+     CLOSE MODAL WHEN CLICKING BACKDROP
+  ========================================================= */
+
+  document
+    .querySelectorAll(".modal")
+    .forEach(modal => {
+
+      modal.addEventListener("click", event => {
+
+        if (event.target === modal) {
+
+          modal.classList.remove("show");
+
+        }
+
+      });
+
+    });
+
+
+  /* =========================================================
+     INIT
+  ========================================================= */
+
+  async function init() {
+
+    const loggedIn =
+      await loadMe();
+
+    if (!loggedIn) return;
+
+    await loadProfile();
+
+  }
+
+  init();
+
+</script>
+
+</body>
+</html>
