@@ -1,221 +1,232 @@
 /*
 ===========================================================
- PULSE SOCIAL — COMPLETE SERVER
+ PULSE SOCIAL
+ Complete Social Media Server
  Node.js + Express + JSON Storage
-===========================================================
 
-FEATURES
-- Signup / Login / Logout
-- Secure bcrypt passwords
-- Session authentication
-- User profiles
-- Profile pictures
-- Cover photos
-- Posts
-- Post images
-- Likes
-- Comments
-- Follow / Unfollow
-- Followers / Following
-- Notifications
-- Messages
-- Message images
-- Search
-- Verification requests
-- Admin dashboard
-- Admin verification
-- Statistics
-- Railway persistent storage
+ FEATURES
+ - Signup / Login / Logout
+ - Secure bcrypt passwords
+ - Persistent JSON storage
+ - Railway Volume support
+ - Profiles
+ - Profile pictures
+ - Cover photos
+ - Posts
+ - Image posts
+ - Video posts
+ - TikTok-style For You feed
+ - TikTok-style Following feed
+ - Likes
+ - Comments
+ - Follow / unfollow
+ - Verified accounts
+ - Notifications
+ - Messages
+ - Search
+ - Verification requests
+ - Admin dashboard
+ - Admin verification
+ - Post deletion
+ - User deletion
+ - Storage information
+ - Health endpoint
 
-RAILWAY
-STORAGE_ROOT=/app/storage
+ LOCAL STORAGE:
+ ./storage
 
-LOCAL
-Storage defaults to ./storage
+ RAILWAY:
+ STORAGE_ROOT=/app/storage
+
+ START:
+ npm install
+ node server.js
 ===========================================================
 */
 
-require("dotenv").config();
+"use strict";
+
+/* =========================================================
+   IMPORTS
+========================================================= */
 
 const express = require("express");
 const session = require("express-session");
 const bcrypt = require("bcryptjs");
+const dotenv = require("dotenv");
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 const crypto = require("crypto");
 
+dotenv.config();
+
 /* =========================================================
-   CONFIG
+   APP
 ========================================================= */
 
 const app = express();
 
+app.set("trust proxy", 1);
+
 const PORT = Number(process.env.PORT || 3000);
 const HOST = process.env.HOST || "0.0.0.0";
 
-const NODE_ENV =
-  String(process.env.NODE_ENV || "development").toLowerCase();
-
 const IS_PRODUCTION =
-  NODE_ENV === "production";
+  process.env.NODE_ENV === "production";
 
-const SESSION_SECRET =
-  process.env.SESSION_SECRET ||
-  "pulse-social-development-secret-change-this";
+/* =========================================================
+   STORAGE
+========================================================= */
 
-const ADMIN_USERNAME =
-  String(process.env.ADMIN_USERNAME || "")
-    .trim()
-    .toLowerCase();
+const ROOT_DIR = __dirname;
 
 const STORAGE_ROOT = path.resolve(
   process.env.STORAGE_ROOT ||
-  path.join(__dirname, "storage")
+  path.join(ROOT_DIR, "storage")
 );
 
-const DATA_DIR =
-  path.join(STORAGE_ROOT, "data");
+const DATA_DIR = path.join(
+  STORAGE_ROOT,
+  "data"
+);
 
-const UPLOADS_DIR =
-  path.join(STORAGE_ROOT, "uploads");
+const UPLOADS_DIR = path.join(
+  STORAGE_ROOT,
+  "uploads"
+);
 
-const PROFILE_UPLOAD_DIR =
+const PROFILE_UPLOADS_DIR =
   path.join(UPLOADS_DIR, "profiles");
 
-const COVER_UPLOAD_DIR =
+const COVER_UPLOADS_DIR =
   path.join(UPLOADS_DIR, "covers");
 
-const POST_UPLOAD_DIR =
+const POST_UPLOADS_DIR =
   path.join(UPLOADS_DIR, "posts");
 
-const MESSAGE_UPLOAD_DIR =
+const VIDEO_UPLOADS_DIR =
+  path.join(UPLOADS_DIR, "videos");
+
+const MESSAGE_UPLOADS_DIR =
   path.join(UPLOADS_DIR, "messages");
 
-const PUBLIC_DIR =
-  path.join(__dirname, "public");
-
-
-/* =========================================================
-   DIRECTORIES
-========================================================= */
-
-[
-  STORAGE_ROOT,
-  DATA_DIR,
-  UPLOADS_DIR,
-  PROFILE_UPLOAD_DIR,
-  COVER_UPLOAD_DIR,
-  POST_UPLOAD_DIR,
-  MESSAGE_UPLOAD_DIR
-].forEach(dir => {
-  fs.mkdirSync(dir, {
-    recursive: true
-  });
-});
-
+const SESSION_FILE =
+  path.join(
+    STORAGE_ROOT,
+    "sessions.json"
+  );
 
 /* =========================================================
-   JSON FILES
+   DATA FILES
 ========================================================= */
 
 const FILES = {
-  users:
-    path.join(DATA_DIR, "users.json"),
-
-  posts:
-    path.join(DATA_DIR, "posts.json"),
-
-  comments:
-    path.join(DATA_DIR, "comments.json"),
-
-  likes:
-    path.join(DATA_DIR, "likes.json"),
-
-  follows:
-    path.join(DATA_DIR, "follows.json"),
-
-  notifications:
-    path.join(DATA_DIR, "notifications.json"),
-
-  messages:
-    path.join(DATA_DIR, "messages.json"),
-
-  verificationRequests:
-    path.join(
-      DATA_DIR,
-      "verification_requests.json"
-    )
+  users: path.join(DATA_DIR, "users.json"),
+  posts: path.join(DATA_DIR, "posts.json"),
+  comments: path.join(DATA_DIR, "comments.json"),
+  likes: path.join(DATA_DIR, "likes.json"),
+  follows: path.join(DATA_DIR, "follows.json"),
+  notifications: path.join(
+    DATA_DIR,
+    "notifications.json"
+  ),
+  messages: path.join(
+    DATA_DIR,
+    "messages.json"
+  ),
+  verificationRequests: path.join(
+    DATA_DIR,
+    "verification_requests.json"
+  )
 };
 
+/* =========================================================
+   CREATE DIRECTORIES
+========================================================= */
+
+function ensureDirectory(directory) {
+  if (!fs.existsSync(directory)) {
+    fs.mkdirSync(directory, {
+      recursive: true
+    });
+  }
+}
+
+ensureDirectory(STORAGE_ROOT);
+ensureDirectory(DATA_DIR);
+ensureDirectory(UPLOADS_DIR);
+ensureDirectory(PROFILE_UPLOADS_DIR);
+ensureDirectory(COVER_UPLOADS_DIR);
+ensureDirectory(POST_UPLOADS_DIR);
+ensureDirectory(VIDEO_UPLOADS_DIR);
+ensureDirectory(MESSAGE_UPLOADS_DIR);
 
 /* =========================================================
    JSON HELPERS
 ========================================================= */
 
-function ensureJsonFile(filePath) {
-
-  if (!fs.existsSync(filePath)) {
-
+function ensureJsonFile(file, fallback = []) {
+  if (!fs.existsSync(file)) {
     fs.writeFileSync(
-      filePath,
-      "[]",
+      file,
+      JSON.stringify(
+        fallback,
+        null,
+        2
+      ),
       "utf8"
     );
   }
 }
 
+Object.values(FILES).forEach(file => {
+  ensureJsonFile(file, []);
+});
 
-Object.values(FILES).forEach(
-  ensureJsonFile
+ensureJsonFile(
+  SESSION_FILE,
+  []
 );
 
+/* =========================================================
+   DATABASE HELPERS
+========================================================= */
 
-function readJson(filePath) {
-
+function readJson(file, fallback = []) {
   try {
-
-    if (!fs.existsSync(filePath)) {
-      return [];
+    if (!fs.existsSync(file)) {
+      return fallback;
     }
 
     const raw =
       fs.readFileSync(
-        filePath,
+        file,
         "utf8"
-      ).trim();
+      );
 
-    if (!raw) {
-      return [];
+    if (!raw.trim()) {
+      return fallback;
     }
 
-    const data =
+    const parsed =
       JSON.parse(raw);
 
-    return Array.isArray(data)
-      ? data
-      : [];
-
+    return parsed;
   } catch (error) {
-
     console.error(
       "JSON READ ERROR:",
-      filePath,
+      file,
       error.message
     );
 
-    return [];
+    return fallback;
   }
 }
 
-
-function writeJson(
-  filePath,
-  data
-) {
-
+function writeJson(file, data) {
   const tempFile =
-    `${filePath}.tmp`;
+    `${file}.tmp`;
 
   fs.writeFileSync(
     tempFile,
@@ -229,60 +240,20 @@ function writeJson(
 
   fs.renameSync(
     tempFile,
-    filePath
+    file
   );
 }
 
-
 /* =========================================================
-   ID / TIME HELPERS
-========================================================= */
-
-function makeId() {
-
-  return (
-    Date.now().toString(36) +
-    crypto.randomBytes(8)
-      .toString("hex")
-  );
-}
-
-
-function now() {
-
-  return new Date()
-    .toISOString();
-}
-
-
-/* =========================================================
-   NORMALIZATION
-========================================================= */
-
-function normalizeUsername(value) {
-
-  return String(value || "")
-    .trim()
-    .toLowerCase();
-}
-
-
-function normalizeEmail(value) {
-
-  return String(value || "")
-    .trim()
-    .toLowerCase();
-}
-
-
-/* =========================================================
-   USER HELPERS
+   DATA LOADERS
 ========================================================= */
 
 function getUsers() {
-  return readJson(FILES.users);
+  return readJson(
+    FILES.users,
+    []
+  );
 }
-
 
 function saveUsers(users) {
   writeJson(
@@ -291,98 +262,220 @@ function saveUsers(users) {
   );
 }
 
-
-function findUserById(id) {
-
-  const users =
-    getUsers();
-
-  return users.find(
-    user =>
-      String(user.id) ===
-      String(id)
+function getPosts() {
+  return readJson(
+    FILES.posts,
+    []
   );
 }
 
+function savePosts(posts) {
+  writeJson(
+    FILES.posts,
+    posts
+  );
+}
+
+function getComments() {
+  return readJson(
+    FILES.comments,
+    []
+  );
+}
+
+function saveComments(comments) {
+  writeJson(
+    FILES.comments,
+    comments
+  );
+}
+
+function getLikes() {
+  return readJson(
+    FILES.likes,
+    []
+  );
+}
+
+function saveLikes(likes) {
+  writeJson(
+    FILES.likes,
+    likes
+  );
+}
+
+function getFollows() {
+  return readJson(
+    FILES.follows,
+    []
+  );
+}
+
+function saveFollows(follows) {
+  writeJson(
+    FILES.follows,
+    follows
+  );
+}
+
+function getNotifications() {
+  return readJson(
+    FILES.notifications,
+    []
+  );
+}
+
+function saveNotifications(notifications) {
+  writeJson(
+    FILES.notifications,
+    notifications
+  );
+}
+
+function getMessages() {
+  return readJson(
+    FILES.messages,
+    []
+  );
+}
+
+function saveMessages(messages) {
+  writeJson(
+    FILES.messages,
+    messages
+  );
+}
+
+function getVerificationRequests() {
+  return readJson(
+    FILES.verificationRequests,
+    []
+  );
+}
+
+function saveVerificationRequests(
+  requests
+) {
+  writeJson(
+    FILES.verificationRequests,
+    requests
+  );
+}
+
+/* =========================================================
+   GENERAL HELPERS
+========================================================= */
+
+function makeId(prefix = "") {
+  return (
+    prefix +
+    crypto.randomBytes(12).toString("hex")
+  );
+}
+
+function now() {
+  return new Date().toISOString();
+}
+
+function cleanText(value, max = 5000) {
+  if (
+    value === undefined ||
+    value === null
+  ) {
+    return "";
+  }
+
+  return String(value)
+    .trim()
+    .slice(0, max);
+}
+
+function normalizeUsername(username) {
+  return cleanText(
+    username,
+    50
+  )
+    .toLowerCase()
+    .replace(/^@/, "");
+}
+
+function findUserById(id) {
+  if (!id) {
+    return null;
+  }
+
+  return getUsers().find(
+    user =>
+      String(user.id) ===
+      String(id)
+  ) || null;
+}
 
 function findUserByUsername(username) {
-
-  const target =
+  const normalized =
     normalizeUsername(username);
 
   return getUsers().find(
     user =>
       normalizeUsername(
         user.username
-      ) === target
-  );
+      ) === normalized
+  ) || null;
 }
 
-
 function findUserByEmail(email) {
-
-  const target =
-    normalizeEmail(email);
+  const normalized =
+    cleanText(email, 200)
+      .toLowerCase();
 
   return getUsers().find(
     user =>
-      normalizeEmail(
-        user.email
-      ) === target
-  );
+      String(user.email || "")
+        .toLowerCase() ===
+      normalized
+  ) || null;
 }
-
 
 /* =========================================================
    ADMIN
 ========================================================= */
 
-function isAdminUser(user) {
-
+function isAdmin(user) {
   if (!user) {
     return false;
   }
 
-  if (
-    user.role === "admin" ||
-    user.role === "superadmin"
-  ) {
-    return true;
-  }
-
-  if (!ADMIN_USERNAME) {
-    return false;
-  }
+  const adminUsername =
+    normalizeUsername(
+      process.env.ADMIN_USERNAME || ""
+    );
 
   return (
-    normalizeUsername(
-      user.username
-    ) === ADMIN_USERNAME
+    user.role === "admin" ||
+    user.role === "superadmin" ||
+    (
+      adminUsername &&
+      normalizeUsername(
+        user.username
+      ) === adminUsername
+    )
   );
 }
-
 
 /* =========================================================
    FOLLOW HELPERS
 ========================================================= */
 
-function getFollows() {
-  return readJson(FILES.follows);
-}
-
-
-function saveFollows(data) {
-  writeJson(
-    FILES.follows,
-    data
-  );
-}
-
-
 function isFollowing(
   followerId,
   followingId
 ) {
+  if (
+    !followerId ||
+    !followingId
+  ) {
+    return false;
+  }
 
   return getFollows().some(
     follow =>
@@ -393,9 +486,7 @@ function isFollowing(
   );
 }
 
-
-function followerCount(userId) {
-
+function getFollowerCount(userId) {
   return getFollows().filter(
     follow =>
       String(follow.followingId) ===
@@ -403,9 +494,7 @@ function followerCount(userId) {
   ).length;
 }
 
-
-function followingCount(userId) {
-
+function getFollowingCount(userId) {
   return getFollows().filter(
     follow =>
       String(follow.followerId) ===
@@ -413,157 +502,25 @@ function followingCount(userId) {
   ).length;
 }
 
-
 /* =========================================================
-   POSTS
+   POST COUNTS
 ========================================================= */
 
-function getPosts() {
-  return readJson(FILES.posts);
-}
-
-
-function savePosts(posts) {
-  writeJson(
-    FILES.posts,
-    posts
+function getPostLikes(postId) {
+  return getLikes().filter(
+    like =>
+      String(like.postId) ===
+      String(postId)
   );
 }
 
-
-/* =========================================================
-   COMMENTS
-========================================================= */
-
-function getComments() {
-  return readJson(FILES.comments);
-}
-
-
-function saveComments(comments) {
-  writeJson(
-    FILES.comments,
-    comments
+function getPostComments(postId) {
+  return getComments().filter(
+    comment =>
+      String(comment.postId) ===
+      String(postId)
   );
 }
-
-
-/* =========================================================
-   LIKES
-========================================================= */
-
-function getLikes() {
-  return readJson(FILES.likes);
-}
-
-
-function saveLikes(likes) {
-  writeJson(
-    FILES.likes,
-    likes
-  );
-}
-
-
-/* =========================================================
-   NOTIFICATIONS
-========================================================= */
-
-function getNotifications() {
-  return readJson(
-    FILES.notifications
-  );
-}
-
-
-function saveNotifications(data) {
-  writeJson(
-    FILES.notifications,
-    data
-  );
-}
-
-
-function createNotification({
-  userId,
-  actorId,
-  type,
-  postId = null,
-  message
-}) {
-
-  if (
-    !userId ||
-    !actorId ||
-    String(userId) ===
-      String(actorId)
-  ) {
-    return;
-  }
-
-  const notifications =
-    getNotifications();
-
-  notifications.unshift({
-    id: makeId(),
-    userId,
-    actorId,
-    type,
-    postId,
-    message:
-      message || "",
-    read: false,
-    createdAt: now()
-  });
-
-  saveNotifications(
-    notifications.slice(
-      0,
-      5000
-    )
-  );
-}
-
-
-/* =========================================================
-   MESSAGES
-========================================================= */
-
-function getMessages() {
-  return readJson(
-    FILES.messages
-  );
-}
-
-
-function saveMessages(messages) {
-  writeJson(
-    FILES.messages,
-    messages
-  );
-}
-
-
-/* =========================================================
-   VERIFICATION
-========================================================= */
-
-function getVerificationRequests() {
-
-  return readJson(
-    FILES.verificationRequests
-  );
-}
-
-
-function saveVerificationRequests(data) {
-
-  writeJson(
-    FILES.verificationRequests,
-    data
-  );
-}
-
 
 /* =========================================================
    SAFE USER
@@ -571,23 +528,26 @@ function saveVerificationRequests(data) {
 
 function safeUser(
   user,
-  viewerId = null
+  viewer = null
 ) {
-
   if (!user) {
     return null;
   }
 
   const posts =
-    getPosts();
+    getPosts().filter(
+      post =>
+        String(post.userId) ===
+        String(user.id)
+    );
 
   return {
-
-    id:
-      user.id,
+    id: user.id,
 
     name:
-      user.name || "",
+      user.name ||
+      user.username ||
+      "User",
 
     username:
       user.username || "",
@@ -605,34 +565,34 @@ function safeUser(
       "/images/default-avatar.png",
 
     profileImage:
-      user.profilePicture ||
       user.profileImage ||
+      user.profilePicture ||
       user.avatar ||
       "/images/default-avatar.png",
 
     avatar:
+      user.avatar ||
       user.profilePicture ||
       user.profileImage ||
-      user.avatar ||
       "/images/default-avatar.png",
 
     coverPhoto:
       user.coverPhoto ||
       user.coverImage ||
       user.cover ||
-      null,
+      "",
 
     coverImage:
-      user.coverPhoto ||
       user.coverImage ||
+      user.coverPhoto ||
       user.cover ||
-      null,
+      "",
 
     cover:
+      user.cover ||
       user.coverPhoto ||
       user.coverImage ||
-      user.cover ||
-      null,
+      "",
 
     role:
       user.role || "user",
@@ -645,8 +605,8 @@ function safeUser(
 
     isVerified:
       Boolean(
-        user.verified ||
-        user.isVerified
+        user.isVerified ||
+        user.verified
       ),
 
     verificationStatus:
@@ -657,104 +617,152 @@ function safeUser(
       user.createdAt || null,
 
     isAdmin:
-      isAdminUser(user),
+      isAdmin(user),
 
     followersCount:
-      followerCount(user.id),
+      getFollowerCount(
+        user.id
+      ),
 
     followingCount:
-      followingCount(user.id),
+      getFollowingCount(
+        user.id
+      ),
 
     postsCount:
-      posts.filter(
-        post =>
-          String(post.userId) ===
-          String(user.id)
-      ).length,
+      posts.length,
 
     isFollowing:
-      viewerId
+      viewer
         ? isFollowing(
-            viewerId,
+            viewer.id,
             user.id
           )
         : false
   };
 }
 
-
 /* =========================================================
-   POST WITH USER DATA
+   SAFE POST
 ========================================================= */
 
 function safePost(
   post,
-  viewerId = null
+  viewer = null
 ) {
-
   const user =
     findUserById(
       post.userId
     );
 
   const likes =
-    getLikes();
-
-  const comments =
-    getComments();
-
-  const postLikes =
-    likes.filter(
-      like =>
-        String(like.postId) ===
-        String(post.id)
+    getPostLikes(
+      post.id
     );
 
-  const postComments =
-    comments.filter(
-      comment =>
-        String(comment.postId) ===
-        String(post.id)
+  const comments =
+    getPostComments(
+      post.id
     );
 
   const liked =
-    viewerId
-      ? postLikes.some(
+    viewer
+      ? likes.some(
           like =>
             String(
               like.userId
             ) ===
-            String(viewerId)
+            String(
+              viewer.id
+            )
         )
       : false;
 
   return {
+    id: post.id,
 
-    ...post,
+    userId:
+      post.userId,
 
     user:
       safeUser(
         user,
-        viewerId
+        viewer
       ),
 
-    author:
-      safeUser(
-        user,
-        viewerId
+    text:
+      post.text || "",
+
+    caption:
+      post.caption ||
+      post.text ||
+      "",
+
+    image:
+      post.image ||
+      post.imageUrl ||
+      null,
+
+    imageUrl:
+      post.imageUrl ||
+      post.image ||
+      null,
+
+    video:
+      post.video ||
+      post.videoUrl ||
+      null,
+
+    videoUrl:
+      post.videoUrl ||
+      post.video ||
+      null,
+
+    mediaUrl:
+      post.mediaUrl ||
+      post.image ||
+      post.video ||
+      null,
+
+    mediaType:
+      post.mediaType ||
+      (
+        post.video ||
+        post.videoUrl
+          ? "video"
+          : "image"
       ),
+
+    sound:
+      post.sound ||
+      null,
+
+    hashtags:
+      Array.isArray(
+        post.hashtags
+      )
+        ? post.hashtags
+        : [],
+
+    createdAt:
+      post.createdAt ||
+      null,
+
+    updatedAt:
+      post.updatedAt ||
+      null,
 
     likesCount:
-      postLikes.length,
+      likes.length,
 
     likeCount:
-      postLikes.length,
+      likes.length,
 
     commentsCount:
-      postComments.length,
+      comments.length,
 
     commentCount:
-      postComments.length,
+      comments.length,
 
     liked,
 
@@ -763,15 +771,117 @@ function safePost(
   };
 }
 
-
 /* =========================================================
-   EXPRESS
+   AUTH MIDDLEWARE
 ========================================================= */
 
-app.set(
-  "trust proxy",
-  1
-);
+function requireAuth(
+  req,
+  res,
+  next
+) {
+  if (
+    !req.session ||
+    !req.session.userId
+  ) {
+    return res.status(401).json({
+      error:
+        "You must be logged in."
+    });
+  }
+
+  const user =
+    findUserById(
+      req.session.userId
+    );
+
+  if (!user) {
+
+    req.session.destroy(() => {});
+
+    return res.status(401).json({
+      error:
+        "Your session is no longer valid."
+    });
+  }
+
+  req.user = user;
+
+  next();
+}
+
+/* =========================================================
+   ADMIN MIDDLEWARE
+========================================================= */
+
+function requireAdmin(
+  req,
+  res,
+  next
+) {
+  if (
+    !req.user ||
+    !isAdmin(req.user)
+  ) {
+    return res.status(403).json({
+      error:
+        "Administrator access required."
+    });
+  }
+
+  next();
+}
+
+/* =========================================================
+   NOTIFICATIONS
+========================================================= */
+
+function createNotification({
+  userId,
+  fromUserId,
+  type,
+  postId = null,
+  message = ""
+}) {
+
+  if (
+    !userId ||
+    !fromUserId ||
+    String(userId) ===
+      String(fromUserId)
+  ) {
+    return;
+  }
+
+  const notifications =
+    getNotifications();
+
+  notifications.unshift({
+    id: makeId("notification_"),
+
+    userId,
+
+    fromUserId,
+
+    type,
+
+    postId,
+
+    message,
+
+    read: false,
+
+    createdAt: now()
+  });
+
+  saveNotifications(
+    notifications.slice(0, 5000)
+  );
+}
+
+/* =========================================================
+   EXPRESS MIDDLEWARE
+========================================================= */
 
 app.use(
   express.json({
@@ -786,6 +896,204 @@ app.use(
   })
 );
 
+/* =========================================================
+   SESSION STORE
+========================================================= */
+
+class FileSessionStore
+  extends session.Store {
+
+  constructor(file) {
+    super();
+
+    this.file = file;
+
+    ensureJsonFile(
+      this.file,
+      []
+    );
+
+    this.sessions =
+      readJson(
+        this.file,
+        []
+      );
+  }
+
+  saveFile() {
+    try {
+
+      writeJson(
+        this.file,
+        this.sessions
+      );
+
+    } catch (error) {
+
+      console.error(
+        "SESSION SAVE ERROR:",
+        error.message
+      );
+
+    }
+  }
+
+  get(
+    sid,
+    callback
+  ) {
+
+    const item =
+      this.sessions.find(
+        session =>
+          session.sid === sid
+      );
+
+    if (!item) {
+      return callback(
+        null,
+        null
+      );
+    }
+
+    if (
+      item.expiresAt &&
+      Date.now() >
+        item.expiresAt
+    ) {
+
+      this.destroy(
+        sid,
+        () => {}
+      );
+
+      return callback(
+        null,
+        null
+      );
+    }
+
+    callback(
+      null,
+      item.session
+    );
+  }
+
+  set(
+    sid,
+    sess,
+    callback
+  ) {
+
+    const cookie =
+      sess.cookie || {};
+
+    let maxAge =
+      cookie.maxAge;
+
+    if (
+      typeof maxAge !==
+      "number"
+    ) {
+      maxAge =
+        7 * 24 * 60 * 60 * 1000;
+    }
+
+    const expiresAt =
+      Date.now() + maxAge;
+
+    const existing =
+      this.sessions.findIndex(
+        item =>
+          item.sid === sid
+      );
+
+    const record = {
+      sid,
+      session: sess,
+      expiresAt
+    };
+
+    if (existing >= 0) {
+      this.sessions[existing] =
+        record;
+    } else {
+      this.sessions.push(
+        record
+      );
+    }
+
+    this.saveFile();
+
+    if (callback) {
+      callback(null);
+    }
+  }
+
+  destroy(
+    sid,
+    callback
+  ) {
+
+    this.sessions =
+      this.sessions.filter(
+        item =>
+          item.sid !== sid
+      );
+
+    this.saveFile();
+
+    if (callback) {
+      callback(null);
+    }
+  }
+
+  touch(
+    sid,
+    sess,
+    callback
+  ) {
+
+    const item =
+      this.sessions.find(
+        record =>
+          record.sid === sid
+      );
+
+    if (item) {
+
+      item.session = sess;
+
+      const cookie =
+        sess.cookie || {};
+
+      const maxAge =
+        typeof cookie.maxAge ===
+        "number"
+          ? cookie.maxAge
+          : 7 *
+            24 *
+            60 *
+            60 *
+            1000;
+
+      item.expiresAt =
+        Date.now() + maxAge;
+
+      this.saveFile();
+
+    }
+
+    if (callback) {
+      callback(null);
+    }
+  }
+}
+
+const sessionStore =
+  new FileSessionStore(
+    SESSION_FILE
+  );
 
 /* =========================================================
    SESSION
@@ -793,21 +1101,19 @@ app.use(
 
 app.use(
   session({
+    store: sessionStore,
 
     secret:
-      SESSION_SECRET,
+      process.env.SESSION_SECRET ||
+      "pulse-social-change-this-secret",
 
-    resave:
-      false,
+    resave: false,
 
-    saveUninitialized:
-      false,
+    saveUninitialized: false,
 
-    rolling:
-      true,
+    rolling: true,
 
     cookie: {
-
       maxAge:
         7 *
         24 *
@@ -815,11 +1121,9 @@ app.use(
         60 *
         1000,
 
-      httpOnly:
-        true,
+      httpOnly: true,
 
-      sameSite:
-        "lax",
+      sameSite: "lax",
 
       secure:
         IS_PRODUCTION
@@ -827,6 +1131,303 @@ app.use(
   })
 );
 
+/* =========================================================
+   UPLOAD CONFIGURATION
+========================================================= */
+
+const imageMimeTypes =
+  new Set([
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "image/gif"
+  ]);
+
+const videoMimeTypes =
+  new Set([
+    "video/mp4",
+    "video/webm",
+    "video/quicktime",
+    "video/x-matroska",
+    "video/ogg"
+  ]);
+
+const allowedMediaMimeTypes =
+  new Set([
+    ...imageMimeTypes,
+    ...videoMimeTypes
+  ]);
+
+const extensionMap = {
+  "image/jpeg": ".jpg",
+  "image/png": ".png",
+  "image/webp": ".webp",
+  "image/gif": ".gif",
+
+  "video/mp4": ".mp4",
+  "video/webm": ".webm",
+  "video/quicktime": ".mov",
+  "video/x-matroska": ".mkv",
+  "video/ogg": ".ogv"
+};
+
+const storage = multer.diskStorage({
+
+  destination: function(
+    req,
+    file,
+    cb
+  ) {
+
+    const mime =
+      file.mimetype;
+
+    if (
+      videoMimeTypes.has(
+        mime
+      )
+    ) {
+
+      return cb(
+        null,
+        VIDEO_UPLOADS_DIR
+      );
+
+    }
+
+    if (
+      imageMimeTypes.has(
+        mime
+      )
+    ) {
+
+      return cb(
+        null,
+        POST_UPLOADS_DIR
+      );
+
+    }
+
+    cb(
+      new Error(
+        "Unsupported file type."
+      )
+    );
+
+  },
+
+  filename: function(
+    req,
+    file,
+    cb
+  ) {
+
+    const extension =
+      extensionMap[
+        file.mimetype
+      ] ||
+      path.extname(
+        file.originalname
+      ) ||
+      "";
+
+    const filename =
+      `${Date.now()}-${crypto.randomBytes(8).toString("hex")}${extension}`;
+
+    cb(
+      null,
+      filename
+    );
+
+  }
+});
+
+const upload =
+  multer({
+
+    storage,
+
+    limits: {
+      fileSize:
+        20 *
+        1024 *
+        1024,
+
+      files: 1
+    },
+
+    fileFilter:
+      function(
+        req,
+        file,
+        cb
+      ) {
+
+        if (
+          allowedMediaMimeTypes.has(
+            file.mimetype
+          )
+        ) {
+
+          cb(
+            null,
+            true
+          );
+
+        } else {
+
+          cb(
+            new Error(
+              "Only JPG, PNG, WEBP, GIF, MP4, WEBM, MOV, MKV and OGG files are allowed."
+            )
+          );
+
+        }
+
+      }
+
+  });
+
+const profileUpload =
+  multer({
+
+    dest:
+      PROFILE_UPLOADS_DIR,
+
+    limits: {
+      fileSize:
+        10 *
+        1024 *
+        1024,
+
+      files: 1
+    },
+
+    fileFilter:
+      function(
+        req,
+        file,
+        cb
+      ) {
+
+        if (
+          imageMimeTypes.has(
+            file.mimetype
+          )
+        ) {
+
+          cb(
+            null,
+            true
+          );
+
+        } else {
+
+          cb(
+            new Error(
+              "Profile picture must be an image."
+            )
+          );
+
+        }
+
+      }
+
+  });
+
+const coverUpload =
+  multer({
+
+    dest:
+      COVER_UPLOADS_DIR,
+
+    limits: {
+      fileSize:
+        10 *
+        1024 *
+        1024,
+
+      files: 1
+    },
+
+    fileFilter:
+      function(
+        req,
+        file,
+        cb
+      ) {
+
+        if (
+          imageMimeTypes.has(
+            file.mimetype
+          )
+        ) {
+
+          cb(
+            null,
+            true
+          );
+
+        } else {
+
+          cb(
+            new Error(
+              "Cover photo must be an image."
+            )
+          );
+
+        }
+
+      }
+
+  });
+
+const messageUpload =
+  multer({
+
+    dest:
+      MESSAGE_UPLOADS_DIR,
+
+    limits: {
+      fileSize:
+        10 *
+        1024 *
+        1024,
+
+      files: 1
+    },
+
+    fileFilter:
+      function(
+        req,
+        file,
+        cb
+      ) {
+
+        if (
+          imageMimeTypes.has(
+            file.mimetype
+          )
+        ) {
+
+          cb(
+            null,
+            true
+          );
+
+        } else {
+
+          cb(
+            new Error(
+              "Message attachment must be an image."
+            )
+          );
+
+        }
+
+      }
+
+  });
 
 /* =========================================================
    STATIC FILES
@@ -834,7 +1435,10 @@ app.use(
 
 app.use(
   express.static(
-    PUBLIC_DIR
+    path.join(
+      ROOT_DIR,
+      "public"
+    )
   )
 );
 
@@ -845,294 +1449,128 @@ app.use(
   )
 );
 
-
 /* =========================================================
-   MULTER
-========================================================= */
-
-const imageStorage =
-  multer.diskStorage({
-
-    destination:
-      function (
-        req,
-        file,
-        cb
-      ) {
-
-        const field =
-          file.fieldname;
-
-        if (
-          field ===
-          "profilePicture"
-        ) {
-
-          cb(
-            null,
-            PROFILE_UPLOAD_DIR
-          );
-
-          return;
-        }
-
-        if (
-          field ===
-          "coverPhoto"
-        ) {
-
-          cb(
-            null,
-            COVER_UPLOAD_DIR
-          );
-
-          return;
-        }
-
-        if (
-          field ===
-          "image"
-        ) {
-
-          cb(
-            null,
-            POST_UPLOAD_DIR
-          );
-
-          return;
-        }
-
-        if (
-          field ===
-          "messageImage"
-        ) {
-
-          cb(
-            null,
-            MESSAGE_UPLOAD_DIR
-          );
-
-          return;
-        }
-
-        cb(
-          new Error(
-            "Invalid upload field."
-          )
-        );
-      },
-
-    filename:
-      function (
-        req,
-        file,
-        cb
-      ) {
-
-        const ext =
-          path.extname(
-            file.originalname
-          ).toLowerCase();
-
-        cb(
-          null,
-          `${Date.now()}-${crypto.randomBytes(8).toString("hex")}${ext}`
-        );
-      }
-  });
-
-
-const upload =
-  multer({
-
-    storage:
-      imageStorage,
-
-    limits: {
-
-      fileSize:
-        10 *
-        1024 *
-        1024
-    },
-
-    fileFilter:
-      function (
-        req,
-        file,
-        cb
-      ) {
-
-        const allowed =
-          new Set([
-            "image/jpeg",
-            "image/png",
-            "image/webp",
-            "image/gif"
-          ]);
-
-        if (
-          !allowed.has(
-            file.mimetype
-          )
-        ) {
-
-          return cb(
-            new Error(
-              "Only JPG, PNG, WEBP and GIF images are allowed."
-            )
-          );
-        }
-
-        cb(
-          null,
-          true
-        );
-      }
-  });
-
-
-/* =========================================================
-   AUTH MIDDLEWARE
-========================================================= */
-
-function requireAuth(
-  req,
-  res,
-  next
-) {
-
-  if (
-    !req.session ||
-    !req.session.userId
-  ) {
-
-    return res.status(401).json({
-      error:
-        "You must be logged in."
-    });
-  }
-
-  const user =
-    findUserById(
-      req.session.userId
-    );
-
-  if (!user) {
-
-    req.session.destroy(
-      () => {}
-    );
-
-    return res.status(401).json({
-      error:
-        "Your session is no longer valid."
-    });
-  }
-
-  req.user =
-    user;
-
-  next();
-}
-
-
-function requireAdmin(
-  req,
-  res,
-  next
-) {
-
-  if (
-    !req.user ||
-    !isAdminUser(req.user)
-  ) {
-
-    return res.status(403).json({
-      error:
-        "Administrator access required."
-    });
-  }
-
-  next();
-}
-
-
-/* =========================================================
-   HOME
+   BASIC ROUTES
 ========================================================= */
 
 app.get(
   "/",
-  (req, res) => {
+  function(req, res) {
 
     res.sendFile(
       path.join(
-        PUBLIC_DIR,
+        ROOT_DIR,
+        "public",
         "index.html"
       )
     );
+
   }
 );
 
+app.get(
+  "/health",
+  function(req, res) {
+
+    res.json({
+      ok: true,
+      service: "Pulse Social",
+      version: "4.0.0",
+      time: now()
+    });
+
+  }
+);
 
 /* =========================================================
-   HEALTH
+   API HEALTH
 ========================================================= */
 
 app.get(
   "/api/health",
-  (req, res) => {
+  function(req, res) {
 
     res.json({
 
-      ok:
-        true,
+      ok: true,
 
       service:
         "Pulse Social",
 
       version:
-        "3.0.0",
-
-      time:
-        now(),
-
-      environment:
-        NODE_ENV,
+        "4.0.0",
 
       storageRoot:
         STORAGE_ROOT,
 
       persistentStorage:
-        IS_PRODUCTION &&
-        STORAGE_ROOT ===
-          "/app/storage",
+        Boolean(
+          process.env.STORAGE_ROOT
+        ),
 
-      directories: {
+      features: {
+        authentication: true,
+        profiles: true,
+        coverPhotos: true,
+        posts: true,
+        imagePosts: true,
+        videoPosts: true,
+        tiktokFeed: true,
+        forYouFeed: true,
+        followingFeed: true,
+        likes: true,
+        comments: true,
+        follows: true,
+        verifiedUsers: true,
+        notifications: true,
+        messages: true,
+        verification: true,
+        admin: true,
+        railwayStorage: Boolean(
+          process.env.STORAGE_ROOT
+        )
+      },
 
-        data:
-          DATA_DIR,
+      time: now()
 
-        uploads:
-          UPLOADS_DIR,
-
-        profiles:
-          PROFILE_UPLOAD_DIR,
-
-        covers:
-          COVER_UPLOAD_DIR,
-
-        posts:
-          POST_UPLOAD_DIR,
-
-        messages:
-          MESSAGE_UPLOAD_DIR
-      }
     });
+
   }
 );
 
+/* =========================================================
+   STORAGE INFO
+========================================================= */
+
+app.get(
+  "/api/storage-info",
+  requireAuth,
+  requireAdmin,
+  function(req, res) {
+
+    res.json({
+
+      storageRoot:
+        STORAGE_ROOT,
+
+      dataDirectory:
+        DATA_DIR,
+
+      uploadsDirectory:
+        UPLOADS_DIR,
+
+      videoDirectory:
+        VIDEO_UPLOADS_DIR,
+
+      persistent:
+        Boolean(
+          process.env.STORAGE_ROOT
+        )
+
+    });
+
+  }
+);
 
 /* =========================================================
    REGISTER
@@ -1145,137 +1583,154 @@ async function registerHandler(
 
   try {
 
-    const {
-      name,
-      username,
-      email,
-      password
-    } = req.body;
+    const name =
+      cleanText(
+        req.body.name,
+        100
+      );
 
-    const cleanName =
-      String(name || "")
-        .trim();
-
-    const cleanUsername =
+    const username =
       normalizeUsername(
-        username
+        req.body.username
       );
 
-    const cleanEmail =
-      normalizeEmail(
-        email
-      );
+    const email =
+      cleanText(
+        req.body.email,
+        200
+      ).toLowerCase();
 
-    const cleanPassword =
-      String(password || "");
+    const password =
+      String(
+        req.body.password ||
+        ""
+      );
 
     if (
-      !cleanName ||
-      !cleanUsername ||
-      !cleanEmail ||
-      !cleanPassword
+      !name ||
+      !username ||
+      !email ||
+      !password
     ) {
 
       return res.status(400).json({
         error:
-          "All fields are required."
+          "Name, username, email and password are required."
       });
+
     }
 
     if (
-      !/^[a-z0-9_]{3,30}$/.test(
-        cleanUsername
+      !/^[a-zA-Z0-9_.-]{3,50}$/.test(
+        username
       )
     ) {
 
       return res.status(400).json({
         error:
-          "Username must contain only letters, numbers and underscores and be 3-30 characters."
+          "Username must be 3-50 characters and may contain letters, numbers, underscores, dots or hyphens."
       });
+
     }
 
     if (
-      cleanPassword.length < 6
+      password.length < 6
     ) {
 
       return res.status(400).json({
         error:
           "Password must be at least 6 characters."
       });
-    }
 
-    if (
-      findUserByUsername(
-        cleanUsername
-      )
-    ) {
-
-      return res.status(409).json({
-        error:
-          "Username already exists."
-      });
-    }
-
-    if (
-      findUserByEmail(
-        cleanEmail
-      )
-    ) {
-
-      return res.status(409).json({
-        error:
-          "Email already exists."
-      });
     }
 
     const users =
       getUsers();
 
+    const usernameExists =
+      users.some(
+        user =>
+          normalizeUsername(
+            user.username
+          ) === username
+      );
+
+    if (usernameExists) {
+
+      return res.status(409).json({
+        error:
+          "Username is already taken."
+      });
+
+    }
+
+    const emailExists =
+      users.some(
+        user =>
+          String(
+            user.email || ""
+          ).toLowerCase() ===
+          email
+      );
+
+    if (emailExists) {
+
+      return res.status(409).json({
+        error:
+          "Email is already registered."
+      });
+
+    }
+
     const passwordHash =
       await bcrypt.hash(
-        cleanPassword,
+        password,
         12
       );
 
     const user = {
 
       id:
-        makeId(),
+        makeId("user_"),
 
-      name:
-        cleanName,
+      name,
 
-      username:
-        cleanUsername,
+      username,
 
-      email:
-        cleanEmail,
+      email,
 
       passwordHash,
 
-      bio:
-        "",
+      bio: "",
 
       profilePicture:
         "/images/default-avatar.png",
 
-      coverPhoto:
-        null,
+      profileImage:
+        "/images/default-avatar.png",
+
+      avatar:
+        "/images/default-avatar.png",
+
+      coverPhoto: "",
+
+      coverImage: "",
+
+      cover: "",
 
       role:
         "user",
 
-      verified:
-        false,
+      verified: false,
 
-      isVerified:
-        false,
+      isVerified: false,
 
       verificationStatus:
         "none",
 
       createdAt:
         now()
+
     };
 
     users.push(user);
@@ -1285,20 +1740,20 @@ async function registerHandler(
     req.session.userId =
       user.id;
 
-    res.status(201).json({
+    req.session.save(
+      function() {
 
-      success:
-        true,
+        return res.status(201).json({
+          success: true,
+          user:
+            safeUser(
+              user,
+              user
+            )
+        });
 
-      message:
-        "Account created successfully.",
-
-      user:
-        safeUser(
-          user,
-          user.id
-        )
-    });
+      }
+    );
 
   } catch (error) {
 
@@ -1311,9 +1766,10 @@ async function registerHandler(
       error:
         "Unable to create account."
     });
-  }
-}
 
+  }
+
+}
 
 app.post(
   "/api/register",
@@ -1325,56 +1781,62 @@ app.post(
   registerHandler
 );
 
-
 /* =========================================================
    LOGIN
 ========================================================= */
 
 app.post(
   "/api/login",
-  async (
-    req,
-    res
-  ) => {
+  async function(req, res) {
 
     try {
 
-      const {
-        login,
-        username,
-        email,
-        password
-      } = req.body;
-
-      const identifier =
-        normalizeUsername(
-          login ||
-          username ||
-          email
+      const login =
+        cleanText(
+          req.body.login ||
+          req.body.username ||
+          req.body.email,
+          200
         );
 
-      const cleanPassword =
+      const password =
         String(
-          password || ""
+          req.body.password ||
+          ""
         );
 
       if (
-        !identifier ||
-        !cleanPassword
+        !login ||
+        !password
       ) {
 
         return res.status(400).json({
           error:
             "Username/email and password are required."
         });
+
       }
 
+      const users =
+        getUsers();
+
+      const normalizedLogin =
+        login.toLowerCase();
+
       const user =
-        findUserByUsername(
-          identifier
-        ) ||
-        findUserByEmail(
-          identifier
+        users.find(
+          candidate =>
+            String(
+              candidate.username ||
+              ""
+            ).toLowerCase() ===
+              normalizedLogin ||
+
+            String(
+              candidate.email ||
+              ""
+            ).toLowerCase() ===
+              normalizedLogin
         );
 
       if (!user) {
@@ -1383,48 +1845,75 @@ app.post(
           error:
             "Invalid username/email or password."
         });
+
       }
 
+      /*
+        IMPORTANT:
+        Prevents bcryptjs:
+        "Illegal arguments: string, undefined"
+      */
+
       if (
+        typeof user.passwordHash !==
+        "string" ||
         !user.passwordHash
       ) {
 
-        return res.status(500).json({
+        return res.status(401).json({
           error:
-            "This account does not have a valid password. Please create a new account."
+            "This account does not have a valid password. Please create a new account or reset the password."
         });
+
       }
 
-      const passwordMatches =
+      const valid =
         await bcrypt.compare(
-          cleanPassword,
+          password,
           user.passwordHash
         );
 
-      if (
-        !passwordMatches
-      ) {
+      if (!valid) {
 
         return res.status(401).json({
           error:
             "Invalid username/email or password."
         });
+
       }
 
       req.session.userId =
         user.id;
 
-      res.json({
+      req.session.save(
+        function(error) {
 
-        success:
-          true,
+          if (error) {
 
-        user:
-          safeUser(
-            user,
-            user.id
-          )
-      });
+            console.error(
+              "SESSION SAVE ERROR:",
+              error
+            );
+
+            return res.status(500).json({
+              error:
+                "Unable to create login session."
+            });
+
+          }
+
+          return res.json({
+            success: true,
+
+            user:
+              safeUser(
+                user,
+                user
+              )
+          });
+
+        }
+      );
 
     } catch (error) {
 
@@ -1437,10 +1926,11 @@ app.post(
         error:
           "Unable to sign in."
       });
+
     }
+
   }
 );
-
 
 /* =========================================================
    LOGOUT
@@ -1448,20 +1938,29 @@ app.post(
 
 app.post(
   "/api/logout",
-  (
-    req,
-    res
-  ) => {
+  function(req, res) {
+
+    if (!req.session) {
+      return res.json({
+        success: true
+      });
+    }
 
     req.session.destroy(
-      error => {
+      function(error) {
 
         if (error) {
+
+          console.error(
+            "LOGOUT ERROR:",
+            error
+          );
 
           return res.status(500).json({
             error:
               "Unable to log out."
           });
+
         }
 
         res.clearCookie(
@@ -1469,14 +1968,14 @@ app.post(
         );
 
         res.json({
-          success:
-            true
+          success: true
         });
+
       }
     );
+
   }
 );
-
 
 /* =========================================================
    CURRENT USER
@@ -1484,10 +1983,7 @@ app.post(
 
 app.get(
   "/api/me",
-  (
-    req,
-    res
-  ) => {
+  function(req, res) {
 
     if (
       !req.session ||
@@ -1495,11 +1991,10 @@ app.get(
     ) {
 
       return res.json({
-        loggedIn:
-          false,
-        user:
-          null
+        loggedIn: false,
+        user: null
       });
+
     }
 
     const user =
@@ -1510,27 +2005,24 @@ app.get(
     if (!user) {
 
       return res.json({
-        loggedIn:
-          false,
-        user:
-          null
+        loggedIn: false,
+        user: null
       });
+
     }
 
     res.json({
-
-      loggedIn:
-        true,
+      loggedIn: true,
 
       user:
         safeUser(
           user,
-          user.id
+          user
         )
     });
+
   }
 );
-
 
 /* =========================================================
    GET USER PROFILE
@@ -1538,10 +2030,7 @@ app.get(
 
 app.get(
   "/api/users/:username",
-  (
-    req,
-    res
-  ) => {
+  function(req, res) {
 
     const user =
       findUserByUsername(
@@ -1554,22 +2043,27 @@ app.get(
         error:
           "User not found."
       });
+
     }
 
-    const viewerId =
-      req.session?.userId ||
-      null;
+    const viewer =
+      req.session &&
+      req.session.userId
+        ? findUserById(
+            req.session.userId
+          )
+        : null;
 
     res.json({
       user:
         safeUser(
           user,
-          viewerId
+          viewer
         )
     });
+
   }
 );
-
 
 /* =========================================================
    UPDATE PROFILE
@@ -1578,15 +2072,7 @@ app.get(
 app.put(
   "/api/profile",
   requireAuth,
-  (
-    req,
-    res
-  ) => {
-
-    const {
-      name,
-      bio
-    } = req.body;
+  function(req, res) {
 
     const users =
       getUsers();
@@ -1598,288 +2084,196 @@ app.put(
           String(req.user.id)
       );
 
-    if (index === -1) {
+    if (index < 0) {
 
       return res.status(404).json({
         error:
           "User not found."
       });
+
     }
 
-    if (
-      typeof name ===
-      "string"
-    ) {
+    const name =
+      cleanText(
+        req.body.name,
+        100
+      );
 
-      const cleanName =
-        name.trim();
+    const bio =
+      cleanText(
+        req.body.bio,
+        500
+      );
 
-      if (cleanName) {
-        users[index].name =
-          cleanName;
-      }
+    if (name) {
+      users[index].name =
+        name;
     }
 
-    if (
-      typeof bio ===
-      "string"
-    ) {
-
-      users[index].bio =
-        bio.trim().slice(
-          0,
-          500
-        );
-    }
+    users[index].bio =
+      bio;
 
     saveUsers(users);
 
-    const updatedUser =
+    req.user =
       users[index];
 
-    req.user =
-      updatedUser;
-
     res.json({
-
-      success:
-        true,
+      success: true,
 
       user:
         safeUser(
-          updatedUser,
-          updatedUser.id
+          users[index],
+          users[index]
         )
     });
+
   }
 );
-
 
 /* =========================================================
    PROFILE PICTURE
 ========================================================= */
 
-const profilePictureUpload =
-  upload.single(
-    "profilePicture"
-  );
-
-
 app.post(
   "/api/profile/picture",
   requireAuth,
-  profilePictureUpload,
-  (
-    req,
-    res
-  ) => {
+  profileUpload.single(
+    "profilePicture"
+  ),
+  function(req, res) {
 
-    if (!req.file) {
+    try {
 
-      return res.status(400).json({
-        error:
-          "Please select a profile picture."
-      });
-    }
+      if (!req.file) {
 
-    const users =
-      getUsers();
+        return res.status(400).json({
+          error:
+            "Profile picture is required."
+        });
 
-    const index =
-      users.findIndex(
-        user =>
-          String(user.id) ===
-          String(req.user.id)
+      }
+
+      const users =
+        getUsers();
+
+      const index =
+        users.findIndex(
+          user =>
+            String(user.id) ===
+            String(req.user.id)
+        );
+
+      if (index < 0) {
+
+        return res.status(404).json({
+          error:
+            "User not found."
+        });
+
+      }
+
+      const extension =
+        extensionMap[
+          req.file.mimetype
+        ] || ".jpg";
+
+      const filename =
+        `${Date.now()}-${crypto.randomBytes(8).toString("hex")}${extension}`;
+
+      const finalPath =
+        path.join(
+          PROFILE_UPLOADS_DIR,
+          filename
+        );
+
+      fs.renameSync(
+        req.file.path,
+        finalPath
       );
 
-    if (index === -1) {
+      const relativePath =
+        `/uploads/profiles/${filename}`;
 
-      return res.status(404).json({
-        error:
-          "User not found."
+      const oldImage =
+        users[index].profilePicture;
+
+      users[index].profilePicture =
+        relativePath;
+
+      users[index].profileImage =
+        relativePath;
+
+      users[index].avatar =
+        relativePath;
+
+      saveUsers(users);
+
+      deleteUploadFile(
+        oldImage
+      );
+
+      res.json({
+        success: true,
+
+        profilePicture:
+          relativePath,
+
+        profileImage:
+          relativePath,
+
+        avatar:
+          relativePath,
+
+        user:
+          safeUser(
+            users[index],
+            users[index]
+          )
       });
+
+    } catch (error) {
+
+      console.error(
+        "PROFILE PICTURE ERROR:",
+        error
+      );
+
+      if (req.file) {
+        safeDelete(
+          req.file.path
+        );
+      }
+
+      res.status(500).json({
+        error:
+          "Unable to upload profile picture."
+      });
+
     }
 
-    const oldPicture =
-      users[index].profilePicture;
-
-    const relativePath =
-      `/uploads/profiles/${req.file.filename}`;
-
-    users[index].profilePicture =
-      relativePath;
-
-    users[index].profileImage =
-      relativePath;
-
-    users[index].avatar =
-      relativePath;
-
-    saveUsers(users);
-
-    deleteLocalUpload(
-      oldPicture
-    );
-
-    res.json({
-
-      success:
-        true,
-
-      profilePicture:
-        relativePath,
-
-      profileImage:
-        relativePath,
-
-      avatar:
-        relativePath,
-
-      user:
-        safeUser(
-          users[index],
-          users[index].id
-        )
-    });
   }
 );
-
 
 /* =========================================================
    COVER PHOTO
 ========================================================= */
 
-const coverPhotoUpload =
-  upload.single(
-    "coverPhoto"
-  );
-
-
-function handleCoverPhotoUpload(
+function coverUploadHandler(
   req,
   res
 ) {
 
-  if (!req.file) {
+  try {
 
-    return res.status(400).json({
-      error:
-        "Please select a cover photo."
-    });
-  }
+    if (!req.file) {
 
-  const users =
-    getUsers();
+      return res.status(400).json({
+        error:
+          "Cover photo is required."
+      });
 
-  const index =
-    users.findIndex(
-      user =>
-        String(user.id) ===
-        String(req.user.id)
-    );
-
-  if (index === -1) {
-
-    deleteFile(
-      req.file.path
-    );
-
-    return res.status(404).json({
-      error:
-        "User not found."
-    });
-  }
-
-  const oldCover =
-    users[index].coverPhoto ||
-    users[index].coverImage ||
-    users[index].cover ||
-    null;
-
-  const relativePath =
-    `/uploads/covers/${req.file.filename}`;
-
-  /*
-  IMPORTANT:
-  Keep all three aliases so the
-  profile frontend can use any
-  of them.
-  */
-
-  users[index].coverPhoto =
-    relativePath;
-
-  users[index].coverImage =
-    relativePath;
-
-  users[index].cover =
-    relativePath;
-
-  saveUsers(users);
-
-  deleteLocalUpload(
-    oldCover
-  );
-
-  res.json({
-
-    success:
-      true,
-
-    message:
-      "Cover photo updated successfully.",
-
-    coverPhoto:
-      relativePath,
-
-    coverImage:
-      relativePath,
-
-    cover:
-      relativePath,
-
-    user:
-      safeUser(
-        users[index],
-        users[index].id
-      )
-  });
-}
-
-
-/*
-Main cover endpoint
-*/
-app.post(
-  "/api/profile/cover",
-  requireAuth,
-  coverPhotoUpload,
-  handleCoverPhotoUpload
-);
-
-
-/*
-Alias for compatibility
-*/
-app.post(
-  "/api/profile/cover-photo",
-  requireAuth,
-  coverPhotoUpload,
-  handleCoverPhotoUpload
-);
-
-
-/* =========================================================
-   REMOVE COVER PHOTO
-========================================================= */
-
-app.delete(
-  "/api/profile/cover",
-  requireAuth,
-  (
-    req,
-    res
-  ) => {
+    }
 
     const users =
       getUsers();
@@ -1891,80 +2285,198 @@ app.delete(
           String(req.user.id)
       );
 
-    if (index === -1) {
+    if (index < 0) {
+
+      safeDelete(
+        req.file.path
+      );
 
       return res.status(404).json({
         error:
           "User not found."
       });
+
+    }
+
+    const extension =
+      extensionMap[
+        req.file.mimetype
+      ] || ".jpg";
+
+    const filename =
+      `${Date.now()}-${crypto.randomBytes(8).toString("hex")}${extension}`;
+
+    const finalPath =
+      path.join(
+        COVER_UPLOADS_DIR,
+        filename
+      );
+
+    fs.renameSync(
+      req.file.path,
+      finalPath
+    );
+
+    const relativePath =
+      `/uploads/covers/${filename}`;
+
+    const oldCover =
+      users[index].coverPhoto ||
+      users[index].coverImage ||
+      users[index].cover;
+
+    users[index].coverPhoto =
+      relativePath;
+
+    users[index].coverImage =
+      relativePath;
+
+    users[index].cover =
+      relativePath;
+
+    saveUsers(users);
+
+    deleteUploadFile(
+      oldCover
+    );
+
+    res.json({
+      success: true,
+
+      coverPhoto:
+        relativePath,
+
+      coverImage:
+        relativePath,
+
+      cover:
+        relativePath,
+
+      user:
+        safeUser(
+          users[index],
+          users[index]
+        )
+    });
+
+  } catch (error) {
+
+    console.error(
+      "COVER ERROR:",
+      error
+    );
+
+    if (req.file) {
+      safeDelete(
+        req.file.path
+      );
+    }
+
+    res.status(500).json({
+      error:
+        "Unable to upload cover photo."
+    });
+
+  }
+
+}
+
+app.post(
+  "/api/profile/cover",
+  requireAuth,
+  coverUpload.single(
+    "coverPhoto"
+  ),
+  coverUploadHandler
+);
+
+app.post(
+  "/api/profile/cover-photo",
+  requireAuth,
+  coverUpload.single(
+    "coverPhoto"
+  ),
+  coverUploadHandler
+);
+
+/* =========================================================
+   DELETE COVER
+========================================================= */
+
+app.delete(
+  "/api/profile/cover",
+  requireAuth,
+  function(req, res) {
+
+    const users =
+      getUsers();
+
+    const index =
+      users.findIndex(
+        user =>
+          String(user.id) ===
+          String(req.user.id)
+      );
+
+    if (index < 0) {
+
+      return res.status(404).json({
+        error:
+          "User not found."
+      });
+
     }
 
     const oldCover =
       users[index].coverPhoto ||
       users[index].coverImage ||
-      users[index].cover ||
-      null;
+      users[index].cover;
 
     users[index].coverPhoto =
-      null;
+      "";
 
     users[index].coverImage =
-      null;
+      "";
 
     users[index].cover =
-      null;
+      "";
 
     saveUsers(users);
 
-    deleteLocalUpload(
+    deleteUploadFile(
       oldCover
     );
 
     res.json({
-
-      success:
-        true,
-
-      message:
-        "Cover photo removed.",
-
-      user:
-        safeUser(
-          users[index],
-          users[index].id
-        )
+      success: true
     });
+
   }
 );
 
-
 /* =========================================================
-   POSTS
+   CREATE POST
 ========================================================= */
-
-const postUpload =
-  upload.single(
-    "image"
-  );
-
 
 app.post(
   "/api/posts",
   requireAuth,
-  postUpload,
-  (
-    req,
-    res
-  ) => {
+  upload.single("image"),
+  function(req, res) {
 
     try {
 
       const text =
-        String(
+        cleanText(
           req.body.text ||
-          req.body.content ||
-          ""
-        ).trim();
+          req.body.caption,
+          5000
+        );
+
+      const hashtags =
+        extractHashtags(
+          text
+        );
 
       if (
         !text &&
@@ -1973,38 +2485,87 @@ app.post(
 
         return res.status(400).json({
           error:
-            "Write something or upload an image."
+            "Post must contain text or media."
         });
+
+      }
+
+      let mediaUrl = null;
+      let mediaType = null;
+
+      if (req.file) {
+
+        if (
+          videoMimeTypes.has(
+            req.file.mimetype
+          )
+        ) {
+
+          mediaUrl =
+            `/uploads/videos/${req.file.filename}`;
+
+          mediaType =
+            "video";
+
+        } else {
+
+          mediaUrl =
+            `/uploads/posts/${req.file.filename}`;
+
+          mediaType =
+            "image";
+
+        }
+
       }
 
       const posts =
         getPosts();
 
-      let image = null;
-
-      if (req.file) {
-
-        image =
-          `/uploads/posts/${req.file.filename}`;
-      }
-
       const post = {
 
         id:
-          makeId(),
+          makeId("post_"),
 
         userId:
           req.user.id,
 
         text,
 
-        content:
+        caption:
           text,
 
-        image,
+        image:
+          mediaType === "image"
+            ? mediaUrl
+            : null,
 
         imageUrl:
-          image,
+          mediaType === "image"
+            ? mediaUrl
+            : null,
+
+        video:
+          mediaType === "video"
+            ? mediaUrl
+            : null,
+
+        videoUrl:
+          mediaType === "video"
+            ? mediaUrl
+            : null,
+
+        mediaUrl,
+
+        mediaType,
+
+        sound:
+          cleanText(
+            req.body.sound,
+            200
+          ) || null,
+
+        hashtags,
 
         createdAt:
           now(),
@@ -2013,26 +2574,17 @@ app.post(
           now()
       };
 
-      posts.unshift(
-        post
-      );
+      posts.unshift(post);
 
-      savePosts(
-        posts.slice(
-          0,
-          10000
-        )
-      );
+      savePosts(posts);
 
       res.status(201).json({
-
-        success:
-          true,
+        success: true,
 
         post:
           safePost(
             post,
-            req.user.id
+            req.user
           )
       });
 
@@ -2044,7 +2596,7 @@ app.post(
       );
 
       if (req.file) {
-        deleteFile(
+        safeDelete(
           req.file.path
         );
       }
@@ -2053,10 +2605,11 @@ app.post(
         error:
           "Unable to create post."
       });
+
     }
+
   }
 );
-
 
 /* =========================================================
    FEED
@@ -2065,44 +2618,132 @@ app.post(
 app.get(
   "/api/feed",
   requireAuth,
-  (
-    req,
-    res
-  ) => {
+  function(req, res) {
 
-    const posts =
-      getPosts()
-        .sort(
-          (a, b) =>
-            new Date(
-              b.createdAt
-            ) -
-            new Date(
-              a.createdAt
-            )
-        )
-        .slice(
-          0,
-          100
-        )
-        .map(
-          post =>
-            safePost(
-              post,
-              req.user.id
-            )
+    try {
+
+      const mode =
+        String(
+          req.query.mode ||
+          req.query.type ||
+          "foryou"
+        ).toLowerCase();
+
+      const limit =
+        Math.min(
+          Math.max(
+            Number(
+              req.query.limit || 100
+            ),
+            1
+          ),
+          200
         );
 
-    res.json({
+      const posts =
+        getPosts();
 
-      posts,
+      let visiblePosts =
+        [...posts];
 
-      feed:
-        posts
-    });
+      /*
+        FOLLOWING FEED
+        Only posts from accounts
+        the current user follows.
+      */
+
+      if (
+        mode === "following" ||
+        mode === "follow"
+      ) {
+
+        const followingIds =
+          new Set(
+            getFollows()
+              .filter(
+                follow =>
+                  String(
+                    follow.followerId
+                  ) ===
+                  String(
+                    req.user.id
+                  )
+              )
+              .map(
+                follow =>
+                  String(
+                    follow.followingId
+                  )
+              )
+          );
+
+        visiblePosts =
+          visiblePosts.filter(
+            post =>
+              followingIds.has(
+                String(
+                  post.userId
+                )
+              )
+          );
+
+      }
+
+      /*
+        FOR YOU
+        Broad feed containing posts
+        from all users.
+
+        Newest posts first.
+      */
+
+      visiblePosts =
+        visiblePosts
+          .sort(
+            (a, b) =>
+              new Date(
+                b.createdAt || 0
+              ) -
+              new Date(
+                a.createdAt || 0
+              )
+          )
+          .slice(
+            0,
+            limit
+          );
+
+      res.json({
+
+        mode,
+
+        posts:
+          visiblePosts.map(
+            post =>
+              safePost(
+                post,
+                req.user
+              )
+          )
+
+      });
+
+    } catch (error) {
+
+      console.error(
+        "FEED ERROR:",
+        error
+      );
+
+      res.status(500).json({
+        error:
+          "Unable to load feed."
+      });
+
+    }
+
   }
 );
-
 
 /* =========================================================
    USER POSTS
@@ -2110,10 +2751,7 @@ app.get(
 
 app.get(
   "/api/users/:username/posts",
-  (
-    req,
-    res
-  ) => {
+  function(req, res) {
 
     const user =
       findUserByUsername(
@@ -2126,11 +2764,16 @@ app.get(
         error:
           "User not found."
       });
+
     }
 
-    const viewerId =
-      req.session?.userId ||
-      null;
+    const viewer =
+      req.session &&
+      req.session.userId
+        ? findUserById(
+            req.session.userId
+          )
+        : null;
 
     const posts =
       getPosts()
@@ -2146,117 +2789,26 @@ app.get(
         .sort(
           (a, b) =>
             new Date(
-              b.createdAt
+              b.createdAt || 0
             ) -
             new Date(
-              a.createdAt
-            )
-        )
-        .map(
-          post =>
-            safePost(
-              post,
-              viewerId
+              a.createdAt || 0
             )
         );
 
     res.json({
-
-      posts
+      posts:
+        posts.map(
+          post =>
+            safePost(
+              post,
+              viewer
+            )
+        )
     });
+
   }
 );
-
-
-/* =========================================================
-   DELETE POST
-========================================================= */
-
-app.delete(
-  "/api/posts/:id",
-  requireAuth,
-  (
-    req,
-    res
-  ) => {
-
-    const posts =
-      getPosts();
-
-    const index =
-      posts.findIndex(
-        post =>
-          String(post.id) ===
-          String(req.params.id)
-      );
-
-    if (index === -1) {
-
-      return res.status(404).json({
-        error:
-          "Post not found."
-      });
-    }
-
-    const post =
-      posts[index];
-
-    if (
-      String(post.userId) !==
-        String(req.user.id) &&
-      !isAdminUser(req.user)
-    ) {
-
-      return res.status(403).json({
-        error:
-          "You cannot delete this post."
-      });
-    }
-
-    posts.splice(
-      index,
-      1
-    );
-
-    savePosts(posts);
-
-    deleteLocalUpload(
-      post.image
-    );
-
-    const comments =
-      getComments().filter(
-        comment =>
-          String(
-            comment.postId
-          ) !==
-          String(post.id)
-      );
-
-    saveComments(
-      comments
-    );
-
-    const likes =
-      getLikes().filter(
-        like =>
-          String(
-            like.postId
-          ) !==
-          String(post.id)
-      );
-
-    saveLikes(
-      likes
-    );
-
-    res.json({
-      success:
-        true
-    });
-  }
-);
-
 
 /* =========================================================
    LIKE POST
@@ -2265,10 +2817,10 @@ app.delete(
 app.post(
   "/api/posts/:id/like",
   requireAuth,
-  (
-    req,
-    res
-  ) => {
+  function(req, res) {
+
+    const postId =
+      req.params.id;
 
     const posts =
       getPosts();
@@ -2277,7 +2829,7 @@ app.post(
       posts.find(
         item =>
           String(item.id) ===
-          String(req.params.id)
+          String(postId)
       );
 
     if (!post) {
@@ -2286,6 +2838,7 @@ app.post(
         error:
           "Post not found."
       });
+
     }
 
     const likes =
@@ -2297,21 +2850,17 @@ app.post(
           String(
             like.postId
           ) ===
-            String(
-              post.id
-            ) &&
+            String(postId) &&
           String(
             like.userId
           ) ===
-            String(
-              req.user.id
-            )
+            String(req.user.id)
       );
 
     let liked;
 
     if (
-      existingIndex !== -1
+      existingIndex >= 0
     ) {
 
       likes.splice(
@@ -2324,12 +2873,10 @@ app.post(
     } else {
 
       likes.push({
-
         id:
-          makeId(),
+          makeId("like_"),
 
-        postId:
-          post.id,
+        postId,
 
         userId:
           req.user.id,
@@ -2341,27 +2888,24 @@ app.post(
       liked = true;
 
       createNotification({
-
         userId:
           post.userId,
 
-        actorId:
+        fromUserId:
           req.user.id,
 
         type:
           "like",
 
-        postId:
-          post.id,
+        postId,
 
         message:
-          `${req.user.name} liked your post.`
+          `${req.user.username} liked your post.`
       });
+
     }
 
-    saveLikes(
-      likes
-    );
+    saveLikes(likes);
 
     const count =
       likes.filter(
@@ -2369,15 +2913,11 @@ app.post(
           String(
             like.postId
           ) ===
-          String(
-            post.id
-          )
+          String(postId)
       ).length;
 
     res.json({
-
-      success:
-        true,
+      success: true,
 
       liked,
 
@@ -2390,106 +2930,27 @@ app.post(
       likeCount:
         count
     });
+
   }
 );
 
-
 /* =========================================================
-   COMMENTS
+   GET COMMENTS
 ========================================================= */
 
 app.get(
   "/api/posts/:id/comments",
-  (
-    req,
-    res
-  ) => {
-
-    const comments =
-      getComments()
-        .filter(
-          comment =>
-            String(
-              comment.postId
-            ) ===
-            String(
-              req.params.id
-            )
-        )
-        .sort(
-          (a, b) =>
-            new Date(
-              a.createdAt
-            ) -
-            new Date(
-              b.createdAt
-            )
-        )
-        .map(
-          comment => {
-
-            const user =
-              findUserById(
-                comment.userId
-              );
-
-            return {
-
-              ...comment,
-
-              user:
-                safeUser(
-                  user,
-                  req.session?.userId ||
-                  null
-                ),
-
-              author:
-                safeUser(
-                  user,
-                  req.session?.userId ||
-                  null
-                )
-            };
-          }
-        );
-
-    res.json({
-
-      comments
-    });
-  }
-);
-
-
-app.post(
-  "/api/posts/:id/comments",
   requireAuth,
-  (
-    req,
-    res
-  ) => {
+  function(req, res) {
 
-    const text =
-      String(
-        req.body.text ||
-        req.body.content ||
-        ""
-      ).trim();
-
-    if (!text) {
-
-      return res.status(400).json({
-        error:
-          "Comment cannot be empty."
-      });
-    }
+    const postId =
+      req.params.id;
 
     const post =
       getPosts().find(
         item =>
           String(item.id) ===
-          String(req.params.id)
+          String(postId)
       );
 
     if (!post) {
@@ -2498,6 +2959,113 @@ app.post(
         error:
           "Post not found."
       });
+
+    }
+
+    const comments =
+      getComments()
+        .filter(
+          comment =>
+            String(
+              comment.postId
+            ) ===
+            String(postId)
+        )
+        .sort(
+          (a, b) =>
+            new Date(
+              a.createdAt || 0
+            ) -
+            new Date(
+              b.createdAt || 0
+            )
+        );
+
+    res.json({
+      comments:
+        comments.map(
+          comment => {
+
+            const user =
+              findUserById(
+                comment.userId
+              );
+
+            return {
+              id:
+                comment.id,
+
+              postId:
+                comment.postId,
+
+              userId:
+                comment.userId,
+
+              user:
+                safeUser(
+                  user,
+                  req.user
+                ),
+
+              text:
+                comment.text,
+
+              content:
+                comment.text,
+
+              createdAt:
+                comment.createdAt
+            };
+
+          }
+        )
+    });
+
+  }
+);
+
+/* =========================================================
+   ADD COMMENT
+========================================================= */
+
+app.post(
+  "/api/posts/:id/comments",
+  requireAuth,
+  function(req, res) {
+
+    const postId =
+      req.params.id;
+
+    const post =
+      getPosts().find(
+        item =>
+          String(item.id) ===
+          String(postId)
+      );
+
+    if (!post) {
+
+      return res.status(404).json({
+        error:
+          "Post not found."
+      });
+
+    }
+
+    const text =
+      cleanText(
+        req.body.text ||
+        req.body.content,
+        1000
+      );
+
+    if (!text) {
+
+      return res.status(400).json({
+        error:
+          "Comment cannot be empty."
+      });
+
     }
 
     const comments =
@@ -2506,22 +3074,18 @@ app.post(
     const comment = {
 
       id:
-        makeId(),
+        makeId("comment_"),
 
-      postId:
-        post.id,
+      postId,
 
       userId:
         req.user.id,
 
-      text:
-        text.slice(
-          0,
-          2000
-        ),
+      text,
 
       createdAt:
         now()
+
     };
 
     comments.push(
@@ -2533,48 +3097,51 @@ app.post(
     );
 
     createNotification({
-
       userId:
         post.userId,
 
-      actorId:
+      fromUserId:
         req.user.id,
 
       type:
         "comment",
 
-      postId:
-        post.id,
+      postId,
 
       message:
-        `${req.user.name} commented on your post.`
+        `${req.user.username} commented on your post.`
     });
 
     res.status(201).json({
-
-      success:
-        true,
+      success: true,
 
       comment: {
+        id:
+          comment.id,
 
-        ...comment,
+        postId,
+
+        userId:
+          req.user.id,
 
         user:
           safeUser(
             req.user,
-            req.user.id
+            req.user
           ),
 
-        author:
-          safeUser(
-            req.user,
-            req.user.id
-          )
+        text,
+
+        content:
+          text,
+
+        createdAt:
+          comment.createdAt
       }
     });
+
   }
 );
-
 
 /* =========================================================
    DELETE COMMENT
@@ -2583,10 +3150,7 @@ app.post(
 app.delete(
   "/api/comments/:id",
   requireAuth,
-  (
-    req,
-    res
-  ) => {
+  function(req, res) {
 
     const comments =
       getComments();
@@ -2594,16 +3158,21 @@ app.delete(
     const index =
       comments.findIndex(
         comment =>
-          String(comment.id) ===
-          String(req.params.id)
+          String(
+            comment.id
+          ) ===
+          String(
+            req.params.id
+          )
       );
 
-    if (index === -1) {
+    if (index < 0) {
 
       return res.status(404).json({
         error:
           "Comment not found."
       });
+
     }
 
     const comment =
@@ -2616,13 +3185,14 @@ app.delete(
         String(
           req.user.id
         ) &&
-      !isAdminUser(req.user)
+      !isAdmin(req.user)
     ) {
 
       return res.status(403).json({
         error:
           "You cannot delete this comment."
       });
+
     }
 
     comments.splice(
@@ -2635,12 +3205,125 @@ app.delete(
     );
 
     res.json({
-      success:
-        true
+      success: true
     });
+
   }
 );
 
+/* =========================================================
+   DELETE POST
+========================================================= */
+
+app.delete(
+  "/api/posts/:id",
+  requireAuth,
+  function(req, res) {
+
+    const posts =
+      getPosts();
+
+    const index =
+      posts.findIndex(
+        post =>
+          String(
+            post.id
+          ) ===
+          String(
+            req.params.id
+          )
+      );
+
+    if (index < 0) {
+
+      return res.status(404).json({
+        error:
+          "Post not found."
+      });
+
+    }
+
+    const post =
+      posts[index];
+
+    if (
+      String(
+        post.userId
+      ) !==
+        String(
+          req.user.id
+        ) &&
+      !isAdmin(req.user)
+    ) {
+
+      return res.status(403).json({
+        error:
+          "You cannot delete this post."
+      });
+
+    }
+
+    posts.splice(
+      index,
+      1
+    );
+
+    savePosts(
+      posts
+    );
+
+    const likes =
+      getLikes().filter(
+        like =>
+          String(
+            like.postId
+          ) !==
+          String(
+            post.id
+          )
+      );
+
+    saveLikes(
+      likes
+    );
+
+    const comments =
+      getComments().filter(
+        comment =>
+          String(
+            comment.postId
+          ) !==
+          String(
+            post.id
+          )
+      );
+
+    saveComments(
+      comments
+    );
+
+    deleteUploadFile(
+      post.image
+    );
+
+    deleteUploadFile(
+      post.imageUrl
+    );
+
+    deleteUploadFile(
+      post.video
+    );
+
+    deleteUploadFile(
+      post.videoUrl
+    );
+
+    res.json({
+      success: true
+    });
+
+  }
+);
 
 /* =========================================================
    FOLLOW / UNFOLLOW
@@ -2649,14 +3332,26 @@ app.delete(
 app.post(
   "/api/users/:id/follow",
   requireAuth,
-  (
-    req,
-    res
-  ) => {
+  function(req, res) {
+
+    const targetId =
+      req.params.id;
+
+    if (
+      String(targetId) ===
+      String(req.user.id)
+    ) {
+
+      return res.status(400).json({
+        error:
+          "You cannot follow yourself."
+      });
+
+    }
 
     const target =
       findUserById(
-        req.params.id
+        targetId
       );
 
     if (!target) {
@@ -2665,27 +3360,13 @@ app.post(
         error:
           "User not found."
       });
-    }
 
-    if (
-      String(
-        target.id
-      ) ===
-      String(
-        req.user.id
-      )
-    ) {
-
-      return res.status(400).json({
-        error:
-          "You cannot follow yourself."
-      });
     }
 
     const follows =
       getFollows();
 
-    const index =
+    const existingIndex =
       follows.findIndex(
         follow =>
           String(
@@ -2698,58 +3379,57 @@ app.post(
             follow.followingId
           ) ===
             String(
-              target.id
+              targetId
             )
       );
 
     let following;
 
     if (
-      index !== -1
+      existingIndex >= 0
     ) {
 
       follows.splice(
-        index,
+        existingIndex,
         1
       );
 
-      following =
-        false;
+      following = false;
 
     } else {
 
       follows.push({
 
         id:
-          makeId(),
+          makeId("follow_"),
 
         followerId:
           req.user.id,
 
         followingId:
-          target.id,
+          targetId,
 
         createdAt:
           now()
+
       });
 
-      following =
-        true;
+      following = true;
 
       createNotification({
-
         userId:
           target.id,
 
-        actorId:
+        fromUserId:
           req.user.id,
 
         type:
           "follow",
 
         message:
-          `${req.user.name} followed you.`
+          `${req.user.username} started following you.`
       });
+
     }
 
     saveFollows(
@@ -2758,8 +3438,7 @@ app.post(
 
     res.json({
 
-      success:
-        true,
+      success: true,
 
       following,
 
@@ -2767,13 +3446,19 @@ app.post(
         following,
 
       followersCount:
-        followerCount(
+        getFollowerCount(
+          target.id
+        ),
+
+      followingCount:
+        getFollowingCount(
           target.id
         )
+
     });
+
   }
 );
-
 
 /* =========================================================
    FOLLOWERS
@@ -2781,12 +3466,31 @@ app.post(
 
 app.get(
   "/api/users/:id/followers",
-  (
-    req,
-    res
-  ) => {
+  function(req, res) {
 
-    const follows =
+    const user =
+      findUserById(
+        req.params.id
+      );
+
+    if (!user) {
+
+      return res.status(404).json({
+        error:
+          "User not found."
+      });
+
+    }
+
+    const viewer =
+      req.session &&
+      req.session.userId
+        ? findUserById(
+            req.session.userId
+          )
+        : null;
+
+    const followers =
       getFollows()
         .filter(
           follow =>
@@ -2794,34 +3498,30 @@ app.get(
               follow.followingId
             ) ===
             String(
-              req.params.id
+              user.id
             )
-        );
-
-    const users =
-      follows
+        )
         .map(
           follow =>
             findUserById(
               follow.followerId
             )
         )
-        .filter(Boolean)
-        .map(
-          user =>
-            safeUser(
-              user,
-              req.session?.userId ||
-              null
-            )
-        );
+        .filter(Boolean);
 
     res.json({
-      users
+      users:
+        followers.map(
+          follower =>
+            safeUser(
+              follower,
+              viewer
+            )
+        )
     });
+
   }
 );
-
 
 /* =========================================================
    FOLLOWING
@@ -2829,12 +3529,31 @@ app.get(
 
 app.get(
   "/api/users/:id/following",
-  (
-    req,
-    res
-  ) => {
+  function(req, res) {
 
-    const follows =
+    const user =
+      findUserById(
+        req.params.id
+      );
+
+    if (!user) {
+
+      return res.status(404).json({
+        error:
+          "User not found."
+      });
+
+    }
+
+    const viewer =
+      req.session &&
+      req.session.userId
+        ? findUserById(
+            req.session.userId
+          )
+        : null;
+
+    const following =
       getFollows()
         .filter(
           follow =>
@@ -2842,34 +3561,30 @@ app.get(
               follow.followerId
             ) ===
             String(
-              req.params.id
+              user.id
             )
-        );
-
-    const users =
-      follows
+        )
         .map(
           follow =>
             findUserById(
               follow.followingId
             )
         )
-        .filter(Boolean)
-        .map(
-          user =>
-            safeUser(
-              user,
-              req.session?.userId ||
-              null
-            )
-        );
+        .filter(Boolean);
 
     res.json({
-      users
+      users:
+        following.map(
+          target =>
+            safeUser(
+              target,
+              viewer
+            )
+        )
     });
+
   }
 );
-
 
 /* =========================================================
    SEARCH
@@ -2878,23 +3593,21 @@ app.get(
 app.get(
   "/api/search",
   requireAuth,
-  (
-    req,
-    res
-  ) => {
+  function(req, res) {
 
     const query =
-      String(
-        req.query.q || ""
-      )
-        .trim()
-        .toLowerCase();
+      cleanText(
+        req.query.q,
+        100
+      ).toLowerCase();
 
     if (!query) {
 
       return res.json({
-        users: []
+        users: [],
+        posts: []
       });
+
     }
 
     const users =
@@ -2902,35 +3615,61 @@ app.get(
         .filter(
           user =>
             String(
-              user.name || ""
+              user.username || ""
             )
               .toLowerCase()
               .includes(query) ||
 
             String(
-              user.username || ""
+              user.name || ""
             )
               .toLowerCase()
               .includes(query)
         )
         .slice(
           0,
-          30
-        )
-        .map(
-          user =>
-            safeUser(
-              user,
-              req.user.id
+          50
+        );
+
+    const posts =
+      getPosts()
+        .filter(
+          post =>
+            String(
+              post.text || ""
             )
+              .toLowerCase()
+              .includes(query)
+        )
+        .slice(
+          0,
+          50
         );
 
     res.json({
-      users
+
+      users:
+        users.map(
+          user =>
+            safeUser(
+              user,
+              req.user
+            )
+        ),
+
+      posts:
+        posts.map(
+          post =>
+            safePost(
+              post,
+              req.user
+            )
+        )
+
     });
+
   }
 );
-
 
 /* =========================================================
    NOTIFICATIONS
@@ -2939,10 +3678,7 @@ app.get(
 app.get(
   "/api/notifications",
   requireAuth,
-  (
-    req,
-    res
-  ) => {
+  function(req, res) {
 
     const notifications =
       getNotifications()
@@ -2955,38 +3691,54 @@ app.get(
               req.user.id
             )
         )
+        .sort(
+          (a, b) =>
+            new Date(
+              b.createdAt || 0
+            ) -
+            new Date(
+              a.createdAt || 0
+            )
+        )
         .slice(
           0,
           100
-        )
-        .map(
-          notification => {
-
-            const actor =
-              findUserById(
-                notification.actorId
-              );
-
-            return {
-
-              ...notification,
-
-              actor:
-                safeUser(
-                  actor,
-                  req.user.id
-                )
-            };
-          }
         );
 
     res.json({
 
-      notifications
+      notifications:
+        notifications.map(
+          notification => {
+
+            const fromUser =
+              findUserById(
+                notification.fromUserId
+              );
+
+            return {
+              ...notification,
+
+              fromUser:
+                safeUser(
+                  fromUser,
+                  req.user
+                )
+            };
+
+          }
+        ),
+
+      unreadCount:
+        notifications.filter(
+          item =>
+            !item.read
+        ).length
+
     });
+
   }
 );
-
 
 /* =========================================================
    MARK NOTIFICATIONS READ
@@ -2995,10 +3747,7 @@ app.get(
 app.post(
   "/api/notifications/read",
   requireAuth,
-  (
-    req,
-    res
-  ) => {
+  function(req, res) {
 
     const notifications =
       getNotifications();
@@ -3017,7 +3766,9 @@ app.post(
 
           notification.read =
             true;
+
         }
+
       }
     );
 
@@ -3026,188 +3777,128 @@ app.post(
     );
 
     res.json({
-      success:
-        true
+      success: true
     });
+
   }
 );
 
-
 /* =========================================================
-   MESSAGES — CONVERSATIONS
+   MESSAGE CONVERSATIONS
 ========================================================= */
 
 app.get(
   "/api/messages/conversations",
   requireAuth,
-  (
-    req,
-    res
-  ) => {
+  function(req, res) {
 
     const messages =
       getMessages();
 
-    const otherUserIds =
-      new Set();
+    const map =
+      new Map();
 
-    messages.forEach(
-      message => {
-
-        if (
+    messages
+      .filter(
+        message =>
           String(
             message.senderId
           ) ===
-          String(
-            req.user.id
-          )
-        ) {
-
-          otherUserIds.add(
             String(
-              message.receiverId
-            )
-          );
-        }
-
-        if (
+              req.user.id
+            ) ||
           String(
             message.receiverId
           ) ===
-          String(
-            req.user.id
+            String(
+              req.user.id
+            )
+      )
+      .sort(
+        (a, b) =>
+          new Date(
+            b.createdAt || 0
+          ) -
+          new Date(
+            a.createdAt || 0
           )
-        ) {
+      )
+      .forEach(
+        message => {
 
-          otherUserIds.add(
+          const otherId =
             String(
               message.senderId
+            ) ===
+            String(
+              req.user.id
             )
-          );
+              ? message.receiverId
+              : message.senderId;
+
+          if (
+            !map.has(
+              String(otherId)
+            )
+          ) {
+
+            map.set(
+              String(otherId),
+              message
+            );
+
+          }
+
         }
-      }
-    );
+      );
 
     const conversations =
       Array.from(
-        otherUserIds
-      )
-        .map(
-          userId => {
+        map.entries()
+      ).map(
+        ([otherId, message]) => {
 
-            const user =
-              findUserById(
-                userId
-              );
+          const user =
+            findUserById(
+              otherId
+            );
 
-            if (!user) {
-              return null;
-            }
+          return {
+            user:
+              safeUser(
+                user,
+                req.user
+              ),
 
-            const conversation =
-              messages
-                .filter(
-                  message =>
-                    (
-                      String(
-                        message.senderId
-                      ) ===
-                        String(
-                          req.user.id
-                        ) &&
-                      String(
-                        message.receiverId
-                      ) ===
-                        String(
-                          userId
-                        )
-                    ) ||
-                    (
-                      String(
-                        message.senderId
-                      ) ===
-                        String(
-                          userId
-                        ) &&
-                      String(
-                        message.receiverId
-                      ) ===
-                        String(
-                          req.user.id
-                        )
-                    )
-                )
-                .sort(
-                  (a, b) =>
-                    new Date(
-                      b.createdAt
-                    ) -
-                    new Date(
-                      a.createdAt
-                    )
-                );
+            lastMessage:
+              message.text ||
+              "",
 
-            const last =
-              conversation[0];
+            createdAt:
+              message.createdAt,
 
-            const unread =
-              conversation.filter(
-                message =>
-                  String(
-                    message.receiverId
-                  ) ===
-                    String(
-                      req.user.id
-                    ) &&
-                  !message.read
-              ).length;
+            messageId:
+              message.id
+          };
 
-            return {
-
-              user:
-                safeUser(
-                  user,
-                  req.user.id
-                ),
-
-              lastMessage:
-                last || null,
-
-              unread
-            };
-          }
-        )
-        .filter(Boolean)
-        .sort(
-          (a, b) =>
-            new Date(
-              b.lastMessage?.createdAt ||
-              0
-            ) -
-            new Date(
-              a.lastMessage?.createdAt ||
-              0
-            )
-        );
+        }
+      );
 
     res.json({
       conversations
     });
+
   }
 );
 
-
 /* =========================================================
-   MESSAGES — GET CHAT
+   GET MESSAGES
 ========================================================= */
 
 app.get(
   "/api/messages/:userId",
   requireAuth,
-  (
-    req,
-    res
-  ) => {
+  function(req, res) {
 
     const otherUser =
       findUserById(
@@ -3220,6 +3911,7 @@ app.get(
         error:
           "User not found."
       });
+
     }
 
     const messages =
@@ -3258,220 +3950,227 @@ app.get(
         .sort(
           (a, b) =>
             new Date(
-              a.createdAt
+              a.createdAt || 0
             ) -
             new Date(
-              b.createdAt
+              b.createdAt || 0
             )
         );
-
-    let allMessages =
-      getMessages();
-
-    allMessages =
-      allMessages.map(
-        message => {
-
-          if (
-            String(
-              message.senderId
-            ) ===
-              String(
-                otherUser.id
-              ) &&
-            String(
-              message.receiverId
-            ) ===
-              String(
-                req.user.id
-              )
-          ) {
-
-            message.read =
-              true;
-          }
-
-          return message;
-        }
-      );
-
-    saveMessages(
-      allMessages
-    );
 
     res.json({
 
       user:
         safeUser(
           otherUser,
-          req.user.id
+          req.user
         ),
 
       messages
+
     });
+
   }
 );
-
 
 /* =========================================================
    SEND MESSAGE
 ========================================================= */
 
-const messageUpload =
-  upload.single(
-    "image"
-  );
-
-
 app.post(
   "/api/messages",
   requireAuth,
-  messageUpload,
-  (
-    req,
-    res
-  ) => {
+  messageUpload.single(
+    "attachment"
+  ),
+  function(req, res) {
 
-    const receiverId =
-      req.body.receiverId;
+    try {
 
-    const text =
-      String(
-        req.body.text || ""
-      ).trim();
-
-    if (!receiverId) {
-
-      if (req.file) {
-        deleteFile(
-          req.file.path
+      const receiverId =
+        cleanText(
+          req.body.receiverId,
+          100
         );
+
+      const text =
+        cleanText(
+          req.body.text,
+          5000
+        );
+
+      const receiver =
+        findUserById(
+          receiverId
+        );
+
+      if (!receiver) {
+
+        if (req.file) {
+          safeDelete(
+            req.file.path
+          );
+        }
+
+        return res.status(404).json({
+          error:
+            "Recipient not found."
+        });
+
       }
 
-      return res.status(400).json({
-        error:
-          "Receiver is required."
-      });
-    }
+      if (
+        String(
+          receiver.id
+        ) ===
+        String(
+          req.user.id
+        )
+      ) {
 
-    const receiver =
-      findUserById(
-        receiverId
+        if (req.file) {
+          safeDelete(
+            req.file.path
+          );
+        }
+
+        return res.status(400).json({
+          error:
+            "You cannot message yourself."
+        });
+
+      }
+
+      if (
+        !text &&
+        !req.file
+      ) {
+
+        return res.status(400).json({
+          error:
+            "Message cannot be empty."
+        });
+
+      }
+
+      let attachment = null;
+
+      if (req.file) {
+
+        const extension =
+          extensionMap[
+            req.file.mimetype
+          ] || ".jpg";
+
+        const filename =
+          `${Date.now()}-${crypto.randomBytes(8).toString("hex")}${extension}`;
+
+        const finalPath =
+          path.join(
+            MESSAGE_UPLOADS_DIR,
+            filename
+          );
+
+        fs.renameSync(
+          req.file.path,
+          finalPath
+        );
+
+        attachment =
+          `/uploads/messages/${filename}`;
+
+      }
+
+      const messages =
+        getMessages();
+
+      const message = {
+
+        id:
+          makeId("message_"),
+
+        senderId:
+          req.user.id,
+
+        receiverId:
+          receiver.id,
+
+        text,
+
+        attachment,
+
+        read: false,
+
+        createdAt:
+          now()
+
+      };
+
+      messages.push(
+        message
       );
 
-    if (!receiver) {
+      saveMessages(
+        messages
+      );
+
+      createNotification({
+        userId:
+          receiver.id,
+
+        fromUserId:
+          req.user.id,
+
+        type:
+          "message",
+
+        message:
+          `${req.user.username} sent you a message.`
+      });
+
+      res.status(201).json({
+
+        success: true,
+
+        message: {
+          ...message,
+
+          sender:
+            safeUser(
+              req.user,
+              req.user
+            ),
+
+          receiver:
+            safeUser(
+              receiver,
+              req.user
+            )
+        }
+
+      });
+
+    } catch (error) {
+
+      console.error(
+        "MESSAGE ERROR:",
+        error
+      );
 
       if (req.file) {
-        deleteFile(
+        safeDelete(
           req.file.path
         );
       }
 
-      return res.status(404).json({
+      res.status(500).json({
         error:
-          "Receiver not found."
+          "Unable to send message."
       });
+
     }
 
-    if (
-      String(
-        receiver.id
-      ) ===
-      String(
-        req.user.id
-      )
-    ) {
-
-      if (req.file) {
-        deleteFile(
-          req.file.path
-        );
-      }
-
-      return res.status(400).json({
-        error:
-          "You cannot message yourself."
-      });
-    }
-
-    if (
-      !text &&
-      !req.file
-    ) {
-
-      return res.status(400).json({
-        error:
-          "Message cannot be empty."
-      });
-    }
-
-    let image =
-      null;
-
-    if (req.file) {
-
-      image =
-        `/uploads/messages/${req.file.filename}`;
-    }
-
-    const messages =
-      getMessages();
-
-    const message = {
-
-      id:
-        makeId(),
-
-      senderId:
-        req.user.id,
-
-      receiverId:
-        receiver.id,
-
-      text,
-
-      image,
-
-      createdAt:
-        now(),
-
-      read:
-        false
-    };
-
-    messages.push(
-      message
-    );
-
-    saveMessages(
-      messages
-    );
-
-    createNotification({
-
-      userId:
-        receiver.id,
-
-      actorId:
-        req.user.id,
-
-      type:
-        "message",
-
-      message:
-        `${req.user.name} sent you a message.`
-    });
-
-    res.status(201).json({
-
-      success:
-        true,
-
-      message
-    });
   }
 );
-
 
 /* =========================================================
    UNREAD MESSAGES
@@ -3480,10 +4179,7 @@ app.post(
 app.get(
   "/api/messages/unread-count",
   requireAuth,
-  (
-    req,
-    res
-  ) => {
+  function(req, res) {
 
     const count =
       getMessages()
@@ -3492,9 +4188,9 @@ app.get(
             String(
               message.receiverId
             ) ===
-            String(
-              req.user.id
-            ) &&
+              String(
+                req.user.id
+              ) &&
             !message.read
         )
         .length;
@@ -3502,81 +4198,18 @@ app.get(
     res.json({
       count
     });
+
   }
 );
 
-
 /* =========================================================
-   STATISTICS
-========================================================= */
-
-app.get(
-  "/api/stats",
-  requireAuth,
-  (
-    req,
-    res
-  ) => {
-
-    const posts =
-      getPosts();
-
-    const comments =
-      getComments();
-
-    const likes =
-      getLikes();
-
-    res.json({
-
-      users:
-        getUsers().length,
-
-      posts:
-        posts.length,
-
-      comments:
-        comments.length,
-
-      likes:
-        likes.length,
-
-      followers:
-        followerCount(
-          req.user.id
-        ),
-
-      following:
-        followingCount(
-          req.user.id
-        ),
-
-      myPosts:
-        posts.filter(
-          post =>
-            String(
-              post.userId
-            ) ===
-            String(
-              req.user.id
-            )
-        ).length
-    });
-  }
-);
-
-
-/* =========================================================
-   VERIFICATION — CURRENT USER
+   VERIFICATION STATUS
 ========================================================= */
 
 app.get(
   "/api/verification/me",
   requireAuth,
-  (
-    req,
-    res
-  ) => {
+  function(req, res) {
 
     const requests =
       getVerificationRequests();
@@ -3595,19 +4228,19 @@ app.get(
         .sort(
           (a, b) =>
             new Date(
-              b.createdAt
+              b.createdAt || 0
             ) -
             new Date(
-              a.createdAt
+              a.createdAt || 0
             )
         )[0] ||
       null;
 
     res.json({
-
       verified:
         Boolean(
-          req.user.verified
+          req.user.verified ||
+          req.user.isVerified
         ),
 
       status:
@@ -3615,31 +4248,31 @@ app.get(
         "none",
 
       request
+
     });
+
   }
 );
 
-
 /* =========================================================
-   VERIFICATION REQUEST
+   REQUEST VERIFICATION
 ========================================================= */
 
 app.post(
   "/api/verification/request",
   requireAuth,
-  (
-    req,
-    res
-  ) => {
+  function(req, res) {
 
     if (
-      req.user.verified
+      req.user.verified ||
+      req.user.isVerified
     ) {
 
       return res.status(400).json({
         error:
           "Your account is already verified."
       });
+
     }
 
     const requests =
@@ -3660,25 +4293,28 @@ app.post(
 
     if (pending) {
 
-      return res.status(400).json({
+      return res.status(409).json({
         error:
           "You already have a pending verification request."
       });
+
     }
+
+    const reason =
+      cleanText(
+        req.body.reason,
+        2000
+      );
 
     const request = {
 
       id:
-        makeId(),
+        makeId("verification_"),
 
       userId:
         req.user.id,
 
-      reason:
-        String(
-          req.body.reason ||
-          ""
-        ).trim(),
+      reason,
 
       status:
         "pending",
@@ -3688,6 +4324,7 @@ app.post(
 
       updatedAt:
         now()
+
     };
 
     requests.push(
@@ -3698,78 +4335,48 @@ app.post(
       requests
     );
 
-    const users =
-      getUsers();
-
-    const index =
-      users.findIndex(
-        user =>
-          String(user.id) ===
-          String(req.user.id)
-      );
-
-    if (index !== -1) {
-
-      users[index]
-        .verificationStatus =
-        "pending";
-
-      saveUsers(
-        users
-      );
-    }
-
     res.status(201).json({
-
-      success:
-        true,
-
+      success: true,
       request
     });
+
   }
 );
 
-
 /* =========================================================
-   ADMIN — CURRENT USER
+   ADMIN ME
 ========================================================= */
 
 app.get(
   "/api/admin/me",
   requireAuth,
   requireAdmin,
-  (
-    req,
-    res
-  ) => {
+  function(req, res) {
 
     res.json({
 
-      admin:
-        true,
+      isAdmin: true,
 
       user:
         safeUser(
           req.user,
-          req.user.id
+          req.user
         )
+
     });
+
   }
 );
 
-
 /* =========================================================
-   ADMIN — STATS
+   ADMIN STATS
 ========================================================= */
 
 app.get(
   "/api/admin/stats",
   requireAuth,
   requireAdmin,
-  (
-    req,
-    res
-  ) => {
+  function(req, res) {
 
     const users =
       getUsers();
@@ -3777,7 +4384,19 @@ app.get(
     const posts =
       getPosts();
 
-    const verification =
+    const comments =
+      getComments();
+
+    const likes =
+      getLikes();
+
+    const follows =
+      getFollows();
+
+    const messages =
+      getMessages();
+
+    const verificationRequests =
       getVerificationRequests();
 
     res.json({
@@ -3789,123 +4408,126 @@ app.get(
         posts.length,
 
       comments:
-        getComments().length,
+        comments.length,
 
       likes:
-        getLikes().length,
+        likes.length,
 
       follows:
-        getFollows().length,
+        follows.length,
 
       messages:
-        getMessages().length,
+        messages.length,
+
+      verifiedUsers:
+        users.filter(
+          user =>
+            user.verified ||
+            user.isVerified
+        ).length,
 
       pendingVerification:
-        verification.filter(
-          item =>
-            item.status ===
+        verificationRequests.filter(
+          request =>
+            request.status ===
             "pending"
         ).length
+
     });
+
   }
 );
 
-
 /* =========================================================
-   ADMIN — USERS
+   ADMIN USERS
 ========================================================= */
 
 app.get(
   "/api/admin/users",
   requireAuth,
   requireAdmin,
-  (
-    req,
-    res
-  ) => {
+  function(req, res) {
 
     const users =
-      getUsers()
-        .map(
+      getUsers();
+
+    res.json({
+
+      users:
+        users.map(
           user =>
             safeUser(
               user,
-              req.user.id
+              req.user
             )
-        );
+        )
 
-    res.json({
-      users
     });
+
   }
 );
 
-
 /* =========================================================
-   ADMIN — VERIFICATION REQUESTS
+   ADMIN VERIFICATION REQUESTS
 ========================================================= */
 
 app.get(
   "/api/admin/verification/requests",
   requireAuth,
   requireAdmin,
-  (
-    req,
-    res
-  ) => {
+  function(req, res) {
 
     const requests =
-      getVerificationRequests()
-        .sort(
-          (a, b) =>
-            new Date(
-              b.createdAt
-            ) -
-            new Date(
-              a.createdAt
-            )
-        )
-        .map(
-          request => {
-
-            const user =
-              findUserById(
-                request.userId
-              );
-
-            return {
-
-              ...request,
-
-              user:
-                safeUser(
-                  user,
-                  req.user.id
-                )
-            };
-          }
-        );
+      getVerificationRequests();
 
     res.json({
 
-      requests
+      requests:
+        requests
+          .sort(
+            (a, b) =>
+              new Date(
+                b.createdAt || 0
+              ) -
+              new Date(
+                a.createdAt || 0
+              )
+          )
+          .map(
+            request => {
+
+              const user =
+                findUserById(
+                  request.userId
+                );
+
+              return {
+                ...request,
+
+                user:
+                  safeUser(
+                    user,
+                    req.user
+                  )
+              };
+
+            }
+          )
+
     });
+
   }
 );
 
-
 /* =========================================================
-   ADMIN — APPROVE VERIFICATION
+   ADMIN APPROVE VERIFICATION
 ========================================================= */
 
 app.post(
   "/api/admin/verification/:id/approve",
   requireAuth,
   requireAdmin,
-  (
-    req,
-    res
-  ) => {
+  function(req, res) {
 
     const requests =
       getVerificationRequests();
@@ -3921,26 +4543,17 @@ app.post(
           )
       );
 
-    if (index === -1) {
+    if (index < 0) {
 
       return res.status(404).json({
         error:
           "Verification request not found."
       });
+
     }
 
     const request =
       requests[index];
-
-    request.status =
-      "approved";
-
-    request.updatedAt =
-      now();
-
-    saveVerificationRequests(
-      requests
-    );
 
     const users =
       getUsers();
@@ -3956,66 +4569,74 @@ app.post(
           )
       );
 
-    if (
-      userIndex !== -1
-    ) {
+    if (userIndex < 0) {
 
-      users[userIndex]
-        .verified =
-        true;
+      return res.status(404).json({
+        error:
+          "User no longer exists."
+      });
 
-      users[userIndex]
-        .isVerified =
-        true;
-
-      users[userIndex]
-        .verificationStatus =
-        "approved";
-
-      saveUsers(
-        users
-      );
     }
 
+    users[userIndex].verified =
+      true;
+
+    users[userIndex].isVerified =
+      true;
+
+    users[userIndex].verificationStatus =
+      "approved";
+
+    request.status =
+      "approved";
+
+    request.updatedAt =
+      now();
+
+    saveUsers(
+      users
+    );
+
+    saveVerificationRequests(
+      requests
+    );
+
     createNotification({
-
       userId:
-        request.userId,
+        users[userIndex].id,
 
-      actorId:
+      fromUserId:
         req.user.id,
 
       type:
         "verification",
 
       message:
-        "Your Pulse Social account has been verified."
+        "Your account has been verified."
     });
 
     res.json({
+      success: true,
 
-      success:
-        true,
-
-      message:
-        "Verification approved."
+      user:
+        safeUser(
+          users[userIndex],
+          req.user
+        )
     });
+
   }
 );
 
-
 /* =========================================================
-   ADMIN — REJECT VERIFICATION
+   ADMIN REJECT VERIFICATION
 ========================================================= */
 
 app.post(
   "/api/admin/verification/:id/reject",
   requireAuth,
   requireAdmin,
-  (
-    req,
-    res
-  ) => {
+  function(req, res) {
 
     const requests =
       getVerificationRequests();
@@ -4031,12 +4652,13 @@ app.post(
           )
       );
 
-    if (index === -1) {
+    if (index < 0) {
 
       return res.status(404).json({
         error:
           "Verification request not found."
       });
+
     }
 
     const request =
@@ -4066,167 +4688,173 @@ app.post(
           )
       );
 
-    if (
-      userIndex !== -1
-    ) {
+    if (userIndex >= 0) {
 
-      users[userIndex]
-        .verificationStatus =
+      users[userIndex].verificationStatus =
         "rejected";
 
       saveUsers(
         users
       );
+
+      createNotification({
+        userId:
+          users[userIndex].id,
+
+        fromUserId:
+          req.user.id,
+
+        type:
+          "verification",
+
+        message:
+          "Your verification request was rejected."
+      });
+
     }
 
-    createNotification({
-
-      userId:
-        request.userId,
-
-      actorId:
-        req.user.id,
-
-      type:
-        "verification",
-
-      message:
-        "Your verification request was rejected."
-    });
-
     res.json({
-
-      success:
-        true,
-
-      message:
-        "Verification rejected."
+      success: true,
+      request
     });
+
   }
 );
 
-
 /* =========================================================
-   STORAGE INFO
+   ADMIN DELETE USER
 ========================================================= */
 
-app.get(
-  "/api/storage-info",
+app.delete(
+  "/api/admin/users/:id",
   requireAuth,
   requireAdmin,
-  (
-    req,
-    res
-  ) => {
+  function(req, res) {
 
-    function sizeOfDirectory(
-      directory
+    const userId =
+      req.params.id;
+
+    if (
+      String(userId) ===
+      String(req.user.id)
     ) {
 
-      if (
-        !fs.existsSync(
-          directory
-        )
-      ) {
-        return 0;
-      }
+      return res.status(400).json({
+        error:
+          "You cannot delete your own admin account."
+      });
 
-      let total = 0;
-
-      for (
-        const entry of
-        fs.readdirSync(
-          directory,
-          {
-            withFileTypes: true
-          }
-        )
-      ) {
-
-        const fullPath =
-          path.join(
-            directory,
-            entry.name
-          );
-
-        if (
-          entry.isDirectory()
-        ) {
-
-          total +=
-            sizeOfDirectory(
-              fullPath
-            );
-
-        } else {
-
-          try {
-
-            total +=
-              fs.statSync(
-                fullPath
-              ).size;
-
-          } catch {}
-        }
-      }
-
-      return total;
     }
 
+    const users =
+      getUsers();
+
+    const user =
+      users.find(
+        item =>
+          String(
+            item.id
+          ) ===
+          String(
+            userId
+          )
+      );
+
+    if (!user) {
+
+      return res.status(404).json({
+        error:
+          "User not found."
+      });
+
+    }
+
+    saveUsers(
+      users.filter(
+        item =>
+          String(
+            item.id
+          ) !==
+          String(
+            userId
+          )
+      )
+    );
+
+    savePosts(
+      getPosts().filter(
+        post =>
+          String(
+            post.userId
+          ) !==
+          String(
+            userId
+          )
+      )
+    );
+
+    saveComments(
+      getComments().filter(
+        comment =>
+          String(
+            comment.userId
+          ) !==
+          String(
+            userId
+          )
+      )
+    );
+
+    saveLikes(
+      getLikes().filter(
+        like =>
+          String(
+            like.userId
+          ) !==
+          String(
+            userId
+          )
+      )
+    );
+
+    saveFollows(
+      getFollows().filter(
+        follow =>
+          String(
+            follow.followerId
+          ) !==
+            String(
+              userId
+            ) &&
+          String(
+            follow.followingId
+          ) !==
+            String(
+              userId
+            )
+      )
+    );
 
     res.json({
-
-      storageRoot:
-        STORAGE_ROOT,
-
-      persistent:
-        IS_PRODUCTION &&
-        STORAGE_ROOT ===
-          "/app/storage",
-
-      dataDirectory:
-        DATA_DIR,
-
-      uploadsDirectory:
-        UPLOADS_DIR,
-
-      profilesSize:
-        sizeOfDirectory(
-          PROFILE_UPLOAD_DIR
-        ),
-
-      coversSize:
-        sizeOfDirectory(
-          COVER_UPLOAD_DIR
-        ),
-
-      postsSize:
-        sizeOfDirectory(
-          POST_UPLOAD_DIR
-        ),
-
-      messagesSize:
-        sizeOfDirectory(
-          MESSAGE_UPLOAD_DIR
-        )
+      success: true
     });
+
   }
 );
 
-
 /* =========================================================
-   FILE HELPERS
+   HELPERS FOR FILE DELETION
 ========================================================= */
 
-function deleteFile(
-  filePath
-) {
+function safeDelete(filePath) {
+
+  if (!filePath) {
+    return;
+  }
 
   try {
 
     if (
-      filePath &&
       fs.existsSync(
         filePath
       )
@@ -4235,6 +4863,7 @@ function deleteFile(
       fs.unlinkSync(
         filePath
       );
+
     }
 
   } catch (error) {
@@ -4243,24 +4872,25 @@ function deleteFile(
       "FILE DELETE ERROR:",
       error.message
     );
+
   }
+
 }
 
-
-function deleteLocalUpload(
-  publicPath
+function deleteUploadFile(
+  urlPath
 ) {
 
   if (
-    !publicPath ||
-    typeof publicPath !==
+    !urlPath ||
+    typeof urlPath !==
       "string"
   ) {
     return;
   }
 
   if (
-    !publicPath.startsWith(
+    !urlPath.startsWith(
       "/uploads/"
     )
   ) {
@@ -4268,7 +4898,7 @@ function deleteLocalUpload(
   }
 
   const relative =
-    publicPath.replace(
+    urlPath.replace(
       /^\/uploads\//,
       ""
     );
@@ -4279,38 +4909,68 @@ function deleteLocalUpload(
       relative
     );
 
-  /*
-  Prevent deleting files
-  outside uploads directory.
-  */
+  const uploadsRoot =
+    path.resolve(
+      UPLOADS_DIR
+    );
 
   if (
     !fullPath.startsWith(
-      path.resolve(
-        UPLOADS_DIR
-      ) + path.sep
+      uploadsRoot
     )
   ) {
     return;
   }
 
-  deleteFile(
+  safeDelete(
     fullPath
   );
+
 }
 
+/* =========================================================
+   HASHTAGS
+========================================================= */
+
+function extractHashtags(
+  text
+) {
+
+  const matches =
+    String(text || "")
+      .match(
+        /#[a-zA-Z0-9_]+/g
+      );
+
+  if (!matches) {
+    return [];
+  }
+
+  return [
+    ...new Set(
+      matches.map(
+        tag =>
+          tag.toLowerCase()
+      )
+    )
+  ].slice(
+    0,
+    50
+  );
+
+}
 
 /* =========================================================
    MULTER ERROR HANDLER
 ========================================================= */
 
 app.use(
-  (
+  function(
     error,
     req,
     res,
     next
-  ) => {
+  ) {
 
     if (
       error instanceof
@@ -4324,81 +4984,53 @@ app.use(
 
         return res.status(400).json({
           error:
-            "Image is too large. Maximum size is 10MB."
+            "File is too large. Maximum size is 20MB."
         });
+
       }
 
       return res.status(400).json({
         error:
           error.message
       });
+
     }
 
-    if (
-      error &&
-      error.message
-    ) {
+    if (error) {
+
+      console.error(
+        "SERVER ERROR:",
+        error
+      );
 
       return res.status(400).json({
         error:
-          error.message
+          error.message ||
+          "Request failed."
       });
+
     }
 
-    next(error);
+    next();
+
   }
 );
 
-
 /* =========================================================
-   API 404
+   404 API HANDLER
 ========================================================= */
 
 app.use(
   "/api",
-  (
-    req,
-    res
-  ) => {
+  function(req, res) {
 
     res.status(404).json({
       error:
         "API endpoint not found."
     });
+
   }
 );
-
-
-/* =========================================================
-   GENERAL ERROR
-========================================================= */
-
-app.use(
-  (
-    error,
-    req,
-    res,
-    next
-  ) => {
-
-    console.error(
-      "SERVER ERROR:",
-      error
-    );
-
-    if (
-      res.headersSent
-    ) {
-      return next(error);
-    }
-
-    res.status(500).json({
-      error:
-        "Internal server error."
-    });
-  }
-);
-
 
 /* =========================================================
    START SERVER
@@ -4407,56 +5039,55 @@ app.use(
 app.listen(
   PORT,
   HOST,
-  () => {
+  function() {
 
+    console.log("");
     console.log(
-      "=========================================="
+      "=============================================="
     );
-
     console.log(
       "        PULSE SOCIAL SERVER"
     );
-
     console.log(
-      "=========================================="
+      "=============================================="
     );
-
     console.log(
       `Server: http://${HOST}:${PORT}`
     );
-
-    console.log(
-      `Environment: ${NODE_ENV}`
-    );
-
     console.log(
       `Storage: ${STORAGE_ROOT}`
     );
-
     console.log(
-      `Profiles: ${PROFILE_UPLOAD_DIR}`
+      `Persistent: ${Boolean(process.env.STORAGE_ROOT)}`
     );
-
     console.log(
-      `Covers: ${COVER_UPLOAD_DIR}`
+      "Video uploads: ENABLED"
     );
-
     console.log(
-      `Posts: ${POST_UPLOAD_DIR}`
+      "For You feed: ENABLED"
     );
-
     console.log(
-      `Messages: ${MESSAGE_UPLOAD_DIR}`
+      "Following feed: ENABLED"
     );
-
     console.log(
-      `Admin username: ${
-        ADMIN_USERNAME || "(not set)"
-      }`
+      "Likes: ENABLED"
     );
-
     console.log(
-      "=========================================="
+      "Comments: ENABLED"
     );
+    console.log(
+      "Follow system: ENABLED"
+    );
+    console.log(
+      "Verified accounts: ENABLED"
+    );
+    console.log(
+      "Messages: ENABLED"
+    );
+    console.log(
+      "=============================================="
+    );
+    console.log("");
+
   }
 );
