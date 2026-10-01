@@ -1,37 +1,55 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+  />
 
   <title>Profile • Pulse Social</title>
 
   <style>
+    :root {
+      --black: #000;
+      --bg: #050505;
+      --card: #111;
+      --card2: #181818;
+      --text: #fff;
+      --muted: #a7a7a7;
+      --line: #292929;
+      --pink: #fe2c55;
+      --cyan: #25f4ee;
+      --blue: #1683ff;
+      --danger: #ff3b30;
+      --nav-height: 62px;
+      --max-width: 620px;
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
 
-    :root {
-      --blue: #1877f2;
-      --blue-dark: #0d65d9;
-      --green: #16a34a;
-      --bg: #f0f2f5;
-      --card: #ffffff;
-      --text: #050505;
-      --muted: #65676b;
-      --border: #dddfe2;
-      --hover: #f2f2f2;
-      --danger: #e41e3f;
-      --shadow: 0 1px 2px rgba(0,0,0,.1);
+    html,
+    body {
+      width: 100%;
+      min-height: 100%;
+      background: var(--black);
+      color: var(--text);
+      font-family:
+        Inter,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Arial,
+        sans-serif;
     }
 
     body {
-      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
+      overflow-x: hidden;
     }
 
     button,
@@ -50,665 +68,503 @@
       text-decoration: none;
     }
 
-    img {
-      max-width: 100%;
-      display: block;
-    }
+    /* =====================================================
+       APP
+    ===================================================== */
 
-    /* =========================
-       TOPBAR
-    ========================= */
-
-    .topbar {
-      height: 64px;
-      background: white;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      padding: 0 20px;
-      gap: 18px;
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 9px;
-      min-width: 210px;
-    }
-
-    .brand-logo {
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #1877f2, #42b72a);
-      display: grid;
-      place-items: center;
-      color: white;
-      font-size: 23px;
-      font-weight: 900;
-    }
-
-    .brand-name {
-      font-size: 22px;
-      font-weight: 800;
-      letter-spacing: -.5px;
-    }
-
-    .search-box {
-      width: 300px;
-      height: 42px;
-      border-radius: 22px;
-      background: #f0f2f5;
-      display: flex;
-      align-items: center;
-      padding: 0 15px;
-      gap: 9px;
-    }
-
-    .search-box span {
-      font-size: 18px;
-      color: var(--muted);
-    }
-
-    .search-box input {
-      border: 0;
-      outline: 0;
-      background: transparent;
+    .app {
       width: 100%;
-      font-size: 14px;
+      min-height: 100vh;
+      background: var(--black);
     }
-
-    .top-nav {
-      margin-left: auto;
-      display: flex;
-      align-items: center;
-      gap: 7px;
-    }
-
-    .top-nav a,
-    .top-action {
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      display: grid;
-      place-items: center;
-      background: #f0f2f5;
-      font-size: 19px;
-      transition: .2s;
-    }
-
-    .top-nav a:hover,
-    .top-action:hover {
-      background: #e4e6eb;
-      transform: translateY(-1px);
-    }
-
-    .top-avatar {
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      object-fit: cover;
-      background: #ddd;
-      cursor: pointer;
-      margin-left: 4px;
-    }
-
-    /* =========================
-       LAYOUT
-    ========================= */
 
     .page {
-      max-width: 1250px;
-      margin: 20px auto 80px;
-      padding: 0 16px;
-    }
-
-    .main-grid {
-      display: grid;
-      grid-template-columns: 270px minmax(0, 680px) 270px;
-      gap: 18px;
-      align-items: start;
-    }
-
-    /* =========================
-       SIDEBAR
-    ========================= */
-
-    .sidebar {
-      position: sticky;
-      top: 84px;
-    }
-
-    .side-card {
-      background: white;
-      border-radius: 12px;
-      padding: 12px;
-      box-shadow: var(--shadow);
-      margin-bottom: 14px;
-    }
-
-    .side-profile {
-      display: flex;
-      align-items: center;
-      gap: 11px;
-      padding: 9px;
-      border-radius: 9px;
-      margin-bottom: 5px;
-    }
-
-    .side-profile:hover {
-      background: var(--hover);
-    }
-
-    .side-profile img {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      object-fit: cover;
-    }
-
-    .side-profile strong {
-      display: block;
-      font-size: 14px;
-    }
-
-    .side-profile small {
-      color: var(--muted);
-    }
-
-    .side-link {
       width: 100%;
+      max-width: var(--max-width);
+      margin: 0 auto;
+      min-height: 100vh;
+      background: var(--bg);
+      padding-bottom: calc(var(--nav-height) + 20px);
+    }
+
+    /* =====================================================
+       TOP BAR
+    ===================================================== */
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      height: 54px;
       display: flex;
       align-items: center;
-      gap: 13px;
-      padding: 11px;
-      border-radius: 9px;
+      justify-content: space-between;
+      padding: 0 16px;
+      background: rgba(0, 0, 0, 0.92);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid #151515;
+    }
+
+    .topbar-left,
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
       background: transparent;
-      font-weight: 600;
-      text-align: left;
-    }
-
-    .side-link:hover {
-      background: var(--hover);
-    }
-
-    .side-icon {
-      width: 28px;
-      text-align: center;
-      font-size: 19px;
-    }
-
-    .side-footer {
-      padding: 10px;
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.6;
-    }
-
-    /* =========================
-       PROFILE HEADER
-    ========================= */
-
-    .profile-card {
-      background: white;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: var(--shadow);
-      margin-bottom: 14px;
-    }
-
-    .cover {
-      height: 245px;
-      background:
-        linear-gradient(135deg, rgba(24,119,242,.8), rgba(22,163,74,.7)),
-        linear-gradient(135deg, #1877f2, #16a34a);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .cover::before {
-      content: "";
-      position: absolute;
-      width: 500px;
-      height: 500px;
-      border-radius: 50%;
-      background: rgba(255,255,255,.08);
-      right: -180px;
-      top: -280px;
-    }
-
-    .cover::after {
-      content: "";
-      position: absolute;
-      width: 300px;
-      height: 300px;
-      border-radius: 50%;
-      background: rgba(255,255,255,.07);
-      left: -130px;
-      bottom: -200px;
-    }
-
-    .cover-upload {
-      position: absolute;
-      right: 18px;
-      bottom: 15px;
-      background: rgba(0,0,0,.55);
       color: white;
-      padding: 9px 13px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
     }
 
-    .cover-upload input {
+    .icon-btn:active {
+      transform: scale(0.9);
+    }
+
+    .username-title {
+      font-size: 17px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .verified {
+      width: 17px;
+      height: 17px;
+      border-radius: 50%;
+      background: #20a7ff;
+      color: white;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 900;
+      flex-shrink: 0;
+    }
+
+    /* =====================================================
+       COVER
+    ===================================================== */
+
+    .cover-wrapper {
+      position: relative;
+      width: 100%;
+      height: 205px;
+      background:
+        radial-gradient(circle at 30% 30%, #292929 0%, transparent 45%),
+        linear-gradient(135deg, #151515, #050505);
+      overflow: hidden;
+    }
+
+    .cover-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
       display: none;
     }
 
-    .profile-info {
-      position: relative;
-      padding: 0 24px 22px;
+    .cover-overlay {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(
+          to bottom,
+          rgba(0, 0, 0, 0.05),
+          rgba(0, 0, 0, 0.55)
+        );
+      pointer-events: none;
     }
 
-    .profile-avatar-wrap {
-      position: relative;
-      width: 150px;
-      height: 150px;
-      margin-top: -75px;
+    .cover-edit {
+      position: absolute;
+      right: 14px;
+      bottom: 14px;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 17px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
       z-index: 5;
     }
 
-    .profile-avatar {
-      width: 150px;
-      height: 150px;
+    /* =====================================================
+       PROFILE HEADER
+    ===================================================== */
+
+    .profile-header {
+      position: relative;
+      padding: 0 16px 20px;
+    }
+
+    .avatar-wrap {
+      position: relative;
+      width: 104px;
+      height: 104px;
+      margin-top: -52px;
+      z-index: 5;
+    }
+
+    .avatar {
+      width: 104px;
+      height: 104px;
       border-radius: 50%;
-      border: 5px solid white;
       object-fit: cover;
-      background: #ddd;
+      background: #222;
+      border: 4px solid #000;
+      display: block;
     }
 
     .avatar-edit {
       position: absolute;
-      right: 7px;
-      bottom: 8px;
-      width: 39px;
-      height: 39px;
+      right: 2px;
+      bottom: 2px;
+      width: 30px;
+      height: 30px;
       border-radius: 50%;
-      background: #e4e6eb;
-      display: grid;
-      place-items: center;
-      border: 3px solid white;
-      cursor: pointer;
-    }
-
-    .avatar-edit input {
-      display: none;
+      background: #fff;
+      color: #000;
+      border: 3px solid #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      z-index: 4;
     }
 
     .profile-main {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      gap: 15px;
-      margin-top: 8px;
+      margin-top: 10px;
     }
 
-    .profile-name-row {
+    .display-name {
+      font-size: 24px;
+      font-weight: 800;
+      line-height: 1.15;
       display: flex;
       align-items: center;
       gap: 7px;
-      flex-wrap: wrap;
     }
 
-    .profile-name {
-      font-size: 28px;
-      font-weight: 800;
-      line-height: 1.15;
-    }
-
-    .verified {
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      display: inline-grid;
-      place-items: center;
-      background: var(--blue);
-      color: white;
-      font-size: 12px;
-      font-weight: 900;
-    }
-
-    .username {
-      color: var(--muted);
+    .handle {
       margin-top: 4px;
+      color: #aaa;
+      font-size: 14px;
     }
 
     .bio {
-      margin-top: 11px;
-      max-width: 550px;
+      margin-top: 12px;
+      color: #eee;
+      font-size: 15px;
       line-height: 1.45;
-      color: #333;
       white-space: pre-wrap;
       word-break: break-word;
     }
+
+    .website {
+      display: inline-block;
+      margin-top: 9px;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    /* =====================================================
+       STATS
+    ===================================================== */
+
+    .stats {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      margin-top: 18px;
+    }
+
+    .stat {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      cursor: pointer;
+    }
+
+    .stat-number {
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .stat-label {
+      margin-top: 3px;
+      color: #999;
+      font-size: 13px;
+    }
+
+    /* =====================================================
+       ACTIONS
+    ===================================================== */
 
     .profile-actions {
       display: flex;
       gap: 8px;
-      flex-wrap: wrap;
+      margin-top: 18px;
     }
 
-    .btn {
-      padding: 10px 17px;
-      border-radius: 8px;
-      font-weight: 700;
-      background: #e4e6eb;
-      transition: .2s;
-    }
-
-    .btn:hover {
-      filter: brightness(.96);
-    }
-
-    .btn-primary {
-      background: var(--blue);
-      color: white;
-    }
-
-    .btn-green {
-      background: var(--green);
-      color: white;
-    }
-
-    .btn-outline {
-      background: white;
-      border: 1px solid var(--border);
-    }
-
-    .btn-danger {
-      background: #ffe5ea;
-      color: var(--danger);
-    }
-
-    .profile-stats {
-      display: flex;
-      gap: 25px;
-      margin-top: 20px;
-      border-top: 1px solid var(--border);
-      padding-top: 15px;
-    }
-
-    .stat {
-      cursor: pointer;
-    }
-
-    .stat strong {
-      font-size: 17px;
-    }
-
-    .stat span {
-      color: var(--muted);
-      margin-left: 4px;
-      font-size: 14px;
-    }
-
-    /* =========================
-       INFO CARD
-    ========================= */
-
-    .info-card,
-    .posts-card,
-    .post {
-      background: white;
-      border-radius: 12px;
-      box-shadow: var(--shadow);
-    }
-
-    .info-card {
-      padding: 18px;
-      margin-bottom: 14px;
-    }
-
-    .section-title {
-      font-size: 20px;
-      font-weight: 800;
-      margin-bottom: 14px;
-    }
-
-    .info-list {
-      display: grid;
-      gap: 10px;
-    }
-
-    .info-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      color: #333;
-      padding: 7px 0;
-    }
-
-    .info-item-icon {
-      width: 35px;
-      height: 35px;
-      border-radius: 50%;
-      background: #f0f2f5;
-      display: grid;
-      place-items: center;
-    }
-
-    .info-item small {
-      display: block;
-      color: var(--muted);
-      margin-bottom: 2px;
-    }
-
-    /* =========================
-       POSTS
-    ========================= */
-
-    .posts-tabs {
-      display: flex;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 14px;
-      background: white;
-      border-radius: 12px;
-      box-shadow: var(--shadow);
-      padding: 5px;
-    }
-
-    .post-tab {
-      flex: 1;
-      padding: 12px;
-      border-radius: 8px;
-      background: transparent;
-      font-weight: 700;
-      color: var(--muted);
-    }
-
-    .post-tab.active {
-      color: var(--blue);
-      background: #eef5ff;
-    }
-
-    .post {
-      margin-bottom: 14px;
-      overflow: hidden;
-    }
-
-    .post-head {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 13px 15px 7px;
-    }
-
-    .post-avatar {
-      width: 42px;
+    .action-button {
       height: 42px;
-      border-radius: 50%;
-      object-fit: cover;
-      background: #ddd;
-    }
-
-    .post-author {
-      flex: 1;
-    }
-
-    .post-author strong {
+      border-radius: 5px;
+      padding: 0 20px;
+      font-weight: 700;
+      font-size: 14px;
       display: flex;
       align-items: center;
-      gap: 5px;
-      font-size: 14px;
+      justify-content: center;
+      transition: 0.18s ease;
     }
 
-    .post-author small {
-      display: block;
-      color: var(--muted);
-      margin-top: 2px;
+    .action-button:active {
+      transform: scale(0.96);
     }
 
-    .post-menu {
-      width: 35px;
-      height: 35px;
-      border-radius: 50%;
+    .follow-btn {
+      flex: 1;
+      background: var(--pink);
+      color: white;
+    }
+
+    .follow-btn.following {
+      background: #272727;
+      border: 1px solid #3c3c3c;
+    }
+
+    .edit-btn {
+      flex: 1;
+      background: #272727;
+      color: white;
+      border: 1px solid #3a3a3a;
+    }
+
+    .more-btn {
+      width: 44px;
+      padding: 0;
+      background: #272727;
+      color: white;
+      border: 1px solid #3a3a3a;
+      font-size: 21px;
+    }
+
+    /* =====================================================
+       PROFILE TABS
+    ===================================================== */
+
+    .profile-tabs {
+      height: 52px;
+      display: flex;
+      border-bottom: 1px solid var(--line);
+      border-top: 1px solid #151515;
+      position: sticky;
+      top: 54px;
+      z-index: 50;
+      background: rgba(0, 0, 0, 0.94);
+      backdrop-filter: blur(14px);
+    }
+
+    .profile-tab {
+      flex: 1;
+      color: #777;
       background: transparent;
-      font-size: 20px;
+      position: relative;
+      font-size: 21px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    .post-menu:hover {
-      background: var(--hover);
+    .profile-tab.active {
+      color: white;
     }
 
-    .post-body {
-      padding: 7px 15px 12px;
-      line-height: 1.5;
-      white-space: pre-wrap;
-      word-break: break-word;
+    .profile-tab.active::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 28%;
+      right: 28%;
+      height: 2px;
+      background: white;
     }
 
-    .post-body a {
-      color: var(--blue);
-      font-weight: 600;
+    /* =====================================================
+       POSTS GRID
+    ===================================================== */
+
+    .posts-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+      background: #000;
     }
 
-    .post-image {
-      width: 100%;
-      max-height: 650px;
-      object-fit: cover;
+    .post-item {
+      position: relative;
+      aspect-ratio: 0.75;
+      overflow: hidden;
+      background: #151515;
       cursor: pointer;
-      background: #f0f2f5;
+    }
+
+    .post-media {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.25s ease;
+    }
+
+    .post-item:hover .post-media {
+      transform: scale(1.04);
+    }
+
+    .post-video-icon {
+      position: absolute;
+      right: 8px;
+      top: 8px;
+      font-size: 17px;
+      text-shadow: 0 2px 5px black;
     }
 
     .post-stats {
-      display: flex;
-      justify-content: space-between;
-      color: var(--muted);
-      padding: 9px 15px;
-      border-bottom: 1px solid var(--border);
-      font-size: 13px;
-    }
-
-    .post-actions {
-      display: flex;
-      padding: 4px 8px;
-    }
-
-    .post-action {
-      flex: 1;
-      background: transparent;
-      padding: 9px;
-      border-radius: 7px;
-      color: var(--muted);
-      font-weight: 700;
-    }
-
-    .post-action:hover {
-      background: var(--hover);
-    }
-
-    .post-action.liked {
-      color: var(--blue);
-    }
-
-    /* =========================
-       RIGHT SIDEBAR
-    ========================= */
-
-    .right-title {
-      font-size: 17px;
-      font-weight: 800;
-      margin: 5px 0 10px;
-    }
-
-    .suggestion {
+      position: absolute;
+      left: 8px;
+      bottom: 7px;
       display: flex;
       align-items: center;
-      gap: 9px;
-      padding: 8px;
-      border-radius: 9px;
-    }
-
-    .suggestion:hover {
-      background: var(--hover);
-    }
-
-    .suggestion img {
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      object-fit: cover;
-    }
-
-    .suggestion-main {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .suggestion-main strong {
-      display: block;
-      font-size: 13px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .suggestion-main small {
-      color: var(--muted);
-    }
-
-    .mini-follow {
-      background: #e7f3ff;
-      color: var(--blue);
-      padding: 7px 9px;
-      border-radius: 7px;
+      gap: 4px;
+      padding: 4px 7px;
+      border-radius: 12px;
+      background: rgba(0, 0, 0, 0.55);
       font-size: 12px;
       font-weight: 700;
     }
 
-    /* =========================
-       EMPTY / LOADING
-    ========================= */
-
-    .loading,
-    .empty {
+    .empty-posts {
+      min-height: 250px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #888;
+      gap: 10px;
+      padding: 40px;
       text-align: center;
-      padding: 45px 20px;
-      color: var(--muted);
     }
 
-    .loader {
-      width: 35px;
-      height: 35px;
-      border: 4px solid #ddd;
-      border-top-color: var(--blue);
+    .empty-icon {
+      width: 62px;
+      height: 62px;
       border-radius: 50%;
-      animation: spin .8s linear infinite;
-      margin: 0 auto 12px;
+      border: 2px solid #444;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+    }
+
+    .empty-title {
+      color: white;
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    /* =====================================================
+       BOTTOM NAV
+    ===================================================== */
+
+    .bottom-nav {
+      position: fixed;
+      z-index: 200;
+      left: 50%;
+      bottom: 0;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: var(--max-width);
+      height: var(--nav-height);
+      background: rgba(0, 0, 0, 0.96);
+      border-top: 1px solid #252525;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      backdrop-filter: blur(18px);
+    }
+
+    .nav-item {
+      flex: 1;
+      height: 100%;
+      color: #aaa;
+      background: transparent;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .nav-item.active {
+      color: white;
+    }
+
+    .nav-icon {
+      font-size: 23px;
+      line-height: 1;
+    }
+
+    .create-icon {
+      width: 45px;
+      height: 30px;
+      border-radius: 8px;
+      background: linear-gradient(
+        90deg,
+        var(--cyan) 0 25%,
+        white 25% 75%,
+        var(--pink) 75%
+      );
+      color: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 21px;
+      font-weight: 900;
+    }
+
+    /* =====================================================
+       LOADING
+    ===================================================== */
+
+    .loading {
+      min-height: 300px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .spinner {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 3px solid #333;
+      border-top-color: white;
+      animation: spin 0.8s linear infinite;
     }
 
     @keyframes spin {
@@ -717,352 +573,166 @@
       }
     }
 
-    /* =========================
-       EDIT MODAL
-    ========================= */
+    /* =====================================================
+       MODAL
+    ===================================================== */
 
     .modal {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,.65);
+      z-index: 500;
+      background: rgba(0, 0, 0, 0.72);
       display: none;
-      align-items: center;
+      align-items: flex-end;
       justify-content: center;
-      padding: 18px;
-      z-index: 5000;
     }
 
     .modal.show {
       display: flex;
     }
 
-    .modal-card {
-      width: min(600px, 100%);
-      max-height: 90vh;
+    .modal-sheet {
+      width: 100%;
+      max-width: var(--max-width);
+      max-height: 88vh;
+      background: #161616;
+      border-radius: 18px 18px 0 0;
       overflow-y: auto;
-      background: white;
-      border-radius: 14px;
-      box-shadow: 0 20px 60px rgba(0,0,0,.3);
+      animation: slideUp 0.22s ease;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(100%);
+      }
+
+      to {
+        transform: translateY(0);
+      }
     }
 
     .modal-head {
+      height: 56px;
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      padding: 17px;
-      border-bottom: 1px solid var(--border);
+      justify-content: space-between;
+      padding: 0 16px;
+      border-bottom: 1px solid #292929;
     }
 
-    .modal-head h2 {
-      font-size: 20px;
+    .modal-title {
+      font-size: 17px;
+      font-weight: 800;
     }
 
-    .close-modal {
-      width: 35px;
-      height: 35px;
+    .modal-close {
+      width: 34px;
+      height: 34px;
       border-radius: 50%;
-      background: #f0f2f5;
+      background: #282828;
+      color: white;
       font-size: 18px;
     }
 
-    .modal-body {
+    .modal-content {
       padding: 18px;
     }
 
-    .field {
+    .upload-label {
+      display: block;
+      font-size: 13px;
+      color: #aaa;
+      margin-bottom: 7px;
+    }
+
+    .upload-input {
+      width: 100%;
+      padding: 12px;
+      background: #222;
+      color: white;
+      border: 1px solid #333;
+      border-radius: 8px;
       margin-bottom: 15px;
     }
 
-    .field label {
-      display: block;
-      font-weight: 700;
-      margin-bottom: 7px;
-      font-size: 14px;
-    }
-
-    .field input,
-    .field textarea {
+    .modal-button {
       width: 100%;
-      border: 1px solid var(--border);
-      border-radius: 9px;
-      padding: 11px 12px;
-      outline: none;
-      background: white;
-    }
-
-    .field textarea {
-      min-height: 100px;
-      resize: vertical;
-    }
-
-    .field input:focus,
-    .field textarea:focus {
-      border-color: var(--blue);
-      box-shadow: 0 0 0 2px rgba(24,119,242,.1);
-    }
-
-    .modal-footer {
-      padding: 14px 18px;
-      border-top: 1px solid var(--border);
-      display: flex;
-      justify-content: flex-end;
-      gap: 8px;
-    }
-
-    /* =========================
-       COMMENTS MODAL
-    ========================= */
-
-    .comments-list {
-      max-height: 350px;
-      overflow-y: auto;
-      display: grid;
-      gap: 10px;
-    }
-
-    .comment {
-      display: flex;
-      gap: 9px;
-    }
-
-    .comment img {
-      width: 35px;
-      height: 35px;
-      border-radius: 50%;
-      object-fit: cover;
-    }
-
-    .comment-bubble {
-      background: #f0f2f5;
-      padding: 8px 11px;
-      border-radius: 12px;
-      flex: 1;
-    }
-
-    .comment-bubble strong {
-      font-size: 13px;
-    }
-
-    .comment-bubble p {
-      margin-top: 2px;
-      font-size: 14px;
-      white-space: pre-wrap;
-    }
-
-    .comment-form {
-      display: flex;
-      gap: 8px;
-      margin-top: 15px;
-    }
-
-    .comment-form input {
-      flex: 1;
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 10px 14px;
-      outline: none;
-    }
-
-    /* =========================
-       IMAGE MODAL
-    ========================= */
-
-    .image-modal {
-      background: rgba(0,0,0,.9);
-    }
-
-    .image-modal img {
-      max-width: 95vw;
-      max-height: 90vh;
-      object-fit: contain;
-      border-radius: 5px;
-    }
-
-    .image-close {
-      position: fixed;
-      right: 22px;
-      top: 20px;
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      background: rgba(255,255,255,.15);
+      height: 44px;
+      border-radius: 6px;
+      background: var(--pink);
       color: white;
-      font-size: 25px;
+      font-weight: 700;
     }
 
-    /* =========================
+    /* =====================================================
        TOAST
-    ========================= */
+    ===================================================== */
 
     .toast {
       position: fixed;
+      z-index: 999;
       left: 50%;
-      bottom: 25px;
-      transform: translate(-50%, 100px);
-      background: #1c1e21;
-      color: white;
-      padding: 12px 18px;
-      border-radius: 9px;
-      opacity: 0;
-      transition: .3s;
-      z-index: 9000;
+      bottom: 78px;
+      transform: translate(-50%, 20px);
+      background: #fff;
+      color: #000;
+      padding: 11px 16px;
+      border-radius: 22px;
       font-size: 14px;
-      box-shadow: 0 8px 30px rgba(0,0,0,.2);
+      font-weight: 600;
+      opacity: 0;
+      pointer-events: none;
+      transition: 0.25s ease;
+      max-width: calc(100% - 40px);
+      text-align: center;
     }
 
     .toast.show {
-      transform: translate(-50%, 0);
       opacity: 1;
+      transform: translate(-50%, 0);
     }
 
-    /* =========================
-       MOBILE NAV
-    ========================= */
+    /* =====================================================
+       DESKTOP
+    ===================================================== */
 
-    .mobile-nav {
-      display: none;
-    }
-
-    /* =========================
-       RESPONSIVE
-    ========================= */
-
-    @media (max-width: 1100px) {
-      .main-grid {
-        grid-template-columns: 220px minmax(0, 1fr);
-      }
-
-      .right-sidebar {
-        display: none;
-      }
-    }
-
-    @media (max-width: 760px) {
-      .topbar {
-        height: 58px;
-        padding: 0 10px;
-        gap: 8px;
-      }
-
-      .brand {
-        min-width: auto;
-      }
-
-      .brand-name {
-        display: none;
-      }
-
-      .brand-logo {
-        width: 39px;
-        height: 39px;
-      }
-
-      .search-box {
-        flex: 1;
-        width: auto;
-        height: 39px;
-      }
-
-      .top-nav a:nth-child(1),
-      .top-nav a:nth-child(2),
-      .top-nav a:nth-child(3) {
-        display: none;
-      }
-
-      .top-nav {
-        margin-left: 0;
+    @media (min-width: 700px) {
+      body {
+        background:
+          radial-gradient(
+            circle at center,
+            #151515 0,
+            #050505 500px
+          );
       }
 
       .page {
-        margin-top: 0;
-        padding: 0;
-        margin-bottom: 70px;
+        box-shadow:
+          0 0 0 1px #1b1b1b,
+          0 0 80px rgba(0, 0, 0, 0.8);
       }
 
-      .main-grid {
-        display: block;
+      .bottom-nav {
+        border-left: 1px solid #252525;
+        border-right: 1px solid #252525;
       }
+    }
 
-      .left-sidebar {
-        display: none;
-      }
-
-      .profile-card,
-      .info-card,
-      .posts-tabs,
-      .post {
-        border-radius: 0;
-        box-shadow: none;
-      }
-
-      .cover {
-        height: 185px;
-      }
-
-      .profile-info {
-        padding: 0 15px 18px;
-      }
-
-      .profile-avatar-wrap {
-        width: 120px;
-        height: 120px;
-        margin-top: -60px;
-      }
-
-      .profile-avatar {
-        width: 120px;
-        height: 120px;
-      }
-
-      .profile-main {
-        display: block;
-      }
-
-      .profile-name {
-        font-size: 24px;
+    @media (max-width: 380px) {
+      .stats {
+        gap: 19px;
       }
 
       .profile-actions {
-        margin-top: 15px;
+        gap: 5px;
       }
 
-      .profile-actions .btn {
-        flex: 1;
+      .action-button {
+        padding: 0 12px;
       }
 
-      .profile-stats {
-        gap: 17px;
-        overflow-x: auto;
-      }
-
-      .stat {
-        white-space: nowrap;
-      }
-
-      .mobile-nav {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        height: 62px;
-        background: white;
-        border-top: 1px solid var(--border);
-        display: flex;
-        align-items: center;
-        justify-content: space-around;
-        z-index: 3000;
-      }
-
-      .mobile-nav a {
-        display: grid;
-        place-items: center;
-        gap: 2px;
-        color: var(--muted);
-        font-size: 19px;
-      }
-
-      .mobile-nav a span {
-        font-size: 10px;
+      .display-name {
+        font-size: 21px;
       }
     }
   </style>
@@ -1070,467 +740,506 @@
 
 <body>
 
-  <!-- =========================
-       TOPBAR
-  ========================== -->
-
-  <header class="topbar">
-
-    <a href="/feed.html" class="brand">
-      <div class="brand-logo">P</div>
-      <div class="brand-name">Pulse</div>
-    </a>
-
-    <div class="search-box">
-      <span>🔍</span>
-      <input
-        id="globalSearch"
-        type="search"
-        placeholder="Search Pulse"
-        autocomplete="off"
-      >
-    </div>
-
-    <nav class="top-nav">
-      <a href="/feed.html" title="Home">🏠</a>
-      <a href="/messages.html" title="Messages">💬</a>
-      <a href="/notifications.html" title="Notifications">🔔</a>
-
-      <img
-        id="topAvatar"
-        class="top-avatar"
-        src="/images/default-avatar.png"
-        alt="Profile"
-        onclick="goMyProfile()"
-      >
-    </nav>
-
-  </header>
-
-
-  <!-- =========================
-       PAGE
-  ========================== -->
-
+<div class="app">
   <main class="page">
 
-    <div class="main-grid">
+    <!-- TOP BAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="icon-btn" id="backBtn" aria-label="Back">‹</button>
 
-      <!-- =========================
-           LEFT SIDEBAR
-      ========================== -->
-
-      <aside class="sidebar left-sidebar">
-
-        <div class="side-card">
-
-          <a href="/profile.html" class="side-profile">
-            <img id="sideAvatar" src="/images/default-avatar.png">
-            <div>
-              <strong id="sideName">Loading...</strong>
-              <small id="sideUsername">@...</small>
-            </div>
-          </a>
-
-          <a href="/feed.html" class="side-link">
-            <span class="side-icon">🏠</span>
-            Home
-          </a>
-
-          <a href="/profile.html" class="side-link">
-            <span class="side-icon">👤</span>
-            My Profile
-          </a>
-
-          <a href="/messages.html" class="side-link">
-            <span class="side-icon">💬</span>
-            Messages
-          </a>
-
-          <a href="/notifications.html" class="side-link">
-            <span class="side-icon">🔔</span>
-            Notifications
-          </a>
-
-          <a href="/verification.html" class="side-link">
-            <span class="side-icon">✓</span>
-            Verification
-          </a>
-
-          <a href="/feed.html?mode=following" class="side-link">
-            <span class="side-icon">👥</span>
-            Following
-          </a>
-
-          <button class="side-link" onclick="logout()">
-            <span class="side-icon">🚪</span>
-            Logout
-          </button>
-
+        <div class="username-title">
+          <span id="topUsername">@profile</span>
+          <span id="topVerified" class="verified" style="display:none;">✓</span>
         </div>
+      </div>
 
-        <div class="side-footer">
-          <div>About · Privacy · Terms · Help</div>
-          <div>© 2026 Pulse Social</div>
-        </div>
+      <div class="topbar-right">
+        <button class="icon-btn" id="shareProfileBtn" title="Share">
+          ↗
+        </button>
 
-      </aside>
+        <button class="icon-btn" id="menuBtn" title="Menu">
+          ⋮
+        </button>
+      </div>
+    </header>
 
+    <!-- PROFILE COVER -->
+    <section class="cover-wrapper">
 
-      <!-- =========================
-           MAIN PROFILE
-      ========================== -->
+      <img
+        id="coverImage"
+        class="cover-image"
+        alt="Cover photo"
+      />
 
-      <section>
+      <div class="cover-overlay"></div>
 
-        <div id="profileContainer">
+      <button
+        id="coverEditBtn"
+        class="cover-edit"
+        title="Change cover photo"
+        style="display:none;"
+      >
+        ✎
+      </button>
 
-          <div class="loading">
-            <div class="loader"></div>
-            Loading profile...
+    </section>
+
+    <!-- PROFILE HEADER -->
+    <section class="profile-header">
+
+      <div class="avatar-wrap">
+
+        <img
+          id="avatar"
+          class="avatar"
+          src="/images/default-avatar.png"
+          alt="Profile picture"
+        />
+
+        <button
+          id="avatarEditBtn"
+          class="avatar-edit"
+          title="Change profile picture"
+          style="display:none;"
+        >
+          ✎
+        </button>
+
+      </div>
+
+      <div class="profile-main">
+
+        <h1 class="display-name">
+          <span id="displayName">Loading...</span>
+          <span id="verifiedBadge" class="verified" style="display:none;">
+            ✓
+          </span>
+        </h1>
+
+        <div class="handle" id="handle">@loading</div>
+
+        <div class="bio" id="bio"></div>
+
+        <a
+          id="website"
+          class="website"
+          href="#"
+          target="_blank"
+          style="display:none;"
+        ></a>
+
+        <!-- STATS -->
+        <div class="stats">
+
+          <div class="stat" id="followingStat">
+            <span class="stat-number" id="followingCount">0</span>
+            <span class="stat-label">Following</span>
+          </div>
+
+          <div class="stat" id="followersStat">
+            <span class="stat-number" id="followersCount">0</span>
+            <span class="stat-label">Followers</span>
+          </div>
+
+          <div class="stat">
+            <span class="stat-number" id="likesCount">0</span>
+            <span class="stat-label">Likes</span>
           </div>
 
         </div>
 
-        <!-- POSTS -->
-
-        <div class="posts-tabs">
+        <!-- ACTIONS -->
+        <div class="profile-actions">
 
           <button
-            id="postsTab"
-            class="post-tab active"
-            onclick="switchProfileTab('posts')"
+            id="followBtn"
+            class="action-button follow-btn"
           >
-            📝 Posts
+            Follow
           </button>
 
           <button
-            id="aboutTab"
-            class="post-tab"
-            onclick="switchProfileTab('about')"
+            id="editBtn"
+            class="action-button edit-btn"
+            style="display:none;"
           >
-            ℹ️ About
+            Edit profile
+          </button>
+
+          <button
+            id="messageBtn"
+            class="action-button edit-btn"
+            style="display:none;"
+          >
+            Message
+          </button>
+
+          <button
+            id="moreBtn"
+            class="action-button more-btn"
+          >
+            ⋯
           </button>
 
         </div>
 
-        <div id="postsSection">
-          <div class="loading">
-            <div class="loader"></div>
-            Loading posts...
-          </div>
+      </div>
+    </section>
+
+    <!-- TABS -->
+    <nav class="profile-tabs">
+
+      <button
+        class="profile-tab active"
+        id="postsTab"
+        title="Posts"
+      >
+        ▦
+      </button>
+
+      <button
+        class="profile-tab"
+        id="likedTab"
+        title="Liked"
+      >
+        ♡
+      </button>
+
+    </nav>
+
+    <!-- POSTS -->
+    <section id="postsContainer">
+
+      <div class="loading" id="loading">
+        <div class="spinner"></div>
+      </div>
+
+      <div
+        class="posts-grid"
+        id="postsGrid"
+        style="display:none;"
+      ></div>
+
+      <div
+        class="empty-posts"
+        id="emptyPosts"
+        style="display:none;"
+      >
+        <div class="empty-icon">▦</div>
+
+        <div class="empty-title">
+          No posts yet
         </div>
 
-        <div id="aboutSection" style="display:none;">
-          <div class="info-card" id="aboutCard"></div>
+        <div>
+          When this user posts, their videos and photos will appear here.
         </div>
+      </div>
 
-      </section>
-
-
-      <!-- =========================
-           RIGHT SIDEBAR
-      ========================== -->
-
-      <aside class="sidebar right-sidebar">
-
-        <div class="side-card">
-
-          <div class="right-title">
-            People you may know
-          </div>
-
-          <div id="suggestions">
-            <div class="loading" style="padding:25px;">
-              Loading...
-            </div>
-          </div>
-
-        </div>
-
-        <div class="side-card">
-
-          <div class="right-title">
-            Pulse Social
-          </div>
-
-          <p style="font-size:13px;color:#65676b;line-height:1.5;">
-            Connect with people, share moments and discover what's happening
-            around your community.
-          </p>
-
-        </div>
-
-      </aside>
-
-    </div>
+    </section>
 
   </main>
 
-
-  <!-- =========================
-       MOBILE NAV
-  ========================== -->
-
-  <nav class="mobile-nav">
-
-    <a href="/feed.html">
-      🏠
-      <span>Home</span>
-    </a>
-
-    <a href="/feed.html?mode=following">
-      👥
-      <span>Following</span>
-    </a>
-
-    <a href="/messages.html">
-      💬
-      <span>Messages</span>
-    </a>
-
-    <a href="/notifications.html">
-      🔔
-      <span>Alerts</span>
-    </a>
-
-    <a href="/profile.html">
-      👤
-      <span>Profile</span>
-    </a>
-
-  </nav>
-
-
-  <!-- =========================
-       EDIT PROFILE MODAL
-  ========================== -->
-
-  <div class="modal" id="editModal">
-
-    <div class="modal-card">
-
-      <div class="modal-head">
-
-        <h2>Edit Profile</h2>
-
-        <button
-          class="close-modal"
-          onclick="closeModal('editModal')"
-        >
-          ✕
-        </button>
-
-      </div>
-
-      <form id="editForm">
-
-        <div class="modal-body">
-
-          <div class="field">
-
-            <label>Name</label>
-
-            <input
-              id="editName"
-              type="text"
-              maxlength="80"
-              required
-            >
-
-          </div>
-
-          <div class="field">
-
-            <label>Username</label>
-
-            <input
-              id="editUsername"
-              type="text"
-              maxlength="30"
-              disabled
-            >
-
-          </div>
-
-          <div class="field">
-
-            <label>Email</label>
-
-            <input
-              id="editEmail"
-              type="email"
-              disabled
-            >
-
-          </div>
-
-          <div class="field">
-
-            <label>Bio</label>
-
-            <textarea
-              id="editBio"
-              maxlength="500"
-              placeholder="Tell people about yourself..."
-            ></textarea>
-
-          </div>
-
-        </div>
-
-        <div class="modal-footer">
-
-          <button
-            type="button"
-            class="btn"
-            onclick="closeModal('editModal')"
-          >
-            Cancel
-          </button>
-
-          <button
-            type="submit"
-            class="btn btn-primary"
-          >
-            Save Changes
-          </button>
-
-        </div>
-
-      </form>
-
-    </div>
-
-  </div>
-
-
-  <!-- =========================
-       COMMENTS MODAL
-  ========================== -->
-
-  <div class="modal" id="commentsModal">
-
-    <div class="modal-card">
-
-      <div class="modal-head">
-
-        <h2>Comments</h2>
-
-        <button
-          class="close-modal"
-          onclick="closeModal('commentsModal')"
-        >
-          ✕
-        </button>
-
-      </div>
-
-      <div class="modal-body">
-
-        <div id="commentsList" class="comments-list">
-
-          <div class="loading">
-            Loading comments...
-          </div>
-
-        </div>
-
-        <form
-          id="commentForm"
-          class="comment-form"
-        >
-
-          <input
-            id="commentInput"
-            type="text"
-            placeholder="Write a comment..."
-            maxlength="500"
-            required
-          >
-
-          <button
-            class="btn btn-primary"
-            type="submit"
-          >
-            Send
-          </button>
-
-        </form>
-
-      </div>
-
-    </div>
-
-  </div>
-
-
-  <!-- =========================
-       IMAGE MODAL
-  ========================== -->
-
-  <div
-    class="modal image-modal"
-    id="imageModal"
-    onclick="closeModal('imageModal')"
-  >
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
 
     <button
-      class="image-close"
-      onclick="closeModal('imageModal')"
+      class="nav-item"
+      onclick="goTo('/feed.html')"
     >
-      ✕
+      <span class="nav-icon">⌂</span>
+      <span>Home</span>
     </button>
 
-    <img
-      id="imageModalImg"
-      src=""
-      alt="Post image"
-      onclick="event.stopPropagation()"
+    <button
+      class="nav-item"
+      onclick="goTo('/feed.html?tab=friends')"
     >
+      <span class="nav-icon">♬</span>
+      <span>Friends</span>
+    </button>
+
+    <button
+      class="nav-item"
+      onclick="openCreate()"
+    >
+      <span class="create-icon">+</span>
+      <span>Create</span>
+    </button>
+
+    <button
+      class="nav-item"
+      onclick="goTo('/messages.html')"
+    >
+      <span class="nav-icon">▢</span>
+      <span>Inbox</span>
+    </button>
+
+    <button
+      class="nav-item active"
+      onclick="goTo('/profile.html')"
+    >
+      <span class="nav-icon">○</span>
+      <span>Profile</span>
+    </button>
+
+  </nav>
+</div>
+
+
+<!-- =====================================================
+     EDIT PROFILE MODAL
+===================================================== -->
+
+<div class="modal" id="editModal">
+
+  <div class="modal-sheet">
+
+    <div class="modal-head">
+
+      <div class="modal-title">
+        Edit profile
+      </div>
+
+      <button
+        class="modal-close"
+        onclick="closeModal('editModal')"
+      >
+        ×
+      </button>
+
+    </div>
+
+    <div class="modal-content">
+
+      <label class="upload-label">
+        Profile picture
+      </label>
+
+      <input
+        class="upload-input"
+        type="file"
+        id="profilePictureInput"
+        accept="image/jpeg,image/png,image/webp,image/gif"
+      />
+
+      <label class="upload-label">
+        Cover photo
+      </label>
+
+      <input
+        class="upload-input"
+        type="file"
+        id="coverPhotoInput"
+        accept="image/jpeg,image/png,image/webp,image/gif"
+      />
+
+      <button
+        class="modal-button"
+        id="savePhotosBtn"
+      >
+        Save photos
+      </button>
+
+    </div>
 
   </div>
+</div>
 
 
-  <!-- TOAST -->
+<!-- =====================================================
+     MORE MODAL
+===================================================== -->
 
-  <div id="toast" class="toast"></div>
+<div class="modal" id="moreModal">
+
+  <div class="modal-sheet">
+
+    <div class="modal-head">
+
+      <div class="modal-title">
+        Profile
+      </div>
+
+      <button
+        class="modal-close"
+        onclick="closeModal('moreModal')"
+      >
+        ×
+      </button>
+
+    </div>
+
+    <div class="modal-content">
+
+      <button
+        class="modal-button"
+        id="verificationBtn"
+        style="margin-bottom:10px;"
+      >
+        ✓ Request verification
+      </button>
+
+      <button
+        class="modal-button"
+        id="logoutBtn"
+        style="background:#292929;"
+      >
+        Log out
+      </button>
+
+    </div>
+
+  </div>
+</div>
+
+
+<div class="toast" id="toast"></div>
 
 
 <script>
+  /* =====================================================
+     STATE
+  ===================================================== */
 
-  /* =========================================================
-     PULSE SOCIAL — ULTIMATE PROFILE
-  ========================================================= */
-
-  const DEFAULT_AVATAR = "/images/default-avatar.png";
-
-  let currentUser = null;
-  let profileUser = null;
+  let me = null;
+  let profile = null;
   let profilePosts = [];
-  let activePostId = null;
+
+  const params = new URLSearchParams(window.location.search);
+  const requestedUsername = params.get("username");
 
 
-  /* =========================================================
+  /* =====================================================
+     HELPERS
+  ===================================================== */
+
+  function $(id) {
+    return document.getElementById(id);
+  }
+
+  function escapeHTML(value) {
+    if (value === null || value === undefined) return "";
+
+    return String(value)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function formatNumber(number) {
+    const n = Number(number || 0);
+
+    if (n >= 1000000) {
+      return (n / 1000000).toFixed(n % 1000000 === 0 ? 0 : 1) + "M";
+    }
+
+    if (n >= 1000) {
+      return (n / 1000).toFixed(n % 1000 === 0 ? 0 : 1) + "K";
+    }
+
+    return n.toString();
+  }
+
+  function goTo(url) {
+    window.location.href = url;
+  }
+
+  function showToast(message) {
+    const toast = $("toast");
+
+    toast.textContent = message;
+    toast.classList.add("show");
+
+    clearTimeout(window.toastTimer);
+
+    window.toastTimer = setTimeout(() => {
+      toast.classList.remove("show");
+    }, 2500);
+  }
+
+  function openModal(id) {
+    $(id).classList.add("show");
+  }
+
+  function closeModal(id) {
+    $(id).classList.remove("show");
+  }
+
+  function getProfileImage(user) {
+    return (
+      user?.profilePicture ||
+      user?.profileImage ||
+      user?.avatar ||
+      "/images/default-avatar.png"
+    );
+  }
+
+  function getCoverImage(user) {
+    return (
+      user?.coverPhoto ||
+      user?.coverImage ||
+      user?.cover ||
+      ""
+    );
+  }
+
+  function isVerified(user) {
+    return Boolean(
+      user?.verified ||
+      user?.isVerified ||
+      user?.verificationStatus === "approved"
+    );
+  }
+
+  function postMedia(post) {
+    return (
+      post?.video ||
+      post?.videoUrl ||
+      post?.image ||
+      post?.imageUrl ||
+      ""
+    );
+  }
+
+  function isVideo(post) {
+    const media = postMedia(post);
+
+    if (!media) return false;
+
+    return (
+      post?.type === "video" ||
+      post?.mediaType === "video" ||
+      /\.(mp4|webm|ogg|mov|m4v)(\?|$)/i.test(media)
+    );
+  }
+
+
+  /* =====================================================
      API
-  ========================================================= */
+  ===================================================== */
 
   async function api(url, options = {}) {
 
-    const config = {
+    const response = await fetch(url, {
       credentials: "include",
       ...options,
       headers: {
         ...(options.body instanceof FormData
           ? {}
-          : { "Content-Type": "application/json" }),
+          : {
+              "Content-Type": "application/json"
+            }),
         ...(options.headers || {})
       }
-    };
+    });
 
-    const response = await fetch(url, config);
-
-    let data = {};
+    let data = null;
 
     try {
       data = await response.json();
@@ -1539,1903 +1248,801 @@
     }
 
     if (!response.ok) {
-
       throw new Error(
-        data.error ||
         data.message ||
+        data.error ||
         `Request failed (${response.status})`
       );
-
     }
 
     return data;
   }
 
 
-  /* =========================================================
-     HELPERS
-  ========================================================= */
-
-  function escapeHTML(value) {
-
-    return String(value ?? "")
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
-
-  }
-
-
-  function avatarUrl(user) {
-
-    if (!user) return DEFAULT_AVATAR;
-
-    return (
-      user.profilePicture ||
-      user.profileImage ||
-      user.avatar ||
-      DEFAULT_AVATAR
-    );
-
-  }
-
-
-  function verifiedBadge(user) {
-
-    if (!user) return "";
-
-    if (
-      user.verified === true ||
-      user.isVerified === true ||
-      user.verificationStatus === "approved"
-    ) {
-
-      return `<span
-        class="verified"
-        title="Verified account"
-      >✓</span>`;
-
-    }
-
-    return "";
-
-  }
-
-
-  function formatDate(dateValue) {
-
-    if (!dateValue) return "Just now";
-
-    const date = new Date(dateValue);
-
-    if (Number.isNaN(date.getTime())) {
-      return "Just now";
-    }
-
-    const now = Date.now();
-    const diff = Math.max(0, now - date.getTime());
-
-    const minute = 60 * 1000;
-    const hour = 60 * minute;
-    const day = 24 * hour;
-
-    if (diff < minute) {
-      return "Just now";
-    }
-
-    if (diff < hour) {
-      return `${Math.floor(diff / minute)}m`;
-    }
-
-    if (diff < day) {
-      return `${Math.floor(diff / hour)}h`;
-    }
-
-    if (diff < 7 * day) {
-      return `${Math.floor(diff / day)}d`;
-    }
-
-    return date.toLocaleDateString();
-
-  }
-
-
-  function formatText(text) {
-
-    let safe = escapeHTML(text || "");
-
-    safe = safe.replace(
-      /(^|\s)@([a-zA-Z0-9_]+)/g,
-      '$1<a href="/profile.html?username=$2">@$2</a>'
-    );
-
-    safe = safe.replace(
-      /(^|\s)#([a-zA-Z0-9_]+)/g,
-      '$1<a href="/feed.html?tag=$2">#$2</a>'
-    );
-
-    return safe;
-
-  }
-
-
-  function getUsernameFromURL() {
-
-    const params = new URLSearchParams(location.search);
-
-    return (
-      params.get("username") ||
-      params.get("user") ||
-      ""
-    ).trim();
-
-  }
-
-
-  function showToast(message) {
-
-    const toast = document.getElementById("toast");
-
-    toast.textContent = message;
-    toast.classList.add("show");
-
-    clearTimeout(window.__toastTimer);
-
-    window.__toastTimer = setTimeout(() => {
-      toast.classList.remove("show");
-    }, 2800);
-
-  }
-
-
-  function openModal(id) {
-
-    document.getElementById(id)?.classList.add("show");
-
-  }
-
-
-  function closeModal(id) {
-
-    document.getElementById(id)?.classList.remove("show");
-
-  }
-
-
-  /* =========================================================
+  /* =====================================================
      LOAD CURRENT USER
-  ========================================================= */
+  ===================================================== */
 
   async function loadMe() {
-
     try {
-
       const data = await api("/api/me");
 
-      if (!data.loggedIn || !data.user) {
+      me = data.user || data;
 
-        location.href = "/login.html";
-        return false;
-
-      }
-
-      currentUser = data.user;
-
-      updateCurrentUserUI();
-
-      return true;
+      return me;
 
     } catch (error) {
 
-      console.error(error);
+      console.error("Unable to load current user:", error);
 
-      location.href = "/login.html";
-
-      return false;
-
+      return null;
     }
-
   }
 
 
-  function updateCurrentUserUI() {
-
-    if (!currentUser) return;
-
-    const avatar = avatarUrl(currentUser);
-
-    document.getElementById("topAvatar").src = avatar;
-    document.getElementById("sideAvatar").src = avatar;
-
-    document.getElementById("sideName").textContent =
-      currentUser.name ||
-      currentUser.username ||
-      "User";
-
-    document.getElementById("sideUsername").textContent =
-      "@" + (currentUser.username || "");
-
-  }
-
-
-  /* =========================================================
+  /* =====================================================
      LOAD PROFILE
-  ========================================================= */
+  ===================================================== */
 
   async function loadProfile() {
 
-    const username = getUsernameFromURL();
-
     try {
 
-      let data;
+      let username = requestedUsername;
 
-      if (username) {
+      if (!username) {
 
-        data = await api(
-          `/api/users/${encodeURIComponent(username)}`
-        );
+        if (!me) {
+          await loadMe();
+        }
 
-      } else {
-
-        data = {
-          success: true,
-          user: currentUser
-        };
-
+        username = me?.username;
       }
 
-      profileUser =
-        data.user ||
-        data.profile ||
-        data;
-
-      if (!profileUser || !profileUser.username) {
-        throw new Error("Profile not found.");
+      if (!username) {
+        window.location.href = "/login.html";
+        return;
       }
 
-      renderProfile(profileUser);
+      const data = await api(
+        `/api/users/${encodeURIComponent(username)}`
+      );
 
-      await Promise.all([
-        loadProfilePosts(),
-        loadSuggestions()
-      ]);
+      profile = data.user || data.profile || data;
+
+      renderProfile();
+
+      await loadPosts(username);
 
     } catch (error) {
 
-      console.error(error);
+      console.error("Profile loading error:", error);
 
-      document.getElementById("profileContainer").innerHTML = `
-        <div class="profile-card">
-          <div class="empty">
-            <div style="font-size:45px;margin-bottom:10px;">😕</div>
-            <h2>Profile not found</h2>
-            <p style="margin-top:7px;">
-              ${escapeHTML(error.message)}
-            </p>
-            <button
-              class="btn btn-primary"
-              style="margin-top:16px;"
-              onclick="location.href='/feed.html'"
-            >
-              Go Home
-            </button>
+      $("loading").innerHTML = `
+        <div style="
+          text-align:center;
+          padding:30px;
+          color:#aaa;
+        ">
+          <div style="
+            font-size:40px;
+            margin-bottom:10px;
+          ">⚠</div>
+
+          <div style="
+            color:white;
+            font-weight:700;
+            margin-bottom:5px;
+          ">
+            Unable to load profile
+          </div>
+
+          <div>
+            ${escapeHTML(error.message)}
           </div>
         </div>
       `;
-
-      document.getElementById("postsSection").innerHTML = "";
-
     }
-
   }
 
 
-  /* =========================================================
+  /* =====================================================
      RENDER PROFILE
-  ========================================================= */
+  ===================================================== */
 
-  function renderProfile(user) {
+  function renderProfile() {
 
-    const isMe =
-      currentUser &&
-      String(currentUser.id) === String(user.id);
+    const username =
+      profile.username ||
+      requestedUsername ||
+      "";
 
-    const following =
-      user.isFollowing === true ||
-      user.following === true;
+    const name =
+      profile.name ||
+      username ||
+      "User";
 
-    const followersCount =
-      Number(
-        user.followersCount ??
-        user.followerCount ??
-        user.followers ??
-        0
-      );
-
-    const followingCount =
-      Number(
-        user.followingCount ??
-        user.following ??
-        0
-      );
-
-    const postsCount =
-      Number(
-        user.postsCount ??
-        user.postCount ??
-        0
-      );
-
-    const bio =
-      user.bio ||
-      "No bio yet.";
+    const verified = isVerified(profile);
 
     document.title =
-      `${user.name || user.username} • Pulse Social`;
+      `${name} (@${username}) • Pulse Social`;
 
-    document.getElementById("profileContainer").innerHTML = `
+    $("topUsername").textContent =
+      "@" + username;
 
-      <div class="profile-card">
+    $("displayName").textContent =
+      name;
 
-        <div class="cover">
+    $("handle").textContent =
+      "@" + username;
 
-          ${
-            isMe
-              ? `
-                <label class="cover-upload">
-                  📷 Change cover
-                  <input
-                    id="coverInput"
-                    type="file"
-                    accept="image/*"
-                    onchange="handleCoverUpload(this)"
-                  >
-                </label>
-              `
-              : ""
-          }
+    $("bio").textContent =
+      profile.bio || "";
 
-        </div>
+    $("followersCount").textContent =
+      formatNumber(profile.followersCount);
 
-        <div class="profile-info">
+    $("followingCount").textContent =
+      formatNumber(profile.followingCount);
 
-          <div class="profile-avatar-wrap">
+    /*
+      safeUser does not necessarily have a direct
+      likes total, so calculate it from posts later.
+    */
 
-            <img
-              class="profile-avatar"
-              id="profileAvatar"
-              src="${escapeHTML(avatarUrl(user))}"
-              alt="${escapeHTML(user.name || user.username)}"
-              onerror="this.src='${DEFAULT_AVATAR}'"
-            >
+    $("likesCount").textContent =
+      formatNumber(
+        profile.likesCount ||
+        profile.totalLikes ||
+        0
+      );
 
-            ${
-              isMe
-                ? `
-                  <label class="avatar-edit" title="Change profile picture">
-                    📷
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onchange="handleAvatarUpload(this)"
-                    >
-                  </label>
-                `
-                : ""
-            }
+    $("avatar").src =
+      getProfileImage(profile);
 
-          </div>
+    const cover =
+      getCoverImage(profile);
 
-          <div class="profile-main">
+    if (cover) {
 
-            <div>
+      $("coverImage").src = cover;
+      $("coverImage").style.display = "block";
 
-              <div class="profile-name-row">
+    } else {
 
-                <h1 class="profile-name">
-                  ${escapeHTML(
-                    user.name ||
-                    user.username ||
-                    "User"
-                  )}
-                </h1>
+      $("coverImage").style.display = "none";
+    }
 
-                ${verifiedBadge(user)}
+    if (verified) {
 
-              </div>
+      $("verifiedBadge").style.display =
+        "inline-flex";
 
-              <div class="username">
-                @${escapeHTML(user.username)}
-              </div>
+      $("topVerified").style.display =
+        "inline-flex";
 
-              <div class="bio">
-                ${formatText(bio)}
-              </div>
+    } else {
 
-            </div>
+      $("verifiedBadge").style.display =
+        "none";
 
-            <div class="profile-actions">
+      $("topVerified").style.display =
+        "none";
+    }
 
-              ${
-                isMe
-                  ? `
-                    <button
-                      class="btn btn-primary"
-                      onclick="openEditProfile()"
-                    >
-                      ✏️ Edit Profile
-                    </button>
-                  `
-                  : `
-                    <button
-                      id="followBtn"
-                      class="btn ${
-                        following
-                          ? "btn-outline"
-                          : "btn-primary"
-                      }"
-                      onclick="toggleFollow('${escapeHTML(user.id)}')"
-                    >
-                      ${
-                        following
-                          ? "Following"
-                          : "Follow"
-                      }
-                    </button>
+    const website =
+      profile.website ||
+      profile.link ||
+      profile.url;
 
-                    <button
-                      class="btn"
-                      onclick="messageUser()"
-                    >
-                      💬 Message
-                    </button>
-                  `
-              }
+    if (website) {
 
-            </div>
+      $("website").href =
+        website.startsWith("http")
+          ? website
+          : "https://" + website;
 
-          </div>
+      $("website").textContent =
+        website.replace(/^https?:\/\//, "");
 
-          <div class="profile-stats">
+      $("website").style.display =
+        "inline-block";
 
-            <div
-              class="stat"
-              onclick="showFollowers()"
-            >
-              <strong id="followersCount">
-                ${followersCount}
-              </strong>
-              <span>Followers</span>
-            </div>
+    } else {
 
-            <div
-              class="stat"
-              onclick="showFollowing()"
-            >
-              <strong id="followingCount">
-                ${followingCount}
-              </strong>
-              <span>Following</span>
-            </div>
+      $("website").style.display =
+        "none";
+    }
 
-            <div class="stat">
-              <strong>
-                ${postsCount}
-              </strong>
-              <span>Posts</span>
-            </div>
+    const ownProfile =
+      me &&
+      profile &&
+      String(me.id) === String(profile.id);
 
-          </div>
+    if (ownProfile) {
 
-        </div>
+      $("followBtn").style.display =
+        "none";
 
-      </div>
+      $("editBtn").style.display =
+        "flex";
 
-    `;
+      $("messageBtn").style.display =
+        "none";
 
-    renderAbout(user);
+      $("avatarEditBtn").style.display =
+        "flex";
 
+      $("coverEditBtn").style.display =
+        "flex";
+
+    } else {
+
+      $("followBtn").style.display =
+        "flex";
+
+      $("editBtn").style.display =
+        "none";
+
+      $("messageBtn").style.display =
+        "flex";
+
+      $("avatarEditBtn").style.display =
+        "none";
+
+      $("coverEditBtn").style.display =
+        "none";
+
+      updateFollowButton();
+    }
   }
 
 
-  /* =========================================================
-     ABOUT
-  ========================================================= */
+  /* =====================================================
+     FOLLOW BUTTON
+  ===================================================== */
 
-  function renderAbout(user) {
+  function updateFollowButton() {
 
-    const joined =
-      user.createdAt
-        ? new Date(user.createdAt).toLocaleDateString(
-            undefined,
-            {
-              year: "numeric",
-              month: "long"
-            }
-          )
-        : "Recently";
+    const following =
+      Boolean(profile?.isFollowing);
 
-    document.getElementById("aboutCard").innerHTML = `
+    const button =
+      $("followBtn");
 
-      <div class="section-title">
-        About
-      </div>
+    if (following) {
 
-      <div class="info-list">
+      button.textContent =
+        "Following";
 
-        <div class="info-item">
+      button.classList.add(
+        "following"
+      );
 
-          <div class="info-item-icon">
-            👤
-          </div>
+    } else {
 
-          <div>
-            <small>Name</small>
-            ${escapeHTML(user.name || user.username)}
-          </div>
+      button.textContent =
+        "Follow";
 
-        </div>
-
-        <div class="info-item">
-
-          <div class="info-item-icon">
-            @
-          </div>
-
-          <div>
-            <small>Username</small>
-            @${escapeHTML(user.username)}
-          </div>
-
-        </div>
-
-        ${
-          user.email && (
-            currentUser &&
-            String(currentUser.id) === String(user.id)
-          )
-            ? `
-              <div class="info-item">
-
-                <div class="info-item-icon">
-                  ✉️
-                </div>
-
-                <div>
-                  <small>Email</small>
-                  ${escapeHTML(user.email)}
-                </div>
-
-              </div>
-            `
-            : ""
-        }
-
-        <div class="info-item">
-
-          <div class="info-item-icon">
-            📅
-          </div>
-
-          <div>
-            <small>Joined Pulse</small>
-            ${escapeHTML(joined)}
-          </div>
-
-        </div>
-
-        <div class="info-item">
-
-          <div class="info-item-icon">
-            ✓
-          </div>
-
-          <div>
-            <small>Account status</small>
-
-            ${
-              user.verified === true ||
-              user.isVerified === true ||
-              user.verificationStatus === "approved"
-                ? "Verified"
-                : "Standard account"
-            }
-
-          </div>
-
-        </div>
-
-      </div>
-
-    `;
-
+      button.classList.remove(
+        "following"
+      );
+    }
   }
 
 
-  /* =========================================================
-     PROFILE POSTS
-  ========================================================= */
+  async function toggleFollow() {
 
-  async function loadProfilePosts() {
+    if (!profile?.id) return;
 
-    const section =
-      document.getElementById("postsSection");
+    const button =
+      $("followBtn");
 
-    section.innerHTML = `
-      <div class="loading">
-        <div class="loader"></div>
-        Loading posts...
-      </div>
-    `;
+    button.disabled = true;
 
     try {
 
       const data = await api(
-        `/api/users/${encodeURIComponent(profileUser.username)}/posts`
+        `/api/users/${profile.id}/follow`,
+        {
+          method: "POST"
+        }
+      );
+
+      if (
+        typeof data.following === "boolean"
+      ) {
+
+        profile.isFollowing =
+          data.following;
+
+      } else {
+
+        profile.isFollowing =
+          !profile.isFollowing;
+      }
+
+      if (profile.isFollowing) {
+
+        profile.followersCount =
+          Number(profile.followersCount || 0) + 1;
+
+      } else {
+
+        profile.followersCount =
+          Math.max(
+            0,
+            Number(profile.followersCount || 0) - 1
+          );
+      }
+
+      $("followersCount").textContent =
+        formatNumber(profile.followersCount);
+
+      updateFollowButton();
+
+    } catch (error) {
+
+      showToast(
+        error.message ||
+        "Unable to update follow"
+      );
+
+    } finally {
+
+      button.disabled = false;
+    }
+  }
+
+
+  /* =====================================================
+     LOAD POSTS
+  ===================================================== */
+
+  async function loadPosts(username) {
+
+    try {
+
+      const data = await api(
+        `/api/users/${encodeURIComponent(username)}/posts`
       );
 
       profilePosts =
-        Array.isArray(data)
-          ? data
-          : (
-              data.posts ||
-              data.items ||
-              []
-            );
+        data.posts ||
+        data ||
+        [];
 
-      renderProfilePosts();
+      renderPosts();
 
     } catch (error) {
 
-      console.error(error);
+      console.error(
+        "Unable to load profile posts:",
+        error
+      );
 
-      section.innerHTML = `
-        <div class="empty">
-          <div style="font-size:40px;">📭</div>
-          <h3 style="margin-top:8px;">
-            Unable to load posts
-          </h3>
-          <p style="margin-top:6px;">
-            ${escapeHTML(error.message)}
-          </p>
+      $("loading").style.display =
+        "none";
 
-          <button
-            class="btn btn-primary"
-            style="margin-top:15px;"
-            onclick="loadProfilePosts()"
-          >
-            Try Again
-          </button>
-        </div>
-      `;
+      $("postsGrid").style.display =
+        "none";
 
+      $("emptyPosts").style.display =
+        "flex";
+
+      $("emptyPosts").querySelector(
+        ".empty-title"
+      ).textContent =
+        "Unable to load posts";
     }
-
   }
 
 
-  function renderProfilePosts() {
+  /* =====================================================
+     RENDER POSTS
+  ===================================================== */
 
-    const section =
-      document.getElementById("postsSection");
+  function renderPosts() {
+
+    $("loading").style.display =
+      "none";
+
+    const grid =
+      $("postsGrid");
+
+    grid.innerHTML = "";
 
     if (!profilePosts.length) {
 
-      section.innerHTML = `
-        <div class="post">
-          <div class="empty">
-            <div style="font-size:50px;margin-bottom:10px;">
-              📝
-            </div>
+      grid.style.display =
+        "none";
 
-            <h3>
-              No posts yet
-            </h3>
-
-            <p style="margin-top:6px;">
-              ${
-                currentUser &&
-                profileUser &&
-                String(currentUser.id) === String(profileUser.id)
-                  ? "Your posts will appear here."
-                  : "This user hasn't posted anything yet."
-              }
-            </p>
-          </div>
-        </div>
-      `;
+      $("emptyPosts").style.display =
+        "flex";
 
       return;
-
     }
 
-    section.innerHTML =
-      profilePosts
-        .map(renderPost)
-        .join("");
+    $("emptyPosts").style.display =
+      "none";
 
-  }
+    grid.style.display =
+      "grid";
 
+    let totalLikes = 0;
 
-  /* =========================================================
-     POST RENDER
-  ========================================================= */
+    profilePosts.forEach(post => {
 
-  function renderPost(post) {
-
-    const user =
-      post.user ||
-      post.author ||
-      profileUser;
-
-    const liked =
-      post.liked === true ||
-      post.isLiked === true;
-
-    const likeCount =
-      Number(
-        post.likeCount ??
-        post.likesCount ??
-        post.likes ??
+      totalLikes += Number(
+        post.likesCount ||
+        post.likeCount ||
         0
       );
 
-    const commentCount =
-      Number(
-        post.commentCount ??
-        post.commentsCount ??
-        post.comments ??
-        0
-      );
+      const item =
+        document.createElement("div");
 
-    const image =
-      post.image ||
-      post.imageUrl ||
-      post.mediaUrl ||
-      "";
+      item.className =
+        "post-item";
 
-    const postId =
-      post.id ||
-      post._id;
+      const media =
+        postMedia(post);
 
-    const isOwner =
-      post.isOwner === true ||
-      (
-        currentUser &&
-        user &&
-        String(currentUser.id) === String(user.id)
-      );
+      const video =
+        isVideo(post);
 
-    const body =
-      post.text ||
-      post.content ||
-      "";
+      if (media) {
 
-    return `
+        if (video) {
 
-      <article
-        class="post"
-        id="post-${escapeHTML(postId)}"
-      >
+          item.innerHTML = `
+            <video
+              class="post-media"
+              src="${escapeHTML(media)}"
+              muted
+              playsinline
+              preload="metadata"
+            ></video>
 
-        <div class="post-head">
-
-          <img
-            class="post-avatar"
-            src="${escapeHTML(avatarUrl(user))}"
-            alt=""
-            onerror="this.src='${DEFAULT_AVATAR}'"
-          >
-
-          <div class="post-author">
-
-            <strong>
-
-              ${escapeHTML(
-                user?.name ||
-                user?.username ||
-                "User"
-              )}
-
-              ${verifiedBadge(user)}
-
-            </strong>
-
-            <small>
-              @${escapeHTML(
-                user?.username ||
-                ""
-              )}
-              ·
-              ${formatDate(
-                post.createdAt ||
-                post.date ||
-                post.timestamp
-              )}
-            </small>
-
-          </div>
-
-          ${
-            isOwner
-              ? `
-                <button
-                  class="post-menu"
-                  title="Delete post"
-                  onclick="deletePost('${escapeHTML(postId)}')"
-                >
-                  ⋯
-                </button>
-              `
-              : ""
-          }
-
-        </div>
-
-        ${
-          body
-            ? `
-              <div class="post-body">
-                ${formatText(body)}
-              </div>
-            `
-            : ""
-        }
-
-        ${
-          image
-            ? `
-              <img
-                class="post-image"
-                src="${escapeHTML(image)}"
-                alt="Post"
-                loading="lazy"
-                onclick="openImage('${escapeHTML(image)}')"
-                onerror="this.style.display='none'"
-              >
-            `
-            : ""
-        }
-
-        <div class="post-stats">
-
-          <span>
-            ${likeCount} ${
-              likeCount === 1
-                ? "Like"
-                : "Likes"
-            }
-          </span>
-
-          <span>
-            ${commentCount} ${
-              commentCount === 1
-                ? "Comment"
-                : "Comments"
-            }
-          </span>
-
-        </div>
-
-        <div class="post-actions">
-
-          <button
-            class="post-action ${liked ? "liked" : ""}"
-            onclick="toggleLike('${escapeHTML(postId)}')"
-          >
-            ${liked ? "👍 Liked" : "👍 Like"}
-          </button>
-
-          <button
-            class="post-action"
-            onclick="openComments('${escapeHTML(postId)}')"
-          >
-            💬 Comment
-          </button>
-
-          <button
-            class="post-action"
-            onclick="sharePost('${escapeHTML(postId)}')"
-          >
-            ↗ Share
-          </button>
-
-        </div>
-
-      </article>
-
-    `;
-
-  }
-
-
-  /* =========================================================
-     LIKE
-  ========================================================= */
-
-  async function toggleLike(postId) {
-
-    try {
-
-      await api(
-        `/api/posts/${encodeURIComponent(postId)}/like`,
-        {
-          method: "POST"
-        }
-      );
-
-      await loadProfilePosts();
-
-    } catch (error) {
-
-      showToast(error.message);
-
-    }
-
-  }
-
-
-  /* =========================================================
-     COMMENTS
-  ========================================================= */
-
-  async function openComments(postId) {
-
-    activePostId = postId;
-
-    openModal("commentsModal");
-
-    const list =
-      document.getElementById("commentsList");
-
-    list.innerHTML = `
-      <div class="loading">
-        <div class="loader"></div>
-        Loading comments...
-      </div>
-    `;
-
-    try {
-
-      const data = await api(
-        `/api/posts/${encodeURIComponent(postId)}/comments`
-      );
-
-      const comments =
-        Array.isArray(data)
-          ? data
-          : (
-              data.comments ||
-              data.items ||
-              []
-            );
-
-      if (!comments.length) {
-
-        list.innerHTML = `
-          <div class="empty" style="padding:25px;">
-            No comments yet.
-            <br>
-            Be the first to comment.
-          </div>
-        `;
-
-        return;
-
-      }
-
-      list.innerHTML =
-        comments.map(comment => {
-
-          const user =
-            comment.user ||
-            comment.author ||
-            {};
-
-          const owner =
-            currentUser &&
-            (
-              String(currentUser.id) ===
-              String(
-                comment.userId ||
-                user.id
-              )
-            );
-
-          return `
-
-            <div class="comment">
-
-              <img
-                src="${escapeHTML(avatarUrl(user))}"
-                onerror="this.src='${DEFAULT_AVATAR}'"
-              >
-
-              <div class="comment-bubble">
-
-                <strong>
-                  ${escapeHTML(
-                    user.name ||
-                    user.username ||
-                    "User"
-                  )}
-
-                  ${verifiedBadge(user)}
-
-                </strong>
-
-                <p>
-                  ${escapeHTML(
-                    comment.text ||
-                    comment.content ||
-                    ""
-                  )}
-                </p>
-
-                <small style="color:#65676b;">
-                  ${formatDate(
-                    comment.createdAt ||
-                    comment.timestamp
-                  )}
-
-                  ${
-                    owner
-                      ? `
-                        ·
-                        <button
-                          onclick="deleteComment('${escapeHTML(comment.id)}')"
-                          style="background:none;color:#e41e3f;font-size:11px;"
-                        >
-                          Delete
-                        </button>
-                      `
-                      : ""
-                  }
-
-                </small>
-
-              </div>
-
+            <div class="post-video-icon">
+              ▶
             </div>
 
+            <div class="post-stats">
+              ♥
+              ${formatNumber(
+                post.likesCount ||
+                post.likeCount ||
+                0
+              )}
+            </div>
           `;
-
-        }).join("");
-
-    } catch (error) {
-
-      list.innerHTML = `
-        <div class="empty">
-          Unable to load comments.
-          <br>
-          <small>
-            ${escapeHTML(error.message)}
-          </small>
-        </div>
-      `;
-
-    }
-
-  }
-
-
-  document
-    .getElementById("commentForm")
-    .addEventListener("submit", async event => {
-
-      event.preventDefault();
-
-      if (!activePostId) return;
-
-      const input =
-        document.getElementById("commentInput");
-
-      const text =
-        input.value.trim();
-
-      if (!text) return;
-
-      try {
-
-        await api(
-          `/api/posts/${encodeURIComponent(activePostId)}/comments`,
-          {
-            method: "POST",
-            body: JSON.stringify({ text })
-          }
-        );
-
-        input.value = "";
-
-        await openComments(activePostId);
-
-        await loadProfilePosts();
-
-      } catch (error) {
-
-        showToast(error.message);
-
-      }
-
-    });
-
-
-  async function deleteComment(commentId) {
-
-    if (!confirm("Delete this comment?")) return;
-
-    try {
-
-      await api(
-        `/api/comments/${encodeURIComponent(commentId)}`,
-        {
-          method: "DELETE"
-        }
-      );
-
-      await openComments(activePostId);
-
-      await loadProfilePosts();
-
-    } catch (error) {
-
-      showToast(error.message);
-
-    }
-
-  }
-
-
-  /* =========================================================
-     DELETE POST
-  ========================================================= */
-
-  async function deletePost(postId) {
-
-    if (!confirm("Delete this post?")) {
-      return;
-    }
-
-    try {
-
-      await api(
-        `/api/posts/${encodeURIComponent(postId)}`,
-        {
-          method: "DELETE"
-        }
-      );
-
-      showToast("Post deleted.");
-
-      await loadProfilePosts();
-
-    } catch (error) {
-
-      showToast(error.message);
-
-    }
-
-  }
-
-
-  /* =========================================================
-     FOLLOW
-  ========================================================= */
-
-  async function toggleFollow(userId) {
-
-    if (!userId) return;
-
-    const button =
-      document.getElementById("followBtn");
-
-    if (button) {
-      button.disabled = true;
-    }
-
-    try {
-
-      const data = await api(
-        `/api/users/${encodeURIComponent(userId)}/follow`,
-        {
-          method: "POST"
-        }
-      );
-
-      const following =
-        data.following === true ||
-        data.isFollowing === true;
-
-      if (button) {
-
-        button.textContent =
-          following
-            ? "Following"
-            : "Follow";
-
-        button.className =
-          `btn ${
-            following
-              ? "btn-outline"
-              : "btn-primary"
-          }`;
-
-        button.disabled = false;
-
-      }
-
-      profileUser.isFollowing = following;
-      profileUser.following = following;
-
-      if (following) {
-        showToast("Following @" + profileUser.username);
-      } else {
-        showToast("Unfollowed @" + profileUser.username);
-      }
-
-      updateFollowerCount(following);
-
-    } catch (error) {
-
-      if (button) {
-        button.disabled = false;
-      }
-
-      showToast(error.message);
-
-    }
-
-  }
-
-
-  function updateFollowerCount(following) {
-
-    const element =
-      document.getElementById("followersCount");
-
-    if (!element) return;
-
-    const current =
-      Number(element.textContent) || 0;
-
-    element.textContent =
-      Math.max(
-        0,
-        current + (following ? 1 : -1)
-      );
-
-  }
-
-
-  /* =========================================================
-     FOLLOWERS
-  ========================================================= */
-
-  async function showFollowers() {
-
-    if (!profileUser?.id) return;
-
-    try {
-
-      const data = await api(
-        `/api/users/${encodeURIComponent(profileUser.id)}/followers`
-      );
-
-      const users =
-        Array.isArray(data)
-          ? data
-          : (
-              data.users ||
-              data.followers ||
-              []
-            );
-
-      if (!users.length) {
-        showToast("No followers yet.");
-        return;
-      }
-
-      showUserList(
-        "Followers",
-        users
-      );
-
-    } catch (error) {
-
-      showToast(error.message);
-
-    }
-
-  }
-
-
-  /* =========================================================
-     FOLLOWING
-  ========================================================= */
-
-  async function showFollowing() {
-
-    if (!profileUser?.id) return;
-
-    try {
-
-      const data = await api(
-        `/api/users/${encodeURIComponent(profileUser.id)}/following`
-      );
-
-      const users =
-        Array.isArray(data)
-          ? data
-          : (
-              data.users ||
-              data.following ||
-              []
-            );
-
-      if (!users.length) {
-        showToast("Not following anyone yet.");
-        return;
-      }
-
-      showUserList(
-        "Following",
-        users
-      );
-
-    } catch (error) {
-
-      showToast(error.message);
-
-    }
-
-  }
-
-
-  function showUserList(title, users) {
-
-    const html = users.map(user => `
-
-      <div class="suggestion">
-
-        <img
-          src="${escapeHTML(avatarUrl(user))}"
-          onerror="this.src='${DEFAULT_AVATAR}'"
-        >
-
-        <div class="suggestion-main">
-
-          <strong>
-            ${escapeHTML(
-              user.name ||
-              user.username
-            )}
-
-            ${verifiedBadge(user)}
-
-          </strong>
-
-          <small>
-            @${escapeHTML(
-              user.username ||
-              ""
-            )}
-          </small>
-
-        </div>
-
-        <button
-          class="mini-follow"
-          onclick="location.href='/profile.html?username=${encodeURIComponent(user.username || "")}'"
-        >
-          View
-        </button>
-
-      </div>
-
-    `).join("");
-
-    document.getElementById("suggestions").innerHTML = `
-      <div class="right-title">
-        ${escapeHTML(title)}
-      </div>
-      ${html}
-    `;
-
-  }
-
-
-  /* =========================================================
-     SUGGESTIONS
-  ========================================================= */
-
-  async function loadSuggestions() {
-
-    const container =
-      document.getElementById("suggestions");
-
-    try {
-
-      const data = await api(
-        "/api/search?q=a"
-      );
-
-      let users =
-        Array.isArray(data)
-          ? data
-          : (
-              data.users ||
-              data.results ||
-              []
-            );
-
-      users = users
-        .filter(user =>
-          !currentUser ||
-          String(user.id) !==
-          String(currentUser.id)
-        )
-        .filter(user =>
-          !profileUser ||
-          String(user.id) !==
-          String(profileUser.id)
-        )
-        .slice(0, 5);
-
-      if (!users.length) {
-
-        container.innerHTML = `
-          <div class="empty" style="padding:20px;">
-            No suggestions right now.
-          </div>
-        `;
-
-        return;
-
-      }
-
-      container.innerHTML =
-        users.map(user => `
-
-          <div class="suggestion">
-
-            <img
-              src="${escapeHTML(avatarUrl(user))}"
-              onerror="this.src='${DEFAULT_AVATAR}'"
-            >
-
-            <div class="suggestion-main">
-
-              <strong>
-
-                ${escapeHTML(
-                  user.name ||
-                  user.username ||
-                  "User"
-                )}
-
-                ${verifiedBadge(user)}
-
-              </strong>
-
-              <small>
-                @${escapeHTML(
-                  user.username ||
-                  ""
-                )}
-              </small>
-
-            </div>
-
-            <button
-              class="mini-follow"
-              onclick="location.href='/profile.html?username=${encodeURIComponent(user.username || "")}'"
-            >
-              View
-            </button>
-
-          </div>
-
-        `).join("");
-
-    } catch (error) {
-
-      console.error(error);
-
-      container.innerHTML = `
-        <div class="empty" style="padding:20px;">
-          Suggestions unavailable.
-        </div>
-      `;
-
-    }
-
-  }
-
-
-  /* =========================================================
-     EDIT PROFILE
-  ========================================================= */
-
-  function openEditProfile() {
-
-    if (!profileUser) return;
-
-    document.getElementById("editName").value =
-      profileUser.name || "";
-
-    document.getElementById("editUsername").value =
-      profileUser.username || "";
-
-    document.getElementById("editEmail").value =
-      profileUser.email || "";
-
-    document.getElementById("editBio").value =
-      profileUser.bio || "";
-
-    openModal("editModal");
-
-  }
-
-
-  document
-    .getElementById("editForm")
-    .addEventListener("submit", async event => {
-
-      event.preventDefault();
-
-      const name =
-        document.getElementById("editName")
-          .value
-          .trim();
-
-      const bio =
-        document.getElementById("editBio")
-          .value
-          .trim();
-
-      if (!name) {
-
-        showToast("Name is required.");
-        return;
-
-      }
-
-      try {
-
-        const data = await api(
-          "/api/profile",
-          {
-            method: "PUT",
-            body: JSON.stringify({
-              name,
-              bio
-            })
-          }
-        );
-
-        const updated =
-          data.user ||
-          data.profile ||
-          data;
-
-        if (updated && updated.username) {
-
-          currentUser = {
-            ...currentUser,
-            ...updated
-          };
-
-          profileUser = {
-            ...profileUser,
-            ...updated
-          };
 
         } else {
 
-          profileUser.name = name;
-          profileUser.bio = bio;
+          item.innerHTML = `
+            <img
+              class="post-media"
+              src="${escapeHTML(media)}"
+              alt="Post"
+              loading="lazy"
+            />
 
-          currentUser.name = name;
-          currentUser.bio = bio;
-
+            <div class="post-stats">
+              ♥
+              ${formatNumber(
+                post.likesCount ||
+                post.likeCount ||
+                0
+              )}
+            </div>
+          `;
         }
 
-        renderProfile(profileUser);
-        updateCurrentUserUI();
+      } else {
 
-        closeModal("editModal");
+        item.innerHTML = `
+          <div style="
+            width:100%;
+            height:100%;
+            padding:14px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            text-align:center;
+            background:
+              linear-gradient(
+                135deg,
+                #151515,
+                #272727
+              );
+            font-size:14px;
+            line-height:1.45;
+            color:#eee;
+          ">
+            ${escapeHTML(
+              post.text ||
+              post.caption ||
+              "Post"
+            )}
+          </div>
 
-        showToast("Profile updated.");
-
-      } catch (error) {
-
-        showToast(error.message);
-
+          <div class="post-stats">
+            ♥
+            ${formatNumber(
+              post.likesCount ||
+              post.likeCount ||
+              0
+            )}
+          </div>
+        `;
       }
 
+      item.addEventListener(
+        "click",
+        () => openPost(post)
+      );
+
+      grid.appendChild(item);
     });
 
+    if (
+      !profile.likesCount &&
+      !profile.totalLikes
+    ) {
 
-  /* =========================================================
-     PROFILE PICTURE
-  ========================================================= */
+      $("likesCount").textContent =
+        formatNumber(totalLikes);
+    }
+  }
 
-  async function handleAvatarUpload(input) {
 
-    const file = input.files?.[0];
+  /* =====================================================
+     OPEN POST
+  ===================================================== */
+
+  function openPost(post) {
+
+    /*
+      Open the main feed with the selected
+      post when possible.
+    */
+
+    if (post.id) {
+
+      window.location.href =
+        `/feed.html?post=${encodeURIComponent(post.id)}`;
+
+    } else {
+
+      window.location.href =
+        "/feed.html";
+    }
+  }
+
+
+  /* =====================================================
+     EDIT PHOTOS
+  ===================================================== */
+
+  async function uploadProfilePicture(file) {
 
     if (!file) return;
 
-    if (!file.type.startsWith("image/")) {
-
-      showToast("Please choose an image.");
-
-      input.value = "";
-      return;
-
-    }
-
-    if (file.size > 10 * 1024 * 1024) {
-
-      showToast("Image must be smaller than 10MB.");
-
-      input.value = "";
-      return;
-
-    }
-
-    const formData = new FormData();
-
-    /*
-      IMPORTANT:
-      Your Pulse server expects the field:
-      profilePicture
-    */
+    const formData =
+      new FormData();
 
     formData.append(
       "profilePicture",
       file
     );
 
-    try {
-
-      showToast("Uploading profile picture...");
-
-      const data = await api(
-        "/api/profile/picture",
-        {
-          method: "POST",
-          body: formData
-        }
-      );
-
-      const updated =
-        data.user ||
-        data.profile ||
-        data;
-
-      const newAvatar =
-        updated.profilePicture ||
-        updated.profileImage ||
-        updated.avatar ||
-        data.profilePicture ||
-        data.url;
-
-      if (newAvatar) {
-
-        profileUser.profilePicture =
-          newAvatar;
-
-        currentUser.profilePicture =
-          newAvatar;
-
-        document.getElementById(
-          "profileAvatar"
-        ).src = newAvatar;
-
-        updateCurrentUserUI();
-
+    await api(
+      "/api/profile/picture",
+      {
+        method: "POST",
+        body: formData
       }
-
-      showToast("Profile picture updated.");
-
-    } catch (error) {
-
-      showToast(error.message);
-
-    }
-
-    input.value = "";
-
+    );
   }
 
 
-  /* =========================================================
-     COVER IMAGE
-     
-     Current server does not expose a dedicated
-     cover-photo endpoint, so this safely informs
-     the user instead of making a broken request.
-  ========================================================= */
-
-  async function handleCoverUpload(input) {
-
-    const file = input.files?.[0];
+  async function uploadCover(file) {
 
     if (!file) return;
 
-    showToast(
-      "Cover photo upload needs the cover-photo API on the server."
+    const formData =
+      new FormData();
+
+    formData.append(
+      "coverPhoto",
+      file
     );
 
-    input.value = "";
-
+    await api(
+      "/api/profile/cover",
+      {
+        method: "POST",
+        body: formData
+      }
+    );
   }
 
 
-  /* =========================================================
-     MESSAGE USER
-  ========================================================= */
+  async function savePhotos() {
 
-  function messageUser() {
+    const profileFile =
+      $("profilePictureInput").files[0];
 
-    if (!profileUser?.id) return;
+    const coverFile =
+      $("coverPhotoInput").files[0];
 
-    location.href =
-      `/messages.html?user=${encodeURIComponent(profileUser.id)}`;
+    if (!profileFile && !coverFile) {
 
-  }
+      showToast(
+        "Choose a profile or cover photo first"
+      );
 
+      return;
+    }
 
-  /* =========================================================
-     IMAGE VIEWER
-  ========================================================= */
+    const button =
+      $("savePhotosBtn");
 
-  function openImage(src) {
-
-    if (!src) return;
-
-    document.getElementById(
-      "imageModalImg"
-    ).src = src;
-
-    openModal("imageModal");
-
-  }
-
-
-  /* =========================================================
-     SHARE
-  ========================================================= */
-
-  async function sharePost(postId) {
-
-    const url =
-      `${location.origin}/profile.html?username=${encodeURIComponent(profileUser.username)}#post-${postId}`;
-
-    const title =
-      `${profileUser.name || profileUser.username} on Pulse`;
+    button.disabled = true;
+    button.textContent =
+      "Saving...";
 
     try {
 
-      if (navigator.share) {
+      if (profileFile) {
+        await uploadProfilePicture(
+          profileFile
+        );
+      }
 
-        await navigator.share({
-          title,
-          url
-        });
+      if (coverFile) {
+        await uploadCover(
+          coverFile
+        );
+      }
+
+      showToast(
+        "Profile updated"
+      );
+
+      closeModal("editModal");
+
+      await loadMe();
+      await loadProfile();
+
+    } catch (error) {
+
+      console.error(error);
+
+      showToast(
+        error.message ||
+        "Unable to update profile"
+      );
+
+    } finally {
+
+      button.disabled = false;
+      button.textContent =
+        "Save photos";
+    }
+  }
+
+
+  /* =====================================================
+     SHARE PROFILE
+  ===================================================== */
+
+  async function shareProfile() {
+
+    const username =
+      profile?.username ||
+      requestedUsername ||
+      "";
+
+    const shareUrl =
+      `${window.location.origin}/profile.html?username=${encodeURIComponent(username)}`;
+
+    const shareData = {
+      title:
+        `${profile?.name || username} on Pulse Social`,
+      text:
+        `Check out @${username} on Pulse Social.`,
+      url: shareUrl
+    };
+
+    try {
+
+      if (
+        navigator.share &&
+        typeof navigator.share === "function"
+      ) {
+
+        await navigator.share(
+          shareData
+        );
 
       } else {
 
-        await navigator.clipboard.writeText(url);
+        await navigator.clipboard.writeText(
+          shareUrl
+        );
 
-        showToast("Post link copied.");
-
+        showToast(
+          "Profile link copied"
+        );
       }
 
     } catch (error) {
 
-      if (error.name !== "AbortError") {
+      if (
+        error?.name !==
+        "AbortError"
+      ) {
 
         try {
 
-          await navigator.clipboard.writeText(url);
+          await navigator.clipboard.writeText(
+            shareUrl
+          );
 
-          showToast("Post link copied.");
+          showToast(
+            "Profile link copied"
+          );
 
         } catch {
-
-          showToast("Unable to share post.");
-
+          showToast(
+            "Unable to share profile"
+          );
         }
-
       }
-
     }
-
   }
 
 
-  /* =========================================================
-     PROFILE TABS
-  ========================================================= */
+  /* =====================================================
+     MESSAGE
+  ===================================================== */
 
-  function switchProfileTab(tab) {
+  function messageUser() {
 
-    const posts =
-      document.getElementById("postsSection");
+    if (!profile?.id) return;
 
-    const about =
-      document.getElementById("aboutSection");
+    window.location.href =
+      `/messages.html?user=${encodeURIComponent(profile.id)}`;
+  }
 
-    const postsTab =
-      document.getElementById("postsTab");
 
-    const aboutTab =
-      document.getElementById("aboutTab");
+  /* =====================================================
+     VERIFICATION
+  ===================================================== */
 
-    if (tab === "about") {
+  async function requestVerification() {
 
-      posts.style.display = "none";
-      about.style.display = "block";
+    closeModal("moreModal");
 
-      postsTab.classList.remove("active");
-      aboutTab.classList.add("active");
+    try {
 
-    } else {
+      window.location.href =
+        "/verification.html";
 
-      posts.style.display = "block";
-      about.style.display = "none";
+    } catch {
 
-      postsTab.classList.add("active");
-      aboutTab.classList.remove("active");
-
+      showToast(
+        "Unable to open verification"
+      );
     }
-
   }
 
 
-  /* =========================================================
-     GLOBAL SEARCH
-  ========================================================= */
-
-  document
-    .getElementById("globalSearch")
-    .addEventListener("keydown", event => {
-
-      if (event.key !== "Enter") return;
-
-      const query =
-        event.target.value.trim();
-
-      if (!query) return;
-
-      location.href =
-        `/feed.html?search=${encodeURIComponent(query)}`;
-
-    });
-
-
-  /* =========================================================
-     MY PROFILE
-  ========================================================= */
-
-  function goMyProfile() {
-
-    if (!currentUser?.username) return;
-
-    location.href =
-      `/profile.html?username=${encodeURIComponent(currentUser.username)}`;
-
-  }
-
-
-  /* =========================================================
+  /* =====================================================
      LOGOUT
-  ========================================================= */
+  ===================================================== */
 
   async function logout() {
 
@@ -3448,70 +2055,223 @@
         }
       );
 
+      window.location.href =
+        "/login.html";
+
     } catch (error) {
 
-      console.error(error);
-
+      showToast(
+        error.message ||
+        "Unable to log out"
+      );
     }
-
-    location.href = "/login.html";
-
   }
 
 
-  /* =========================================================
-     ESC KEY
-  ========================================================= */
+  /* =====================================================
+     CREATE
+  ===================================================== */
 
-  document.addEventListener("keydown", event => {
+  function openCreate() {
 
-    if (event.key === "Escape") {
+    /*
+      The new TikTok-style feed owns the
+      Create flow.
+    */
 
-      document
-        .querySelectorAll(".modal.show")
-        .forEach(modal => {
-          modal.classList.remove("show");
-        });
+    window.location.href =
+      "/feed.html?create=1";
+  }
 
+
+  /* =====================================================
+     EVENT LISTENERS
+  ===================================================== */
+
+  $("backBtn").addEventListener(
+    "click",
+    () => {
+
+      if (
+        window.history.length > 1
+      ) {
+
+        window.history.back();
+
+      } else {
+
+        window.location.href =
+          "/feed.html";
+      }
     }
+  );
 
-  });
+
+  $("followBtn").addEventListener(
+    "click",
+    toggleFollow
+  );
 
 
-  /* =========================================================
-     CLOSE MODAL WHEN CLICKING BACKDROP
-  ========================================================= */
+  $("editBtn").addEventListener(
+    "click",
+    () => openModal("editModal")
+  );
 
-  document
-    .querySelectorAll(".modal")
+
+  $("messageBtn").addEventListener(
+    "click",
+    messageUser
+  );
+
+
+  $("shareProfileBtn").addEventListener(
+    "click",
+    shareProfile
+  );
+
+
+  $("menuBtn").addEventListener(
+    "click",
+    () => openModal("moreModal")
+  );
+
+
+  $("moreBtn").addEventListener(
+    "click",
+    () => openModal("moreModal")
+  );
+
+
+  $("avatarEditBtn").addEventListener(
+    "click",
+    () => openModal("editModal")
+  );
+
+
+  $("coverEditBtn").addEventListener(
+    "click",
+    () => openModal("editModal")
+  );
+
+
+  $("savePhotosBtn").addEventListener(
+    "click",
+    savePhotos
+  );
+
+
+  $("verificationBtn").addEventListener(
+    "click",
+    requestVerification
+  );
+
+
+  $("logoutBtn").addEventListener(
+    "click",
+    logout
+  );
+
+
+  $("followersStat").addEventListener(
+    "click",
+    () => {
+
+      if (!profile?.username) return;
+
+      window.location.href =
+        `/profile.html?username=${encodeURIComponent(profile.username)}&tab=followers`;
+    }
+  );
+
+
+  $("followingStat").addEventListener(
+    "click",
+    () => {
+
+      if (!profile?.username) return;
+
+      window.location.href =
+        `/profile.html?username=${encodeURIComponent(profile.username)}&tab=following`;
+    }
+  );
+
+
+  /* =====================================================
+     CLOSE MODALS WHEN CLICKING OUTSIDE
+  ===================================================== */
+
+  document.querySelectorAll(".modal")
     .forEach(modal => {
 
-      modal.addEventListener("click", event => {
+      modal.addEventListener(
+        "click",
+        event => {
 
-        if (event.target === modal) {
+          if (
+            event.target === modal
+          ) {
 
-          modal.classList.remove("show");
-
+            modal.classList.remove(
+              "show"
+            );
+          }
         }
-
-      });
-
+      );
     });
 
 
-  /* =========================================================
-     INIT
-  ========================================================= */
+  /* =====================================================
+     ESCAPE KEY
+  ===================================================== */
+
+  document.addEventListener(
+    "keydown",
+    event => {
+
+      if (
+        event.key === "Escape"
+      ) {
+
+        document
+          .querySelectorAll(".modal.show")
+          .forEach(modal => {
+            modal.classList.remove(
+              "show"
+            );
+          });
+      }
+    }
+  );
+
+
+  /* =====================================================
+     INITIALIZE
+  ===================================================== */
 
   async function init() {
 
-    const loggedIn =
+    try {
+
       await loadMe();
 
-    if (!loggedIn) return;
+      if (!me) {
 
-    await loadProfile();
+        window.location.href =
+          "/login.html";
 
+        return;
+      }
+
+      await loadProfile();
+
+    } catch (error) {
+
+      console.error(
+        "Profile initialization error:",
+        error
+      );
+    }
   }
 
   init();
