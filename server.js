@@ -1,97 +1,100 @@
 /*
-============================================================
+===========================================================
  PULSE SOCIAL
- Full Node.js + Express Social Media Server
- JSON File Storage
-============================================================
+ Production Node.js + Express Server
+ JSON Storage + Railway Persistent Volume
+===========================================================
 
-ROLES:
-  user
-  admin
-  superadmin
+RAILWAY VOLUME:
+  Mount path:
+    /app/storage
 
-FEATURES:
-  - Registration
-  - Login / Logout
-  - Sessions
-  - Profiles
-  - Profile picture
-  - Cover photo
-  - Posts
-  - Post images
-  - Likes
-  - Comments
-  - Follow / unfollow
-  - Followers
-  - Following
-  - Search
-  - Notifications
-  - Private messaging
-  - Message images
-  - Unread messages
-  - Verification requests
-  - Admin verification
-  - Admin statistics
-  - JSON storage
-============================================================
+RAILWAY VARIABLE:
+  STORAGE_ROOT=/app/storage
+
+LOCAL DEVELOPMENT:
+  STORAGE_ROOT defaults to ./storage
+
+REQUIRED PACKAGES:
+  npm install express express-session bcryptjs dotenv multer
+
+START:
+  node server.js
+===========================================================
 */
+
+require("dotenv").config();
 
 const express = require("express");
 const session = require("express-session");
 const bcrypt = require("bcryptjs");
-const dotenv = require("dotenv");
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 const crypto = require("crypto");
 
-dotenv.config();
-
 const app = express();
+
+/* =========================================================
+   CONFIG
+========================================================= */
 
 const PORT = Number(process.env.PORT || 3000);
 const HOST = process.env.HOST || "0.0.0.0";
 
-const SESSION_SECRET =
-  process.env.SESSION_SECRET || "pulse-social-change-this-secret";
+const IS_PRODUCTION =
+  String(process.env.NODE_ENV || "").toLowerCase() === "production";
 
-const ADMIN_USERNAME =
-  String(process.env.ADMIN_USERNAME || "")
-    .trim()
-    .toLowerCase();
+const SESSION_SECRET =
+  process.env.SESSION_SECRET || "pulse-social-development-secret";
+
+const ADMIN_USERNAME = String(
+  process.env.ADMIN_USERNAME || ""
+).trim().toLowerCase();
+
+/*
+  Railway:
+    STORAGE_ROOT=/app/storage
+
+  Local:
+    ./storage
+*/
+const STORAGE_ROOT = path.resolve(
+  process.env.STORAGE_ROOT || path.join(__dirname, "storage")
+);
+
+const DATA_DIR = path.join(STORAGE_ROOT, "data");
+const UPLOADS_DIR = path.join(STORAGE_ROOT, "uploads");
+
+const PROFILE_UPLOAD_DIR = path.join(UPLOADS_DIR, "profiles");
+const COVER_UPLOAD_DIR = path.join(UPLOADS_DIR, "covers");
+const POST_UPLOAD_DIR = path.join(UPLOADS_DIR, "posts");
+const MESSAGE_UPLOAD_DIR = path.join(UPLOADS_DIR, "messages");
+
+const PUBLIC_DIR = path.join(__dirname, "public");
 
 /* =========================================================
-   DIRECTORIES
+   DATA FILES
 ========================================================= */
 
-const ROOT = __dirname;
-
-const DATA_DIR = path.join(ROOT, "data");
-const UPLOADS_DIR = path.join(ROOT, "uploads");
-
-const PROFILE_UPLOAD_DIR = path.join(
-  UPLOADS_DIR,
-  "profiles"
+const USERS_FILE = path.join(DATA_DIR, "users.json");
+const POSTS_FILE = path.join(DATA_DIR, "posts.json");
+const COMMENTS_FILE = path.join(DATA_DIR, "comments.json");
+const LIKES_FILE = path.join(DATA_DIR, "likes.json");
+const FOLLOWS_FILE = path.join(DATA_DIR, "follows.json");
+const NOTIFICATIONS_FILE = path.join(DATA_DIR, "notifications.json");
+const MESSAGES_FILE = path.join(DATA_DIR, "messages.json");
+const VERIFICATION_FILE = path.join(
+  DATA_DIR,
+  "verification_requests.json"
 );
 
-const COVER_UPLOAD_DIR = path.join(
-  UPLOADS_DIR,
-  "covers"
-);
-
-const POST_UPLOAD_DIR = path.join(
-  UPLOADS_DIR,
-  "posts"
-);
-
-const MESSAGE_UPLOAD_DIR = path.join(
-  UPLOADS_DIR,
-  "messages"
-);
-
-const PUBLIC_DIR = path.join(ROOT, "public");
+/* =========================================================
+   CREATE DIRECTORIES
+========================================================= */
 
 [
+  STORAGE_ROOT,
   DATA_DIR,
   UPLOADS_DIR,
   PROFILE_UPLOAD_DIR,
@@ -99,55 +102,9 @@ const PUBLIC_DIR = path.join(ROOT, "public");
   POST_UPLOAD_DIR,
   MESSAGE_UPLOAD_DIR,
   PUBLIC_DIR
-].forEach(dir => {
-  fs.mkdirSync(dir, {
-    recursive: true
-  });
+].forEach((dir) => {
+  fs.mkdirSync(dir, { recursive: true });
 });
-
-/* =========================================================
-   DATA FILES
-========================================================= */
-
-const USERS_FILE = path.join(
-  DATA_DIR,
-  "users.json"
-);
-
-const POSTS_FILE = path.join(
-  DATA_DIR,
-  "posts.json"
-);
-
-const COMMENTS_FILE = path.join(
-  DATA_DIR,
-  "comments.json"
-);
-
-const LIKES_FILE = path.join(
-  DATA_DIR,
-  "likes.json"
-);
-
-const FOLLOWS_FILE = path.join(
-  DATA_DIR,
-  "follows.json"
-);
-
-const NOTIFICATIONS_FILE = path.join(
-  DATA_DIR,
-  "notifications.json"
-);
-
-const MESSAGES_FILE = path.join(
-  DATA_DIR,
-  "messages.json"
-);
-
-const VERIFICATION_FILE = path.join(
-  DATA_DIR,
-  "verification_requests.json"
-);
 
 /* =========================================================
    JSON HELPERS
@@ -157,7 +114,8 @@ function ensureJSONFile(file, defaultValue = []) {
   if (!fs.existsSync(file)) {
     fs.writeFileSync(
       file,
-      JSON.stringify(defaultValue, null, 2)
+      JSON.stringify(defaultValue, null, 2),
+      "utf8"
     );
   }
 }
@@ -171,57 +129,604 @@ function ensureJSONFile(file, defaultValue = []) {
   NOTIFICATIONS_FILE,
   MESSAGES_FILE,
   VERIFICATION_FILE
-].forEach(file => ensureJSONFile(file, []));
+].forEach((file) => ensureJSONFile(file, []));
 
-function readJSON(file) {
+function readJSON(file, fallback = []) {
   try {
-    const raw = fs.readFileSync(file, "utf8");
-
-    if (!raw.trim()) {
-      return [];
+    if (!fs.existsSync(file)) {
+      ensureJSONFile(file, fallback);
+      return fallback;
     }
 
-    return JSON.parse(raw);
-  } catch (error) {
-    console.error(
-      "JSON READ ERROR:",
-      file,
-      error.message
-    );
+    const raw = fs.readFileSync(file, "utf8").trim();
 
-    return [];
+    if (!raw) {
+      return fallback;
+    }
+
+    const parsed = JSON.parse(raw);
+
+    return parsed;
+  } catch (error) {
+    console.error("JSON READ ERROR:", file, error.message);
+    return fallback;
   }
 }
 
 function writeJSON(file, data) {
-  fs.writeFileSync(
-    file,
-    JSON.stringify(data, null, 2)
-  );
+  const tempFile = `${file}.tmp`;
+
+  try {
+    fs.writeFileSync(
+      tempFile,
+      JSON.stringify(data, null, 2),
+      "utf8"
+    );
+
+    fs.renameSync(tempFile, file);
+  } catch (error) {
+    console.error("JSON WRITE ERROR:", file, error.message);
+
+    try {
+      if (fs.existsSync(tempFile)) {
+        fs.unlinkSync(tempFile);
+      }
+    } catch (_) {}
+
+    throw error;
+  }
 }
 
-function generateId(prefix = "") {
-  return (
-    prefix +
-    Date.now().toString(36) +
-    crypto
-      .randomBytes(8)
-      .toString("hex")
-  );
+/* =========================================================
+   UTILITIES
+========================================================= */
+
+function generateId() {
+  return crypto.randomBytes(12).toString("hex");
 }
 
 function now() {
   return new Date().toISOString();
 }
 
-function clean(value, max = 5000) {
+function clean(value, maxLength = 5000) {
   return String(value ?? "")
     .trim()
-    .slice(0, max);
+    .slice(0, maxLength);
+}
+
+function normalizeUsername(username) {
+  return String(username || "")
+    .trim()
+    .toLowerCase()
+    .replace(/^@/, "");
+}
+
+function normalizeEmail(email) {
+  return String(email || "")
+    .trim()
+    .toLowerCase();
+}
+
+function fileExists(file) {
+  try {
+    return fs.existsSync(file);
+  } catch (_) {
+    return false;
+  }
+}
+
+function deleteFileIfExists(file) {
+  try {
+    if (file && fileExists(file)) {
+      fs.unlinkSync(file);
+    }
+  } catch (error) {
+    console.error("FILE DELETE ERROR:", error.message);
+  }
+}
+
+function publicUploadPath(folder, filename) {
+  return `/uploads/${folder}/${filename}`;
 }
 
 /* =========================================================
-   APP MIDDLEWARE
+   USER HELPERS
+========================================================= */
+
+function getUsers() {
+  return readJSON(USERS_FILE, []);
+}
+
+function saveUsers(users) {
+  writeJSON(USERS_FILE, users);
+}
+
+function getPosts() {
+  return readJSON(POSTS_FILE, []);
+}
+
+function savePosts(posts) {
+  writeJSON(POSTS_FILE, posts);
+}
+
+function getComments() {
+  return readJSON(COMMENTS_FILE, []);
+}
+
+function saveComments(comments) {
+  writeJSON(COMMENTS_FILE, comments);
+}
+
+function getLikes() {
+  return readJSON(LIKES_FILE, []);
+}
+
+function saveLikes(likes) {
+  writeJSON(LIKES_FILE, likes);
+}
+
+function getFollows() {
+  return readJSON(FOLLOWS_FILE, []);
+}
+
+function saveFollows(follows) {
+  writeJSON(FOLLOWS_FILE, follows);
+}
+
+function getNotifications() {
+  return readJSON(NOTIFICATIONS_FILE, []);
+}
+
+function saveNotifications(notifications) {
+  writeJSON(NOTIFICATIONS_FILE, notifications);
+}
+
+function getMessages() {
+  return readJSON(MESSAGES_FILE, []);
+}
+
+function saveMessages(messages) {
+  writeJSON(MESSAGES_FILE, messages);
+}
+
+function getVerificationRequests() {
+  return readJSON(VERIFICATION_FILE, []);
+}
+
+function saveVerificationRequests(requests) {
+  writeJSON(VERIFICATION_FILE, requests);
+}
+
+function getUserById(id) {
+  const users = getUsers();
+
+  return users.find(
+    (user) => String(user.id) === String(id)
+  );
+}
+
+function getUserByUsername(username) {
+  const target = normalizeUsername(username);
+
+  const users = getUsers();
+
+  return users.find(
+    (user) =>
+      normalizeUsername(user.username) === target
+  );
+}
+
+function getUserByEmail(email) {
+  const target = normalizeEmail(email);
+
+  const users = getUsers();
+
+  return users.find(
+    (user) =>
+      normalizeEmail(user.email) === target
+  );
+}
+
+function getPostById(id) {
+  const posts = getPosts();
+
+  return posts.find(
+    (post) => String(post.id) === String(id)
+  );
+}
+
+function getCurrentUser(req) {
+  if (!req.session || !req.session.userId) {
+    return null;
+  }
+
+  return getUserById(req.session.userId);
+}
+
+/* =========================================================
+   ADMIN
+========================================================= */
+
+function isAdminUser(user) {
+  if (!user) return false;
+
+  if (
+    user.role === "admin" ||
+    user.role === "superadmin"
+  ) {
+    return true;
+  }
+
+  if (!ADMIN_USERNAME) {
+    return false;
+  }
+
+  return (
+    normalizeUsername(user.username) ===
+    ADMIN_USERNAME
+  );
+}
+
+/* =========================================================
+   SAFE USER
+========================================================= */
+
+function safeUser(user, currentUserId = null) {
+  if (!user) return null;
+
+  const follows = getFollows();
+
+  const followersCount = follows.filter(
+    (follow) =>
+      String(follow.followingId) === String(user.id)
+  ).length;
+
+  const followingCount = follows.filter(
+    (follow) =>
+      String(follow.followerId) === String(user.id)
+  ).length;
+
+  const usersPosts = getPosts().filter(
+    (post) =>
+      String(post.userId) === String(user.id)
+  );
+
+  const following =
+    currentUserId &&
+    follows.some(
+      (follow) =>
+        String(follow.followerId) ===
+          String(currentUserId) &&
+        String(follow.followingId) ===
+          String(user.id)
+    );
+
+  const verified =
+    user.verified === true ||
+    user.isVerified === true;
+
+  return {
+    id: user.id,
+
+    name: user.name || "",
+
+    username: user.username || "",
+
+    email: user.email || "",
+
+    bio: user.bio || "",
+
+    profilePicture:
+      user.profilePicture ||
+      user.profileImage ||
+      user.avatar ||
+      "/images/default-avatar.png",
+
+    profileImage:
+      user.profileImage ||
+      user.profilePicture ||
+      user.avatar ||
+      "/images/default-avatar.png",
+
+    avatar:
+      user.avatar ||
+      user.profilePicture ||
+      user.profileImage ||
+      "/images/default-avatar.png",
+
+    coverPhoto:
+      user.coverPhoto ||
+      user.coverImage ||
+      user.cover ||
+      "",
+
+    coverImage:
+      user.coverImage ||
+      user.coverPhoto ||
+      user.cover ||
+      "",
+
+    cover:
+      user.cover ||
+      user.coverPhoto ||
+      user.coverImage ||
+      "",
+
+    role: user.role || "user",
+
+    verified,
+
+    isVerified: verified,
+
+    verificationStatus:
+      user.verificationStatus || "none",
+
+    createdAt: user.createdAt || null,
+
+    isAdmin: isAdminUser(user),
+
+    followersCount,
+
+    followingCount,
+
+    postsCount: usersPosts.length,
+
+    isFollowing: Boolean(following),
+
+    following: Boolean(following)
+  };
+}
+
+/* =========================================================
+   AUTH MIDDLEWARE
+========================================================= */
+
+function requireAuth(req, res, next) {
+  const user = getCurrentUser(req);
+
+  if (!user) {
+    return res.status(401).json({
+      success: false,
+      error: "You must be logged in."
+    });
+  }
+
+  req.user = user;
+
+  next();
+}
+
+function requireAdmin(req, res, next) {
+  const user = getCurrentUser(req);
+
+  if (!user) {
+    return res.status(401).json({
+      success: false,
+      error: "You must be logged in."
+    });
+  }
+
+  if (!isAdminUser(user)) {
+    return res.status(403).json({
+      success: false,
+      error: "Administrator access required."
+    });
+  }
+
+  req.user = user;
+
+  next();
+}
+
+/* =========================================================
+   FOLLOW HELPERS
+========================================================= */
+
+function isFollowing(followerId, followingId) {
+  const follows = getFollows();
+
+  return follows.some(
+    (follow) =>
+      String(follow.followerId) ===
+        String(followerId) &&
+      String(follow.followingId) ===
+        String(followingId)
+  );
+}
+
+function followersCount(userId) {
+  return getFollows().filter(
+    (follow) =>
+      String(follow.followingId) ===
+      String(userId)
+  ).length;
+}
+
+function followingCount(userId) {
+  return getFollows().filter(
+    (follow) =>
+      String(follow.followerId) ===
+      String(userId)
+  ).length;
+}
+
+/* =========================================================
+   POST HELPERS
+========================================================= */
+
+function postLikeCount(postId) {
+  return getLikes().filter(
+    (like) =>
+      String(like.postId) === String(postId)
+  ).length;
+}
+
+function postCommentCount(postId) {
+  return getComments().filter(
+    (comment) =>
+      String(comment.postId) === String(postId)
+  ).length;
+}
+
+function buildPost(post, currentUserId = null) {
+  const author = getUserById(post.userId);
+
+  const liked =
+    currentUserId &&
+    getLikes().some(
+      (like) =>
+        String(like.postId) === String(post.id) &&
+        String(like.userId) === String(currentUserId)
+    );
+
+  return {
+    ...post,
+
+    user: safeUser(author, currentUserId),
+
+    author: safeUser(author, currentUserId),
+
+    likeCount: postLikeCount(post.id),
+
+    commentCount: postCommentCount(post.id),
+
+    liked: Boolean(liked),
+
+    isLiked: Boolean(liked),
+
+    isOwner:
+      currentUserId &&
+      String(post.userId) ===
+        String(currentUserId)
+  };
+}
+
+/* =========================================================
+   NOTIFICATIONS
+========================================================= */
+
+function createNotification({
+  userId,
+  fromUserId = null,
+  type,
+  text,
+  postId = null,
+  messageId = null
+}) {
+  if (
+    !userId ||
+    (fromUserId &&
+      String(userId) === String(fromUserId))
+  ) {
+    return null;
+  }
+
+  const notifications = getNotifications();
+
+  const notification = {
+    id: generateId(),
+
+    userId,
+
+    fromUserId,
+
+    type,
+
+    text: clean(text, 500),
+
+    postId,
+
+    messageId,
+
+    read: false,
+
+    createdAt: now()
+  };
+
+  notifications.unshift(notification);
+
+  saveNotifications(notifications);
+
+  return notification;
+}
+
+/* =========================================================
+   MULTER
+========================================================= */
+
+const allowedMimeTypes = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif"
+]);
+
+function imageFilter(req, file, cb) {
+  if (!allowedMimeTypes.has(file.mimetype)) {
+    return cb(
+      new Error(
+        "Only JPG, PNG, WEBP and GIF images are allowed."
+      )
+    );
+  }
+
+  cb(null, true);
+}
+
+function createStorage(destination) {
+  return multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, destination);
+    },
+
+    filename: (req, file, cb) => {
+      const extension =
+        path.extname(file.originalname).toLowerCase() ||
+        ".jpg";
+
+      cb(
+        null,
+        `${Date.now()}-${crypto.randomBytes(8).toString("hex")}${extension}`
+      );
+    }
+  });
+}
+
+const profileUpload = multer({
+  storage: createStorage(PROFILE_UPLOAD_DIR),
+  fileFilter: imageFilter,
+  limits: {
+    fileSize: 10 * 1024 * 1024
+  }
+});
+
+const coverUpload = multer({
+  storage: createStorage(COVER_UPLOAD_DIR),
+  fileFilter: imageFilter,
+  limits: {
+    fileSize: 15 * 1024 * 1024
+  }
+});
+
+const postUpload = multer({
+  storage: createStorage(POST_UPLOAD_DIR),
+  fileFilter: imageFilter,
+  limits: {
+    fileSize: 15 * 1024 * 1024
+  }
+});
+
+const messageUpload = multer({
+  storage: createStorage(MESSAGE_UPLOAD_DIR),
+  fileFilter: imageFilter,
+  limits: {
+    fileSize: 15 * 1024 * 1024
+  }
+});
+
+/* =========================================================
+   EXPRESS
 ========================================================= */
 
 app.set("trust proxy", 1);
@@ -239,22 +744,35 @@ app.use(
   })
 );
 
+/* =========================================================
+   SESSION
+========================================================= */
+
 app.use(
   session({
     secret: SESSION_SECRET,
+
     resave: false,
+
     saveUninitialized: false,
+
     rolling: true,
 
     cookie: {
       maxAge: 7 * 24 * 60 * 60 * 1000,
+
       httpOnly: true,
+
       sameSite: "lax",
-      secure:
-        process.env.NODE_ENV === "production"
+
+      secure: IS_PRODUCTION
     }
   })
 );
+
+/* =========================================================
+   STATIC FILES
+========================================================= */
 
 app.use(
   express.static(PUBLIC_DIR)
@@ -266,420 +784,14 @@ app.use(
 );
 
 /* =========================================================
-   MULTER
+   HOME
 ========================================================= */
 
-const allowedMimeTypes = new Set([
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-  "image/gif"
-]);
-
-function createImageStorage(folder, prefix) {
-  return multer.diskStorage({
-    destination: (req, file, cb) => {
-      cb(null, folder);
-    },
-
-    filename: (req, file, cb) => {
-      const ext =
-        path.extname(file.originalname)
-          .toLowerCase();
-
-      const filename =
-        `${prefix}-${Date.now()}-` +
-        crypto.randomBytes(6).toString("hex") +
-        ext;
-
-      cb(null, filename);
-    }
-  });
-}
-
-function imageFilter(req, file, cb) {
-  if (!allowedMimeTypes.has(file.mimetype)) {
-    return cb(
-      new Error(
-        "Only JPG, PNG, WEBP and GIF images are allowed."
-      )
-    );
-  }
-
-  cb(null, true);
-}
-
-const profileUpload = multer({
-  storage: createImageStorage(
-    PROFILE_UPLOAD_DIR,
-    "profile"
-  ),
-  limits: {
-    fileSize: 10 * 1024 * 1024
-  },
-  fileFilter: imageFilter
+app.get("/", (req, res) => {
+  res.sendFile(
+    path.join(PUBLIC_DIR, "index.html")
+  );
 });
-
-const coverUpload = multer({
-  storage: createImageStorage(
-    COVER_UPLOAD_DIR,
-    "cover"
-  ),
-  limits: {
-    fileSize: 10 * 1024 * 1024
-  },
-  fileFilter: imageFilter
-});
-
-const postUpload = multer({
-  storage: createImageStorage(
-    POST_UPLOAD_DIR,
-    "post"
-  ),
-  limits: {
-    fileSize: 10 * 1024 * 1024
-  },
-  fileFilter: imageFilter
-});
-
-const messageUpload = multer({
-  storage: createImageStorage(
-    MESSAGE_UPLOAD_DIR,
-    "message"
-  ),
-  limits: {
-    fileSize: 10 * 1024 * 1024
-  },
-  fileFilter: imageFilter
-});
-
-/* =========================================================
-   USER HELPERS
-========================================================= */
-
-function getUsers() {
-  return readJSON(USERS_FILE);
-}
-
-function getUserById(id) {
-  return getUsers().find(
-    user =>
-      String(user.id) === String(id)
-  );
-}
-
-function getUserByUsername(username) {
-  const target =
-    String(username || "")
-      .trim()
-      .toLowerCase();
-
-  return getUsers().find(
-    user =>
-      String(user.username || "")
-        .toLowerCase() === target
-  );
-}
-
-function getUserByEmail(email) {
-  const target =
-    String(email || "")
-      .trim()
-      .toLowerCase();
-
-  return getUsers().find(
-    user =>
-      String(user.email || "")
-        .toLowerCase() === target
-  );
-}
-
-function isAdminUser(user) {
-  if (!user) return false;
-
-  if (
-    user.role === "admin" ||
-    user.role === "superadmin"
-  ) {
-    return true;
-  }
-
-  if (!ADMIN_USERNAME) {
-    return false;
-  }
-
-  return (
-    String(user.username || "")
-      .toLowerCase() === ADMIN_USERNAME
-  );
-}
-
-function safeUser(user) {
-  if (!user) return null;
-
-  const verified =
-    Boolean(
-      user.verified ||
-      user.isVerified ||
-      user.verificationStatus ===
-        "approved"
-    );
-
-  const profilePicture =
-    user.profilePicture ||
-    user.profileImage ||
-    user.avatar ||
-    "/images/default-avatar.png";
-
-  const coverPhoto =
-    user.coverPhoto ||
-    user.coverImage ||
-    "";
-
-  return {
-    id: user.id,
-
-    name:
-      user.name ||
-      user.username ||
-      "Pulse User",
-
-    username:
-      user.username || "",
-
-    email:
-      user.email || "",
-
-    bio:
-      user.bio || "",
-
-    profilePicture,
-
-    profileImage: profilePicture,
-
-    avatar: profilePicture,
-
-    coverPhoto,
-
-    coverImage: coverPhoto,
-
-    role:
-      user.role || "user",
-
-    verified,
-
-    isVerified: verified,
-
-    verificationStatus:
-      user.verificationStatus ||
-      "none",
-
-    createdAt:
-      user.createdAt || null,
-
-    isAdmin:
-      isAdminUser(user)
-  };
-}
-
-/* =========================================================
-   AUTH
-========================================================= */
-
-function getCurrentUser(req) {
-  if (!req.session.userId) {
-    return null;
-  }
-
-  return getUserById(
-    req.session.userId
-  );
-}
-
-function requireAuth(req, res, next) {
-  const user = getCurrentUser(req);
-
-  if (!user) {
-    return res.status(401).json({
-      success: false,
-      message: "You must be logged in."
-    });
-  }
-
-  req.user = user;
-
-  next();
-}
-
-function requireAdmin(req, res, next) {
-  const user = getCurrentUser(req);
-
-  if (!user || !isAdminUser(user)) {
-    return res.status(403).json({
-      success: false,
-      message: "Administrator access required."
-    });
-  }
-
-  req.user = user;
-
-  next();
-}
-
-/* =========================================================
-   FOLLOW HELPERS
-========================================================= */
-
-function isFollowing(
-  followerId,
-  followingId
-) {
-  const follows =
-    readJSON(FOLLOWS_FILE);
-
-  return follows.some(
-    follow =>
-      String(follow.followerId) ===
-        String(followerId) &&
-      String(follow.followingId) ===
-        String(followingId)
-  );
-}
-
-function followersCount(userId) {
-  return readJSON(FOLLOWS_FILE)
-    .filter(
-      follow =>
-        String(follow.followingId) ===
-        String(userId)
-    ).length;
-}
-
-function followingCount(userId) {
-  return readJSON(FOLLOWS_FILE)
-    .filter(
-      follow =>
-        String(follow.followerId) ===
-        String(userId)
-    ).length;
-}
-
-/* =========================================================
-   POST HELPERS
-========================================================= */
-
-function getPosts() {
-  return readJSON(POSTS_FILE);
-}
-
-function getPostById(id) {
-  return getPosts().find(
-    post =>
-      String(post.id) === String(id)
-  );
-}
-
-function postLikeCount(postId) {
-  return readJSON(LIKES_FILE)
-    .filter(
-      like =>
-        String(like.postId) ===
-        String(postId)
-    ).length;
-}
-
-function postCommentCount(postId) {
-  return readJSON(COMMENTS_FILE)
-    .filter(
-      comment =>
-        String(comment.postId) ===
-        String(postId)
-    ).length;
-}
-
-function buildPost(post, currentUserId) {
-  const author =
-    getUserById(post.userId);
-
-  const liked =
-    readJSON(LIKES_FILE).some(
-      like =>
-        String(like.postId) ===
-          String(post.id) &&
-        String(like.userId) ===
-          String(currentUserId)
-    );
-
-  return {
-    ...post,
-
-    user:
-      safeUser(author),
-
-    author:
-      safeUser(author),
-
-    likeCount:
-      postLikeCount(post.id),
-
-    commentCount:
-      postCommentCount(post.id),
-
-    liked,
-
-    isLiked: liked,
-
-    isOwner:
-      String(post.userId) ===
-      String(currentUserId)
-  };
-}
-
-/* =========================================================
-   NOTIFICATIONS
-========================================================= */
-
-function createNotification({
-  userId,
-  actorId,
-  type,
-  text,
-  postId = null
-}) {
-  if (
-    !userId ||
-    !actorId ||
-    String(userId) ===
-      String(actorId)
-  ) {
-    return null;
-  }
-
-  const notifications =
-    readJSON(NOTIFICATIONS_FILE);
-
-  const notification = {
-    id: generateId("notif_"),
-    userId,
-    actorId,
-    type,
-    text,
-    postId,
-    read: false,
-    createdAt: now()
-  };
-
-  notifications.unshift(
-    notification
-  );
-
-  writeJSON(
-    NOTIFICATIONS_FILE,
-    notifications
-  );
-
-  return notification;
-}
 
 /* =========================================================
    HEALTH
@@ -688,592 +800,462 @@ function createNotification({
 app.get("/api/health", (req, res) => {
   res.json({
     success: true,
-    status: "online",
-    platform: "Pulse Social",
-    version: "4.0.0",
-    storage: "JSON",
-    features: {
-      authentication: true,
-      profiles: true,
-      profilePictures: true,
-      coverPhotos: true,
-      posts: true,
-      likes: true,
-      comments: true,
-      follows: true,
-      notifications: true,
-      messaging: true,
-      messageImages: true,
-      verification: true,
-      admin: true
-    }
+
+    status: "ok",
+
+    app: "Pulse Social",
+
+    version: "2.0.0",
+
+    storageRoot: STORAGE_ROOT,
+
+    persistentStorage:
+      String(
+        process.env.STORAGE_ROOT || ""
+      ).length > 0,
+
+    directories: {
+      data: DATA_DIR,
+      uploads: UPLOADS_DIR,
+      profiles: PROFILE_UPLOAD_DIR,
+      covers: COVER_UPLOAD_DIR,
+      posts: POST_UPLOAD_DIR,
+      messages: MESSAGE_UPLOAD_DIR
+    },
+
+    time: now()
   });
-});
-
-/* =========================================================
-   HOME
-========================================================= */
-
-app.get("/", (req, res) => {
-  res.sendFile(
-    path.join(
-      PUBLIC_DIR,
-      "index.html"
-    )
-  );
 });
 
 /* =========================================================
    REGISTER
 ========================================================= */
 
-async function registerUser({
-  name,
-  username,
-  email,
-  password
-}) {
-  const users = getUsers();
+async function registerUser(req, res) {
+  try {
+    const name = clean(req.body.name, 100);
 
-  name = clean(name, 100);
-
-  username =
-    String(username || "")
-      .trim()
-      .toLowerCase()
-      .replace(/[^a-z0-9_]/g, "");
-
-  email =
-    String(email || "")
-      .trim()
-      .toLowerCase();
-
-  password =
-    String(password || "");
-
-  if (!name) {
-    throw new Error(
-      "Name is required."
+    const username = normalizeUsername(
+      req.body.username
     );
+
+    const email = normalizeEmail(
+      req.body.email
+    );
+
+    const password = String(
+      req.body.password || ""
+    );
+
+    if (!name) {
+      return res.status(400).json({
+        success: false,
+        error: "Name is required."
+      });
+    }
+
+    if (!username) {
+      return res.status(400).json({
+        success: false,
+        error: "Username is required."
+      });
+    }
+
+    if (!/^[a-z0-9_]{3,30}$/.test(username)) {
+      return res.status(400).json({
+        success: false,
+        error:
+          "Username must be 3-30 characters and use only letters, numbers and underscores."
+      });
+    }
+
+    if (!email || !email.includes("@")) {
+      return res.status(400).json({
+        success: false,
+        error: "A valid email is required."
+      });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        error:
+          "Password must be at least 6 characters."
+      });
+    }
+
+    const users = getUsers();
+
+    if (
+      users.some(
+        (user) =>
+          normalizeUsername(user.username) ===
+          username
+      )
+    ) {
+      return res.status(409).json({
+        success: false,
+        error: "Username is already taken."
+      });
+    }
+
+    if (
+      users.some(
+        (user) =>
+          normalizeEmail(user.email) ===
+          email
+      )
+    ) {
+      return res.status(409).json({
+        success: false,
+        error: "Email is already registered."
+      });
+    }
+
+    const passwordHash =
+      await bcrypt.hash(password, 12);
+
+    const user = {
+      id: generateId(),
+
+      name,
+
+      username,
+
+      email,
+
+      passwordHash,
+
+      bio: "",
+
+      profilePicture:
+        "/images/default-avatar.png",
+
+      profileImage:
+        "/images/default-avatar.png",
+
+      avatar:
+        "/images/default-avatar.png",
+
+      coverPhoto: "",
+
+      coverImage: "",
+
+      cover: "",
+
+      role: "user",
+
+      verified: false,
+
+      isVerified: false,
+
+      verificationStatus: "none",
+
+      createdAt: now()
+    };
+
+    users.push(user);
+
+    saveUsers(users);
+
+    req.session.userId = user.id;
+
+    return res.status(201).json({
+      success: true,
+
+      message: "Account created successfully.",
+
+      user: safeUser(user, user.id)
+    });
+  } catch (error) {
+    console.error("REGISTER ERROR:", error);
+
+    return res.status(500).json({
+      success: false,
+      error: "Unable to create account."
+    });
   }
-
-  if (username.length < 3) {
-    throw new Error(
-      "Username must contain at least 3 characters."
-    );
-  }
-
-  if (password.length < 6) {
-    throw new Error(
-      "Password must contain at least 6 characters."
-    );
-  }
-
-  if (
-    users.some(
-      user =>
-        String(user.username || "")
-          .toLowerCase() ===
-        username
-    )
-  ) {
-    throw new Error(
-      "Username is already taken."
-    );
-  }
-
-  if (
-    email &&
-    users.some(
-      user =>
-        String(user.email || "")
-          .toLowerCase() ===
-        email
-    )
-  ) {
-    throw new Error(
-      "Email is already registered."
-    );
-  }
-
-  const passwordHash =
-    await bcrypt.hash(
-      password,
-      12
-    );
-
-  const user = {
-    id: generateId("user_"),
-
-    name,
-
-    username,
-
-    email,
-
-    passwordHash,
-
-    bio: "",
-
-    profilePicture:
-      "/images/default-avatar.png",
-
-    profileImage:
-      "/images/default-avatar.png",
-
-    avatar:
-      "/images/default-avatar.png",
-
-    coverPhoto: "",
-
-    coverImage: "",
-
-    role: "user",
-
-    verified: false,
-
-    isVerified: false,
-
-    verificationStatus:
-      "none",
-
-    createdAt: now()
-  };
-
-  users.push(user);
-
-  writeJSON(
-    USERS_FILE,
-    users
-  );
-
-  return user;
 }
 
 app.post(
   "/api/register",
-  async (req, res) => {
-    try {
-      const user =
-        await registerUser({
-          name: req.body.name,
-          username:
-            req.body.username,
-          email:
-            req.body.email,
-          password:
-            req.body.password
-        });
-
-      req.session.userId =
-        user.id;
-
-      res.json({
-        success: true,
-        message:
-          "Account created successfully.",
-        user:
-          safeUser(user)
-      });
-    } catch (error) {
-      res.status(400).json({
-        success: false,
-        message:
-          error.message
-      });
-    }
-  }
+  registerUser
 );
 
 app.post(
   "/api/signup",
-  async (req, res) => {
-    try {
-      const user =
-        await registerUser({
-          name: req.body.name,
-          username:
-            req.body.username,
-          email:
-            req.body.email,
-          password:
-            req.body.password
-        });
-
-      req.session.userId =
-        user.id;
-
-      res.json({
-        success: true,
-        message:
-          "Account created successfully.",
-        user:
-          safeUser(user)
-      });
-    } catch (error) {
-      res.status(400).json({
-        success: false,
-        message:
-          error.message
-      });
-    }
-  }
+  registerUser
 );
 
 /* =========================================================
    LOGIN
 ========================================================= */
 
-app.post(
-  "/api/login",
-  async (req, res) => {
-    try {
-      const login =
-        String(
-          req.body.login ||
-          req.body.username ||
-          req.body.email ||
-          ""
-        )
-          .trim()
-          .toLowerCase();
+app.post("/api/login", async (req, res) => {
+  try {
+    const login = clean(
+      req.body.login ||
+        req.body.username ||
+        req.body.email,
+      200
+    );
 
-      const password =
-        String(
-          req.body.password || ""
-        );
+    const password = String(
+      req.body.password || ""
+    );
 
-      if (!login || !password) {
-        return res.status(400).json({
-          success: false,
-          message:
-            "Username/email and password are required."
-        });
-      }
-
-      let user =
-        getUserByUsername(login);
-
-      if (!user) {
-        user =
-          getUserByEmail(login);
-      }
-
-      if (!user) {
-        return res.status(401).json({
-          success: false,
-          message:
-            "Invalid login details."
-        });
-      }
-
-      if (!user.passwordHash) {
-        return res.status(401).json({
-          success: false,
-          message:
-            "This account has no valid password. Please reset the password."
-        });
-      }
-
-      const valid =
-        await bcrypt.compare(
-          password,
-          user.passwordHash
-        );
-
-      if (!valid) {
-        return res.status(401).json({
-          success: false,
-          message:
-            "Invalid login details."
-        });
-      }
-
-      req.session.userId =
-        user.id;
-
-      res.json({
-        success: true,
-        message:
-          "Login successful.",
-        user:
-          safeUser(user),
-        admin:
-          isAdminUser(user)
-      });
-    } catch (error) {
-      console.error(
-        "LOGIN ERROR:",
-        error
-      );
-
-      res.status(500).json({
+    if (!login || !password) {
+      return res.status(400).json({
         success: false,
-        message:
-          "Unable to sign in."
+        error:
+          "Username/email and password are required."
       });
     }
+
+    const users = getUsers();
+
+    const normalizedLogin =
+      login.toLowerCase();
+
+    const user = users.find((item) => {
+      return (
+        normalizeUsername(item.username) ===
+          normalizeUsername(normalizedLogin) ||
+        normalizeEmail(item.email) ===
+          normalizeEmail(normalizedLogin)
+      );
+    });
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        error: "Invalid login details."
+      });
+    }
+
+    /*
+      This check prevents:
+      bcryptjs Illegal arguments: string, undefined
+    */
+    if (!user.passwordHash) {
+      return res.status(401).json({
+        success: false,
+        error:
+          "This account does not have a valid password. Please reset the password."
+      });
+    }
+
+    const valid =
+      await bcrypt.compare(
+        password,
+        user.passwordHash
+      );
+
+    if (!valid) {
+      return res.status(401).json({
+        success: false,
+        error: "Invalid login details."
+      });
+    }
+
+    req.session.userId = user.id;
+
+    return res.json({
+      success: true,
+
+      message: "Login successful.",
+
+      user: safeUser(user, user.id)
+    });
+  } catch (error) {
+    console.error("LOGIN ERROR:", error);
+
+    return res.status(500).json({
+      success: false,
+      error: "Unable to sign in."
+    });
   }
-);
+});
 
 /* =========================================================
    LOGOUT
 ========================================================= */
 
-app.post(
-  "/api/logout",
-  (req, res) => {
-    req.session.destroy(
-      error => {
-        if (error) {
-          return res.status(500).json({
-            success: false,
-            message:
-              "Unable to log out."
-          });
-        }
+app.post("/api/logout", (req, res) => {
+  req.session.destroy((error) => {
+    if (error) {
+      return res.status(500).json({
+        success: false,
+        error: "Unable to log out."
+      });
+    }
 
-        res.clearCookie(
-          "connect.sid"
-        );
+    res.clearCookie("connect.sid");
 
-        res.json({
-          success: true,
-          message:
-            "Logged out successfully."
-        });
-      }
-    );
-  }
-);
+    return res.json({
+      success: true,
+      message: "Logged out successfully."
+    });
+  });
+});
 
 /* =========================================================
    CURRENT USER
 ========================================================= */
 
-app.get(
-  "/api/me",
-  (req, res) => {
-    const user =
-      getCurrentUser(req);
+app.get("/api/me", (req, res) => {
+  const user = getCurrentUser(req);
 
-    if (!user) {
-      return res.json({
-        success: true,
-        loggedIn: false,
-        admin: false,
-        user: null
-      });
-    }
-
-    res.json({
+  if (!user) {
+    return res.json({
       success: true,
-      loggedIn: true,
-      admin:
-        isAdminUser(user),
-      user:
-        safeUser(user)
+
+      loggedIn: false,
+
+      admin: false,
+
+      user: null
     });
   }
-);
+
+  return res.json({
+    success: true,
+
+    loggedIn: true,
+
+    admin: isAdminUser(user),
+
+    user: safeUser(user, user.id)
+  });
+});
 
 /* =========================================================
-   PROFILE
+   GET USER PROFILE
 ========================================================= */
 
 app.get(
   "/api/users/:username",
   requireAuth,
   (req, res) => {
-    const user =
-      getUserByUsername(
-        req.params.username
-      );
-
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message:
-          "User not found."
-      });
-    }
-
-    const posts =
-      getPosts().filter(
-        post =>
-          String(post.userId) ===
-          String(user.id)
-      );
-
-    const profile = {
-      ...safeUser(user),
-
-      followersCount:
-        followersCount(user.id),
-
-      followingCount:
-        followingCount(user.id),
-
-      postsCount:
-        posts.length,
-
-      isFollowing:
-        isFollowing(
-          req.user.id,
-          user.id
-        ),
-
-      following:
-        isFollowing(
-          req.user.id,
-          user.id
-        )
-    };
-
-    res.json({
-      success: true,
-      user: profile
-    });
-  }
-);
-
-app.get(
-  "/api/users/:username/posts",
-  requireAuth,
-  (req, res) => {
-    const user =
-      getUserByUsername(
-        req.params.username
-      );
-
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message:
-          "User not found."
-      });
-    }
-
-    const posts =
-      getPosts()
-        .filter(
-          post =>
-            String(post.userId) ===
-            String(user.id)
-        )
-        .sort(
-          (a, b) =>
-            new Date(b.createdAt) -
-            new Date(a.createdAt)
-        )
-        .map(post =>
-          buildPost(
-            post,
-            req.user.id
-          )
-        );
-
-    res.json({
-      success: true,
-      posts
-    });
-  }
-);
-
-app.put(
-  "/api/profile",
-  requireAuth,
-  (req, res) => {
-    const users =
-      getUsers();
-
-    const index =
-      users.findIndex(
-        user =>
-          String(user.id) ===
-          String(req.user.id)
-      );
-
-    if (index === -1) {
-      return res.status(404).json({
-        success: false,
-        message:
-          "User not found."
-      });
-    }
-
-    users[index].name =
-      clean(
-        req.body.name ||
-          users[index].name,
-        100
-      );
-
-    users[index].bio =
-      clean(
-        req.body.bio || "",
-        500
-      );
-
-    writeJSON(
-      USERS_FILE,
-      users
+    const user = getUserByUsername(
+      req.params.username
     );
 
-    res.json({
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: "User not found."
+      });
+    }
+
+    return res.json({
       success: true,
-      message:
-        "Profile updated successfully.",
-      user:
-        safeUser(users[index])
+
+      user: safeUser(
+        user,
+        req.user.id
+      )
     });
   }
 );
 
 /* =========================================================
-   PROFILE PICTURE
+   UPDATE PROFILE
+========================================================= */
+
+app.put(
+  "/api/profile",
+  requireAuth,
+  (req, res) => {
+    const users = getUsers();
+
+    const index = users.findIndex(
+      (user) =>
+        String(user.id) ===
+        String(req.user.id)
+    );
+
+    if (index === -1) {
+      return res.status(404).json({
+        success: false,
+        error: "User not found."
+      });
+    }
+
+    const current = users[index];
+
+    const name =
+      req.body.name !== undefined
+        ? clean(req.body.name, 100)
+        : current.name;
+
+    const bio =
+      req.body.bio !== undefined
+        ? clean(req.body.bio, 500)
+        : current.bio || "";
+
+    if (!name) {
+      return res.status(400).json({
+        success: false,
+        error: "Name cannot be empty."
+      });
+    }
+
+    current.name = name;
+    current.bio = bio;
+
+    users[index] = current;
+
+    saveUsers(users);
+
+    return res.json({
+      success: true,
+
+      message: "Profile updated successfully.",
+
+      user: safeUser(
+        current,
+        current.id
+      )
+    });
+  }
+);
+
+/* =========================================================
+   PROFILE PICTURE UPLOAD
 ========================================================= */
 
 app.post(
   "/api/profile/picture",
   requireAuth,
-  profileUpload.single(
-    "profilePicture"
-  ),
+  profileUpload.single("profilePicture"),
   (req, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({
           success: false,
-          message:
-            "Please select a profile picture."
+          error: "Please select an image."
         });
       }
 
-      const users =
-        getUsers();
+      const users = getUsers();
 
-      const index =
-        users.findIndex(
-          user =>
-            String(user.id) ===
-            String(req.user.id)
-        );
+      const index = users.findIndex(
+        (user) =>
+          String(user.id) ===
+          String(req.user.id)
+      );
 
       if (index === -1) {
-        fs.unlinkSync(
-          req.file.path
-        );
+        deleteFileIfExists(req.file.path);
 
         return res.status(404).json({
           success: false,
-          message:
-            "User not found."
+          error: "User not found."
         });
       }
 
-      const user =
-        users[index];
+      const user = users[index];
 
       const oldPicture =
         user.profilePicture;
@@ -1284,57 +1266,43 @@ app.post(
           "/uploads/profiles/"
         )
       ) {
-        const oldFile =
-          path.basename(
-            oldPicture
-          );
+        const oldFilename =
+          path.basename(oldPicture);
 
-        const oldPath =
+        deleteFileIfExists(
           path.join(
             PROFILE_UPLOAD_DIR,
-            oldFile
-          );
-
-        try {
-          if (
-            fs.existsSync(
-              oldPath
-            )
-          ) {
-            fs.unlinkSync(
-              oldPath
-            );
-          }
-        } catch {}
+            oldFilename
+          )
+        );
       }
 
-      const profilePicture =
-        `/uploads/profiles/${req.file.filename}`;
+      const publicPath =
+        publicUploadPath(
+          "profiles",
+          req.file.filename
+        );
 
-      user.profilePicture =
-        profilePicture;
+      user.profilePicture = publicPath;
+      user.profileImage = publicPath;
+      user.avatar = publicPath;
 
-      user.profileImage =
-        profilePicture;
+      users[index] = user;
 
-      user.avatar =
-        profilePicture;
+      saveUsers(users);
 
-      users[index] =
-        user;
-
-      writeJSON(
-        USERS_FILE,
-        users
-      );
-
-      res.json({
+      return res.json({
         success: true,
+
         message:
-          "Profile picture updated.",
-        profilePicture,
-        user:
-          safeUser(user)
+          "Profile picture updated successfully.",
+
+        profilePicture: publicPath,
+
+        user: safeUser(
+          user,
+          user.id
+        )
       });
     } catch (error) {
       console.error(
@@ -1342,17 +1310,13 @@ app.post(
         error
       );
 
-      if (req.file?.path) {
-        try {
-          fs.unlinkSync(
-            req.file.path
-          );
-        } catch {}
+      if (req.file) {
+        deleteFileIfExists(req.file.path);
       }
 
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
-        message:
+        error:
           "Unable to upload profile picture."
       });
     }
@@ -1360,134 +1324,121 @@ app.post(
 );
 
 /* =========================================================
-   COVER PHOTO
+   COVER PHOTO UPLOAD
 ========================================================= */
+
+function handleCoverUpload(req, res) {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        error: "Please select a cover photo."
+      });
+    }
+
+    const users = getUsers();
+
+    const index = users.findIndex(
+      (user) =>
+        String(user.id) ===
+        String(req.user.id)
+    );
+
+    if (index === -1) {
+      deleteFileIfExists(req.file.path);
+
+      return res.status(404).json({
+        success: false,
+        error: "User not found."
+      });
+    }
+
+    const user = users[index];
+
+    const oldCover =
+      user.coverPhoto ||
+      user.coverImage ||
+      user.cover ||
+      "";
+
+    if (
+      oldCover &&
+      oldCover.startsWith(
+        "/uploads/covers/"
+      )
+    ) {
+      const oldFilename =
+        path.basename(oldCover);
+
+      deleteFileIfExists(
+        path.join(
+          COVER_UPLOAD_DIR,
+          oldFilename
+        )
+      );
+    }
+
+    const publicPath =
+      publicUploadPath(
+        "covers",
+        req.file.filename
+      );
+
+    user.coverPhoto = publicPath;
+    user.coverImage = publicPath;
+    user.cover = publicPath;
+
+    users[index] = user;
+
+    saveUsers(users);
+
+    return res.json({
+      success: true,
+
+      message:
+        "Cover photo updated successfully.",
+
+      coverPhoto: publicPath,
+
+      coverImage: publicPath,
+
+      cover: publicPath,
+
+      user: safeUser(
+        user,
+        user.id
+      )
+    });
+  } catch (error) {
+    console.error(
+      "COVER PHOTO ERROR:",
+      error
+    );
+
+    if (req.file) {
+      deleteFileIfExists(req.file.path);
+    }
+
+    return res.status(500).json({
+      success: false,
+      error:
+        "Unable to upload cover photo."
+    });
+  }
+}
 
 app.post(
   "/api/profile/cover",
   requireAuth,
-  coverUpload.single(
-    "coverPhoto"
-  ),
-  (req, res) => {
-    try {
-      if (!req.file) {
-        return res.status(400).json({
-          success: false,
-          message:
-            "Please select a cover photo."
-        });
-      }
+  coverUpload.single("coverPhoto"),
+  handleCoverUpload
+);
 
-      const users =
-        getUsers();
-
-      const index =
-        users.findIndex(
-          user =>
-            String(user.id) ===
-            String(req.user.id)
-        );
-
-      if (index === -1) {
-        try {
-          fs.unlinkSync(
-            req.file.path
-          );
-        } catch {}
-
-        return res.status(404).json({
-          success: false,
-          message:
-            "User not found."
-        });
-      }
-
-      const user =
-        users[index];
-
-      const oldCover =
-        user.coverPhoto ||
-        user.coverImage ||
-        "";
-
-      if (
-        oldCover.startsWith(
-          "/uploads/covers/"
-        )
-      ) {
-        const oldFile =
-          path.basename(
-            oldCover
-          );
-
-        const oldPath =
-          path.join(
-            COVER_UPLOAD_DIR,
-            oldFile
-          );
-
-        try {
-          if (
-            fs.existsSync(
-              oldPath
-            )
-          ) {
-            fs.unlinkSync(
-              oldPath
-            );
-          }
-        } catch {}
-      }
-
-      const coverPhoto =
-        `/uploads/covers/${req.file.filename}`;
-
-      user.coverPhoto =
-        coverPhoto;
-
-      user.coverImage =
-        coverPhoto;
-
-      users[index] =
-        user;
-
-      writeJSON(
-        USERS_FILE,
-        users
-      );
-
-      res.json({
-        success: true,
-        message:
-          "Cover photo updated successfully.",
-        coverPhoto,
-        coverImage:
-          coverPhoto,
-        user:
-          safeUser(user)
-      });
-    } catch (error) {
-      console.error(
-        "COVER PHOTO ERROR:",
-        error
-      );
-
-      if (req.file?.path) {
-        try {
-          fs.unlinkSync(
-            req.file.path
-          );
-        } catch {}
-      }
-
-      res.status(500).json({
-        success: false,
-        message:
-          "Unable to upload cover photo."
-      });
-    }
-  }
+app.post(
+  "/api/profile/cover-photo",
+  requireAuth,
+  coverUpload.single("coverPhoto"),
+  handleCoverUpload
 );
 
 /* =========================================================
@@ -1500,81 +1451,65 @@ app.post(
   postUpload.single("image"),
   (req, res) => {
     try {
-      const text =
-        clean(
-          req.body.text || "",
-          5000
-        );
+      const text = clean(
+        req.body.text,
+        5000
+      );
 
-      if (
-        !text &&
-        !req.file
-      ) {
+      if (!text && !req.file) {
         return res.status(400).json({
           success: false,
-          message:
-            "Write something or select an image."
+          error:
+            "Write something or add an image."
         });
       }
 
-      const posts =
-        getPosts();
-
       const post = {
-        id:
-          generateId("post_"),
+        id: generateId(),
 
-        userId:
-          req.user.id,
+        userId: req.user.id,
 
         text,
 
-        image:
-          req.file
-            ? `/uploads/posts/${req.file.filename}`
-            : "",
+        image: req.file
+          ? publicUploadPath(
+              "posts",
+              req.file.filename
+            )
+          : "",
 
-        createdAt:
-          now()
+        createdAt: now()
       };
 
-      posts.unshift(
-        post
-      );
+      const posts = getPosts();
 
-      writeJSON(
-        POSTS_FILE,
-        posts
-      );
+      posts.unshift(post);
 
-      res.json({
+      savePosts(posts);
+
+      return res.status(201).json({
         success: true,
-        message:
-          "Post published.",
-        post:
-          buildPost(
-            post,
-            req.user.id
-          )
+
+        message: "Post created successfully.",
+
+        post: buildPost(
+          post,
+          req.user.id
+        )
       });
     } catch (error) {
       console.error(
-        "POST ERROR:",
+        "CREATE POST ERROR:",
         error
       );
 
-      if (req.file?.path) {
-        try {
-          fs.unlinkSync(
-            req.file.path
-          );
-        } catch {}
+      if (req.file) {
+        deleteFileIfExists(req.file.path);
       }
 
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
-        message:
-          "Unable to create post."
+        error: "Unable to create post."
       });
     }
   }
@@ -1588,54 +1523,113 @@ app.get(
   "/api/feed",
   requireAuth,
   (req, res) => {
-    const limit =
-      Math.min(
-        Number(
-          req.query.limit || 50
-        ),
-        100
-      );
+    const limit = Math.min(
+      Math.max(
+        Number(req.query.limit) || 50,
+        1
+      ),
+      100
+    );
 
     const followingOnly =
       String(
-        req.query.following
-      ) === "true";
+        req.query.following || ""
+      ).toLowerCase() === "true";
 
-    const posts =
-      getPosts()
-        .sort(
-          (a, b) =>
-            new Date(b.createdAt) -
-            new Date(a.createdAt)
-        )
-        .filter(post => {
-          if (!followingOnly) {
-            return true;
-          }
+    let posts = getPosts();
 
-          return (
-            String(
-              post.userId
-            ) ===
+    if (followingOnly) {
+      const follows = getFollows();
+
+      const followingIds =
+        follows
+          .filter(
+            (follow) =>
               String(
-                req.user.id
-              ) ||
-            isFollowing(
-              req.user.id,
-              post.userId
-            )
-          );
-        })
-        .slice(0, limit)
-        .map(post =>
-          buildPost(
-            post,
-            req.user.id
+                follow.followerId
+              ) ===
+              String(req.user.id)
           )
-        );
+          .map(
+            (follow) =>
+              String(follow.followingId)
+          );
 
-    res.json({
+      followingIds.push(
+        String(req.user.id)
+      );
+
+      posts = posts.filter((post) =>
+        followingIds.includes(
+          String(post.userId)
+        )
+      );
+    }
+
+    posts.sort(
+      (a, b) =>
+        new Date(b.createdAt) -
+        new Date(a.createdAt)
+    );
+
+    posts = posts
+      .slice(0, limit)
+      .map((post) =>
+        buildPost(
+          post,
+          req.user.id
+        )
+      );
+
+    return res.json({
       success: true,
+
+      posts
+    });
+  }
+);
+
+/* =========================================================
+   USER POSTS
+========================================================= */
+
+app.get(
+  "/api/users/:username/posts",
+  requireAuth,
+  (req, res) => {
+    const user =
+      getUserByUsername(
+        req.params.username
+      );
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: "User not found."
+      });
+    }
+
+    const posts = getPosts()
+      .filter(
+        (post) =>
+          String(post.userId) ===
+          String(user.id)
+      )
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt) -
+          new Date(a.createdAt)
+      )
+      .map((post) =>
+        buildPost(
+          post,
+          req.user.id
+        )
+      );
+
+    return res.json({
+      success: true,
+
       posts
     });
   }
@@ -1649,35 +1643,31 @@ app.delete(
   "/api/posts/:id",
   requireAuth,
   (req, res) => {
-    const posts =
-      getPosts();
+    const posts = getPosts();
 
-    const index =
-      posts.findIndex(
-        post =>
-          String(post.id) ===
-          String(req.params.id)
-      );
+    const index = posts.findIndex(
+      (post) =>
+        String(post.id) ===
+        String(req.params.id)
+    );
 
     if (index === -1) {
       return res.status(404).json({
         success: false,
-        message:
-          "Post not found."
+        error: "Post not found."
       });
     }
 
-    const post =
-      posts[index];
+    const post = posts[index];
 
     if (
       String(post.userId) !==
-      String(req.user.id) &&
+        String(req.user.id) &&
       !isAdminUser(req.user)
     ) {
       return res.status(403).json({
         success: false,
-        message:
+        error:
           "You cannot delete this post."
       });
     }
@@ -1688,66 +1678,46 @@ app.delete(
         "/uploads/posts/"
       )
     ) {
-      const file =
+      deleteFileIfExists(
         path.join(
           POST_UPLOAD_DIR,
-          path.basename(
-            post.image
-          )
-        );
-
-      try {
-        if (fs.existsSync(file)) {
-          fs.unlinkSync(file);
-        }
-      } catch {}
+          path.basename(post.image)
+        )
+      );
     }
 
     posts.splice(index, 1);
 
-    writeJSON(
-      POSTS_FILE,
-      posts
-    );
+    savePosts(posts);
 
     const comments =
-      readJSON(
-        COMMENTS_FILE
-      ).filter(
-        comment =>
+      getComments().filter(
+        (comment) =>
           String(comment.postId) !==
           String(post.id)
       );
 
-    writeJSON(
-      COMMENTS_FILE,
-      comments
-    );
+    saveComments(comments);
 
     const likes =
-      readJSON(
-        LIKES_FILE
-      ).filter(
-        like =>
+      getLikes().filter(
+        (like) =>
           String(like.postId) !==
           String(post.id)
       );
 
-    writeJSON(
-      LIKES_FILE,
-      likes
-    );
+    saveLikes(likes);
 
-    res.json({
+    return res.json({
       success: true,
-      message:
-        "Post deleted."
+
+      message: "Post deleted successfully."
     });
   }
 );
 
 /* =========================================================
-   LIKE POST
+   LIKE / UNLIKE
 ========================================================= */
 
 app.post(
@@ -1755,83 +1725,68 @@ app.post(
   requireAuth,
   (req, res) => {
     const post =
-      getPostById(
-        req.params.id
-      );
+      getPostById(req.params.id);
 
     if (!post) {
       return res.status(404).json({
         success: false,
-        message:
-          "Post not found."
+        error: "Post not found."
       });
     }
 
-    const likes =
-      readJSON(
-        LIKES_FILE
-      );
+    const likes = getLikes();
 
-    const index =
-      likes.findIndex(
-        like =>
-          String(like.postId) ===
-            String(post.id) &&
-          String(like.userId) ===
-            String(req.user.id)
-      );
+    const index = likes.findIndex(
+      (like) =>
+        String(like.postId) ===
+          String(post.id) &&
+        String(like.userId) ===
+          String(req.user.id)
+    );
 
     let liked;
 
-    if (index >= 0) {
-      likes.splice(
-        index,
-        1
-      );
+    if (index !== -1) {
+      likes.splice(index, 1);
 
       liked = false;
     } else {
       likes.push({
-        id:
-          generateId("like_"),
-        postId:
-          post.id,
-        userId:
-          req.user.id,
-        createdAt:
-          now()
+        id: generateId(),
+
+        postId: post.id,
+
+        userId: req.user.id,
+
+        createdAt: now()
       });
 
       liked = true;
 
       createNotification({
-        userId:
-          post.userId,
-        actorId:
-          req.user.id,
-        type:
-          "like",
-        text:
-          `${req.user.name} liked your post.`,
-        postId:
-          post.id
+        userId: post.userId,
+
+        fromUserId: req.user.id,
+
+        type: "like",
+
+        text: `${req.user.name} liked your post.`,
+
+        postId: post.id
       });
     }
 
-    writeJSON(
-      LIKES_FILE,
-      likes
-    );
+    saveLikes(likes);
 
-    res.json({
+    return res.json({
       success: true,
+
       liked,
-      isLiked:
-        liked,
+
+      isLiked: liked,
+
       likeCount:
-        postLikeCount(
-          post.id
-        )
+        postLikeCount(post.id)
     });
   }
 );
@@ -1845,24 +1800,19 @@ app.get(
   requireAuth,
   (req, res) => {
     const post =
-      getPostById(
-        req.params.id
-      );
+      getPostById(req.params.id);
 
     if (!post) {
       return res.status(404).json({
         success: false,
-        message:
-          "Post not found."
+        error: "Post not found."
       });
     }
 
     const comments =
-      readJSON(
-        COMMENTS_FILE
-      )
+      getComments()
         .filter(
-          comment =>
+          (comment) =>
             String(comment.postId) ===
             String(post.id)
         )
@@ -1871,31 +1821,24 @@ app.get(
             new Date(a.createdAt) -
             new Date(b.createdAt)
         )
-        .map(comment => ({
+        .map((comment) => ({
           ...comment,
-          user:
-            safeUser(
-              getUserById(
-                comment.userId
-              )
-            ),
-          author:
-            safeUser(
-              getUserById(
-                comment.userId
-              )
-            ),
-          isOwner:
-            String(
+
+          user: safeUser(
+            getUserById(
               comment.userId
-            ) ===
-            String(
-              req.user.id
-            )
+            ),
+            req.user.id
+          ),
+
+          isOwner:
+            String(comment.userId) ===
+            String(req.user.id)
         }));
 
-    res.json({
+    return res.json({
       success: true,
+
       comments
     });
   }
@@ -1906,99 +1849,88 @@ app.post(
   requireAuth,
   (req, res) => {
     const post =
-      getPostById(
-        req.params.id
-      );
+      getPostById(req.params.id);
 
     if (!post) {
       return res.status(404).json({
         success: false,
-        message:
-          "Post not found."
+        error: "Post not found."
       });
     }
 
-    const text =
-      clean(
-        req.body.text || "",
-        1000
-      );
+    const text = clean(
+      req.body.text ||
+        req.body.comment,
+      1000
+    );
 
     if (!text) {
       return res.status(400).json({
         success: false,
-        message:
-          "Comment cannot be empty."
+        error: "Comment cannot be empty."
       });
     }
 
-    const comments =
-      readJSON(
-        COMMENTS_FILE
-      );
-
     const comment = {
-      id:
-        generateId("comment_"),
-      postId:
-        post.id,
-      userId:
-        req.user.id,
+      id: generateId(),
+
+      postId: post.id,
+
+      userId: req.user.id,
+
       text,
-      createdAt:
-        now()
+
+      createdAt: now()
     };
 
-    comments.push(
-      comment
-    );
+    const comments = getComments();
 
-    writeJSON(
-      COMMENTS_FILE,
-      comments
-    );
+    comments.push(comment);
+
+    saveComments(comments);
 
     createNotification({
-      userId:
-        post.userId,
-      actorId:
-        req.user.id,
-      type:
-        "comment",
-      text:
-        `${req.user.name} commented on your post.`,
-      postId:
-        post.id
+      userId: post.userId,
+
+      fromUserId: req.user.id,
+
+      type: "comment",
+
+      text: `${req.user.name} commented on your post.`,
+
+      postId: post.id
     });
 
-    res.json({
+    return res.status(201).json({
       success: true,
-      message:
-        "Comment added.",
+
       comment: {
         ...comment,
-        user:
-          safeUser(req.user),
-        author:
-          safeUser(req.user),
+
+        user: safeUser(
+          req.user,
+          req.user.id
+        ),
+
         isOwner: true
       }
     });
   }
 );
 
+/* =========================================================
+   DELETE COMMENT
+========================================================= */
+
 app.delete(
   "/api/comments/:id",
   requireAuth,
   (req, res) => {
-    const comments =
-      readJSON(
-        COMMENTS_FILE
-      );
+    const comments = getComments();
 
     const index =
       comments.findIndex(
-        comment =>
+        (comment) =>
           String(comment.id) ===
           String(req.params.id)
       );
@@ -2006,13 +1938,11 @@ app.delete(
     if (index === -1) {
       return res.status(404).json({
         success: false,
-        message:
-          "Comment not found."
+        error: "Comment not found."
       });
     }
 
-    const comment =
-      comments[index];
+    const comment = comments[index];
 
     if (
       String(comment.userId) !==
@@ -2021,25 +1951,20 @@ app.delete(
     ) {
       return res.status(403).json({
         success: false,
-        message:
+        error:
           "You cannot delete this comment."
       });
     }
 
-    comments.splice(
-      index,
-      1
-    );
+    comments.splice(index, 1);
 
-    writeJSON(
-      COMMENTS_FILE,
-      comments
-    );
+    saveComments(comments);
 
-    res.json({
+    return res.json({
       success: true,
+
       message:
-        "Comment deleted."
+        "Comment deleted successfully."
     });
   }
 );
@@ -2053,15 +1978,12 @@ app.post(
   requireAuth,
   (req, res) => {
     const target =
-      getUserById(
-        req.params.id
-      );
+      getUserById(req.params.id);
 
     if (!target) {
       return res.status(404).json({
         success: false,
-        message:
-          "User not found."
+        error: "User not found."
       });
     }
 
@@ -2071,80 +1993,63 @@ app.post(
     ) {
       return res.status(400).json({
         success: false,
-        message:
+        error:
           "You cannot follow yourself."
       });
     }
 
-    const follows =
-      readJSON(
-        FOLLOWS_FILE
-      );
+    const follows = getFollows();
 
     const index =
       follows.findIndex(
-        follow =>
-          String(
-            follow.followerId
-          ) ===
-            String(
-              req.user.id
-            ) &&
-          String(
-            follow.followingId
-          ) ===
+        (follow) =>
+          String(follow.followerId) ===
+            String(req.user.id) &&
+          String(follow.followingId) ===
             String(target.id)
       );
 
     let following;
 
-    if (index >= 0) {
-      follows.splice(
-        index,
-        1
-      );
+    if (index !== -1) {
+      follows.splice(index, 1);
 
       following = false;
     } else {
       follows.push({
-        id:
-          generateId("follow_"),
-        followerId:
-          req.user.id,
-        followingId:
-          target.id,
-        createdAt:
-          now()
+        id: generateId(),
+
+        followerId: req.user.id,
+
+        followingId: target.id,
+
+        createdAt: now()
       });
 
       following = true;
 
       createNotification({
-        userId:
-          target.id,
-        actorId:
-          req.user.id,
-        type:
-          "follow",
-        text:
-          `${req.user.name} started following you.`
+        userId: target.id,
+
+        fromUserId: req.user.id,
+
+        type: "follow",
+
+        text: `${req.user.name} started following you.`
       });
     }
 
-    writeJSON(
-      FOLLOWS_FILE,
-      follows
-    );
+    saveFollows(follows);
 
-    res.json({
+    return res.json({
       success: true,
+
       following,
-      isFollowing:
-        following,
+
+      isFollowing: following,
+
       followersCount:
-        followersCount(
-          target.id
-        )
+        followersCount(target.id)
     });
   }
 );
@@ -2157,37 +2062,37 @@ app.get(
   "/api/users/:id/followers",
   requireAuth,
   (req, res) => {
-    const follows =
-      readJSON(
-        FOLLOWS_FILE
-      );
+    const user =
+      getUserById(req.params.id);
 
-    const users =
-      follows
-        .filter(
-          follow =>
-            String(
-              follow.followingId
-            ) ===
-            String(
-              req.params.id
-            )
-        )
-        .map(
-          follow =>
-            getUserById(
-              follow.followerId
-            )
-        )
-        .filter(Boolean)
-        .map(
-          user =>
-            safeUser(user)
-        );
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: "User not found."
+      });
+    }
 
-    res.json({
+    const users = getFollows()
+      .filter(
+        (follow) =>
+          String(follow.followingId) ===
+          String(user.id)
+      )
+      .map((follow) =>
+        safeUser(
+          getUserById(
+            follow.followerId
+          ),
+          req.user.id
+        )
+      )
+      .filter(Boolean);
+
+    return res.json({
       success: true,
+
       users,
+
       followers: users
     });
   }
@@ -2201,37 +2106,37 @@ app.get(
   "/api/users/:id/following",
   requireAuth,
   (req, res) => {
-    const follows =
-      readJSON(
-        FOLLOWS_FILE
-      );
+    const user =
+      getUserById(req.params.id);
 
-    const users =
-      follows
-        .filter(
-          follow =>
-            String(
-              follow.followerId
-            ) ===
-            String(
-              req.params.id
-            )
-        )
-        .map(
-          follow =>
-            getUserById(
-              follow.followingId
-            )
-        )
-        .filter(Boolean)
-        .map(
-          user =>
-            safeUser(user)
-        );
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: "User not found."
+      });
+    }
 
-    res.json({
+    const users = getFollows()
+      .filter(
+        (follow) =>
+          String(follow.followerId) ===
+          String(user.id)
+      )
+      .map((follow) =>
+        safeUser(
+          getUserById(
+            follow.followingId
+          ),
+          req.user.id
+        )
+      )
+      .filter(Boolean);
+
+    return res.json({
       success: true,
+
       users,
+
       following: users
     });
   }
@@ -2245,61 +2150,49 @@ app.get(
   "/api/search",
   requireAuth,
   (req, res) => {
-    const q =
-      String(
-        req.query.q || ""
-      )
-        .trim()
-        .toLowerCase();
+    const query = clean(
+      req.query.q,
+      100
+    ).toLowerCase();
 
-    if (!q) {
+    if (!query) {
       return res.json({
         success: true,
         users: []
       });
     }
 
-    const users =
-      getUsers()
-        .filter(user => {
-          const name =
-            String(
-              user.name || ""
-            ).toLowerCase();
+    const users = getUsers()
+      .filter((user) => {
+        const name =
+          String(user.name || "")
+            .toLowerCase();
 
-          const username =
-            String(
-              user.username || ""
-            ).toLowerCase();
+        const username =
+          String(user.username || "")
+            .toLowerCase();
 
-          return (
-            name.includes(q) ||
-            username.includes(q)
-          );
-        })
-        .slice(0, 30)
-        .map(user => ({
-          ...safeUser(user),
+        return (
+          name.includes(query) ||
+          username.includes(query)
+        );
+      })
+      .filter(
+        (user) =>
+          String(user.id) !==
+          String(req.user.id)
+      )
+      .slice(0, 30)
+      .map((user) =>
+        safeUser(
+          user,
+          req.user.id
+        )
+      );
 
-          followersCount:
-            followersCount(
-              user.id
-            ),
-
-          followingCount:
-            followingCount(
-              user.id
-            ),
-
-          isFollowing:
-            isFollowing(
-              req.user.id,
-              user.id
-            )
-        }));
-
-    res.json({
+    return res.json({
       success: true,
+
       users
     });
   }
@@ -2314,45 +2207,38 @@ app.get(
   requireAuth,
   (req, res) => {
     const notifications =
-      readJSON(
-        NOTIFICATIONS_FILE
-      )
+      getNotifications()
         .filter(
-          notification =>
-            String(
-              notification.userId
-            ) ===
-            String(
-              req.user.id
-            )
+          (notification) =>
+            String(notification.userId) ===
+            String(req.user.id)
         )
         .sort(
           (a, b) =>
-            new Date(
-              b.createdAt
-            ) -
-            new Date(
-              a.createdAt
-            )
+            new Date(b.createdAt) -
+            new Date(a.createdAt)
         )
-        .map(
-          notification => ({
-            ...notification,
-            actor:
-              safeUser(
-                getUserById(
-                  notification.actorId
-                )
-              )
-          })
-        );
+        .slice(0, 100)
+        .map((notification) => ({
+          ...notification,
 
-    res.json({
+          user: safeUser(
+            getUserById(
+              notification.fromUserId
+            ),
+            req.user.id
+          )
+        }));
+
+    return res.json({
       success: true,
+
       notifications,
+
       unreadCount:
         notifications.filter(
-          n => !n.read
+          (notification) =>
+            !notification.read
         ).length
     });
   }
@@ -2363,305 +2249,148 @@ app.post(
   requireAuth,
   (req, res) => {
     const notifications =
-      readJSON(
-        NOTIFICATIONS_FILE
-      );
+      getNotifications();
 
     notifications.forEach(
-      notification => {
+      (notification) => {
         if (
-          String(
-            notification.userId
-          ) ===
-          String(
-            req.user.id
-          )
+          String(notification.userId) ===
+          String(req.user.id)
         ) {
-          notification.read =
-            true;
+          notification.read = true;
         }
       }
     );
 
-    writeJSON(
-      NOTIFICATIONS_FILE,
-      notifications
-    );
+    saveNotifications(notifications);
 
-    res.json({
+    return res.json({
       success: true
     });
   }
 );
 
 /* =========================================================
-   STATISTICS
-========================================================= */
-
-app.get(
-  "/api/stats",
-  requireAuth,
-  (req, res) => {
-    const posts =
-      getPosts().filter(
-        post =>
-          String(post.userId) ===
-          String(req.user.id)
-      );
-
-    const likes =
-      readJSON(
-        LIKES_FILE
-      );
-
-    const comments =
-      readJSON(
-        COMMENTS_FILE
-      );
-
-    const likesReceived =
-      likes.filter(
-        like =>
-          posts.some(
-            post =>
-              String(
-                post.id
-              ) ===
-              String(
-                like.postId
-              )
-          )
-      ).length;
-
-    const commentsReceived =
-      comments.filter(
-        comment =>
-          posts.some(
-            post =>
-              String(
-                post.id
-              ) ===
-              String(
-                comment.postId
-              )
-          )
-      ).length;
-
-    res.json({
-      success: true,
-
-      stats: {
-        posts:
-          posts.length,
-
-        followers:
-          followersCount(
-            req.user.id
-          ),
-
-        following:
-          followingCount(
-            req.user.id
-          ),
-
-        likesReceived,
-
-        commentsReceived
-      }
-    });
-  }
-);
-
-/* =========================================================
-   MESSAGES
-========================================================= */
-
-/*
-Message object:
-
-{
-  id,
-  senderId,
-  receiverId,
-  text,
-  image,
-  createdAt,
-  read
-}
-*/
-
-function buildMessage(
-  message,
-  currentUserId
-) {
-  const sender =
-    getUserById(
-      message.senderId
-    );
-
-  const receiver =
-    getUserById(
-      message.receiverId
-    );
-
-  return {
-    ...message,
-
-    sender:
-      safeUser(sender),
-
-    receiver:
-      safeUser(receiver),
-
-    isMine:
-      String(
-        message.senderId
-      ) ===
-      String(
-        currentUserId
-      )
-  };
-}
-
-/* =========================================================
-   MESSAGE CONVERSATIONS
+   MESSAGES - CONVERSATIONS
 ========================================================= */
 
 app.get(
   "/api/messages/conversations",
   requireAuth,
   (req, res) => {
-    const messages =
-      readJSON(
-        MESSAGES_FILE
-      );
+    const messages = getMessages();
 
-    const relevant =
-      messages.filter(
-        message =>
-          String(
-            message.senderId
-          ) ===
-            String(
-              req.user.id
-            ) ||
-          String(
-            message.receiverId
-          ) ===
-            String(
-              req.user.id
-            )
-      );
+    const otherIds = new Set();
 
-    const map =
-      new Map();
+    messages.forEach((message) => {
+      if (
+        String(message.senderId) ===
+        String(req.user.id)
+      ) {
+        otherIds.add(
+          String(message.receiverId)
+        );
+      }
 
-    relevant.forEach(
-      message => {
-        const otherId =
-          String(
-            message.senderId
-          ) ===
-          String(
-            req.user.id
+      if (
+        String(message.receiverId) ===
+        String(req.user.id)
+      ) {
+        otherIds.add(
+          String(message.senderId)
+        );
+      }
+    });
+
+    const conversations = [];
+
+    for (const otherId of otherIds) {
+      const otherUser =
+        getUserById(otherId);
+
+      if (!otherUser) continue;
+
+      const conversationMessages =
+        messages
+          .filter(
+            (message) =>
+              (
+                String(message.senderId) ===
+                  String(req.user.id) &&
+                String(message.receiverId) ===
+                  String(otherId)
+              ) ||
+              (
+                String(message.senderId) ===
+                  String(otherId) &&
+                String(message.receiverId) ===
+                  String(req.user.id)
+              )
           )
-            ? message.receiverId
-            : message.senderId;
+          .sort(
+            (a, b) =>
+              new Date(b.createdAt) -
+              new Date(a.createdAt)
+          );
 
-        const key =
-          String(otherId);
+      const latest =
+        conversationMessages[0];
 
-        const existing =
-          map.get(key);
+      const unread =
+        conversationMessages.filter(
+          (message) =>
+            String(message.receiverId) ===
+              String(req.user.id) &&
+            !message.read
+        ).length;
 
-        if (
-          !existing ||
-          new Date(
-            message.createdAt
-          ) >
-            new Date(
-              existing.message.createdAt
-            )
-        ) {
-          map.set(key, {
-            message,
-            unreadCount: 0
-          });
-        }
-      }
-    );
+      conversations.push({
+        user: safeUser(
+          otherUser,
+          req.user.id
+        ),
 
-    relevant.forEach(
-      message => {
-        if (
-          String(
-            message.receiverId
-          ) ===
-            String(
-              req.user.id
-            ) &&
-          !message.read
-        ) {
-          const otherId =
-            String(
-              message.senderId
-            );
+        lastMessage: latest
+          ? {
+              id: latest.id,
 
-          const conversation =
-            map.get(otherId);
+              text: latest.text || "",
 
-          if (conversation) {
-            conversation.unreadCount++;
-          }
-        }
-      }
-    );
+              image: latest.image || "",
 
-    const conversations =
-      Array.from(
-        map.entries()
-      )
-        .map(
-          ([userId, data]) => {
-            const otherUser =
-              getUserById(
-                userId
-              );
+              createdAt:
+                latest.createdAt,
 
-            if (!otherUser) {
-              return null;
+              senderId:
+                latest.senderId
             }
+          : null,
 
-            return {
-              user:
-                safeUser(
-                  otherUser
-                ),
+        unreadCount: unread
+      });
+    }
 
-              lastMessage:
-                buildMessage(
-                  data.message,
-                  req.user.id
-                ),
-
-              unreadCount:
-                data.unreadCount
-            };
-          }
-        )
-        .filter(Boolean)
-        .sort(
-          (a, b) =>
-            new Date(
-              b.lastMessage.createdAt
-            ) -
-            new Date(
+    conversations.sort((a, b) => {
+      const aDate =
+        a.lastMessage
+          ? new Date(
               a.lastMessage.createdAt
             )
-        );
+          : 0;
 
-    res.json({
+      const bDate =
+        b.lastMessage
+          ? new Date(
+              b.lastMessage.createdAt
+            )
+          : 0;
+
+      return bDate - aDate;
+    });
+
+    return res.json({
       success: true,
+
       conversations
     });
   }
@@ -2683,118 +2412,86 @@ app.get(
     if (!otherUser) {
       return res.status(404).json({
         success: false,
-        message:
-          "User not found."
+        error: "User not found."
       });
     }
 
-    const messages =
-      readJSON(
-        MESSAGES_FILE
-      );
+    const messages = getMessages();
 
     const conversation =
-      messages.filter(
-        message =>
-          (
-            String(
-              message.senderId
-            ) ===
-              String(
-                req.user.id
-              ) &&
-            String(
-              message.receiverId
-            ) ===
-              String(
-                otherUser.id
-              )
-          ) ||
-          (
-            String(
-              message.senderId
-            ) ===
-              String(
-                otherUser.id
-              ) &&
-            String(
-              message.receiverId
-            ) ===
-              String(
-                req.user.id
-              )
-          )
-      )
-      .sort(
-        (a, b) =>
-          new Date(
-            a.createdAt
-          ) -
-          new Date(
-            b.createdAt
-          )
-      );
+      messages
+        .filter(
+          (message) =>
+            (
+              String(message.senderId) ===
+                String(req.user.id) &&
+              String(message.receiverId) ===
+                String(otherUser.id)
+            ) ||
+            (
+              String(message.senderId) ===
+                String(otherUser.id) &&
+              String(message.receiverId) ===
+                String(req.user.id)
+            )
+        )
+        .sort(
+          (a, b) =>
+            new Date(a.createdAt) -
+            new Date(b.createdAt)
+        );
 
     let changed = false;
 
-    conversation.forEach(
-      message => {
-        if (
-          String(
-            message.receiverId
-          ) ===
-            String(
-              req.user.id
-            ) &&
-          !message.read
-        ) {
-          message.read =
-            true;
+    conversation.forEach((message) => {
+      if (
+        String(message.receiverId) ===
+          String(req.user.id) &&
+        !message.read
+      ) {
+        message.read = true;
 
-          const original =
-            messages.find(
-              item =>
-                String(
-                  item.id
-                ) ===
-                String(
-                  message.id
-                )
-            );
-
-          if (original) {
-            original.read =
-              true;
-
-            changed = true;
-          }
-        }
+        changed = true;
       }
-    );
+    });
 
     if (changed) {
-      writeJSON(
-        MESSAGES_FILE,
-        messages
-      );
+      saveMessages(messages);
     }
 
-    res.json({
-      success: true,
+    const result = conversation.map(
+      (message) => ({
+        ...message,
 
-      user:
-        safeUser(
-          otherUser
+        sender: safeUser(
+          getUserById(
+            message.senderId
+          ),
+          req.user.id
         ),
 
-      messages:
-        conversation.map(
-          message =>
-            buildMessage(
-              message,
-              req.user.id
-            )
-        )
+        receiver: safeUser(
+          getUserById(
+            message.receiverId
+          ),
+          req.user.id
+        ),
+
+        isMine:
+          String(message.senderId) ===
+          String(req.user.id)
+      })
+    );
+
+    return res.json({
+      success: true,
+
+      user: safeUser(
+        otherUser,
+        req.user.id
+      ),
+
+      messages: result
     });
   }
 );
@@ -2806,168 +2503,146 @@ app.get(
 app.post(
   "/api/messages",
   requireAuth,
-  messageUpload.single(
-    "image"
-  ),
+  messageUpload.single("image"),
   (req, res) => {
     try {
-      const receiverId =
-        String(
-          req.body.receiverId ||
-          req.body.userId ||
-          ""
-        ).trim();
+      const receiverId = clean(
+        req.body.receiverId,
+        200
+      );
 
-      const text =
-        clean(
-          req.body.text || "",
-          5000
-        );
+      const text = clean(
+        req.body.text,
+        5000
+      );
 
       if (!receiverId) {
-        if (req.file?.path) {
-          try {
-            fs.unlinkSync(
-              req.file.path
-            );
-          } catch {}
+        if (req.file) {
+          deleteFileIfExists(
+            req.file.path
+          );
         }
 
         return res.status(400).json({
           success: false,
-          message:
-            "Receiver is required."
+          error: "Receiver is required."
         });
       }
 
       const receiver =
-        getUserById(
-          receiverId
-        );
+        getUserById(receiverId);
 
       if (!receiver) {
-        if (req.file?.path) {
-          try {
-            fs.unlinkSync(
-              req.file.path
-            );
-          } catch {}
+        if (req.file) {
+          deleteFileIfExists(
+            req.file.path
+          );
         }
 
         return res.status(404).json({
           success: false,
-          message:
-            "Receiver not found."
+          error: "Receiver not found."
         });
       }
 
       if (
-        String(
-          receiver.id
-        ) ===
-        String(
-          req.user.id
-        )
+        String(receiver.id) ===
+        String(req.user.id)
       ) {
-        if (req.file?.path) {
-          try {
-            fs.unlinkSync(
-              req.file.path
-            );
-          } catch {}
+        if (req.file) {
+          deleteFileIfExists(
+            req.file.path
+          );
         }
 
         return res.status(400).json({
           success: false,
-          message:
+          error:
             "You cannot message yourself."
         });
       }
 
-      if (
-        !text &&
-        !req.file
-      ) {
+      if (!text && !req.file) {
         return res.status(400).json({
           success: false,
-          message:
+          error:
             "Message cannot be empty."
         });
       }
 
-      const messages =
-        readJSON(
-          MESSAGES_FILE
-        );
-
       const message = {
-        id:
-          generateId("msg_"),
+        id: generateId(),
 
-        senderId:
-          req.user.id,
+        senderId: req.user.id,
 
-        receiverId:
-          receiver.id,
+        receiverId: receiver.id,
 
         text,
 
-        image:
-          req.file
-            ? `/uploads/messages/${req.file.filename}`
-            : "",
+        image: req.file
+          ? publicUploadPath(
+              "messages",
+              req.file.filename
+            )
+          : "",
 
-        createdAt:
-          now(),
+        read: false,
 
-        read: false
+        createdAt: now()
       };
 
-      messages.push(
-        message
-      );
+      const messages = getMessages();
 
-      writeJSON(
-        MESSAGES_FILE,
-        messages
-      );
+      messages.push(message);
+
+      saveMessages(messages);
 
       createNotification({
-        userId:
-          receiver.id,
-        actorId:
-          req.user.id,
-        type:
-          "message",
-        text:
-          `${req.user.name} sent you a message.`
+        userId: receiver.id,
+
+        fromUserId: req.user.id,
+
+        type: "message",
+
+        text: `${req.user.name} sent you a message.`,
+
+        messageId: message.id
       });
 
-      res.json({
+      return res.status(201).json({
         success: true,
-        message:
-          buildMessage(
-            message,
+
+        message: {
+          ...message,
+
+          sender: safeUser(
+            req.user,
             req.user.id
-          )
+          ),
+
+          receiver: safeUser(
+            receiver,
+            req.user.id
+          ),
+
+          isMine: true
+        }
       });
     } catch (error) {
       console.error(
-        "MESSAGE ERROR:",
+        "SEND MESSAGE ERROR:",
         error
       );
 
-      if (req.file?.path) {
-        try {
-          fs.unlinkSync(
-            req.file.path
-          );
-        } catch {}
+      if (req.file) {
+        deleteFileIfExists(
+          req.file.path
+        );
       }
 
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
-        message:
+        error:
           "Unable to send message."
       });
     }
@@ -2982,124 +2657,84 @@ app.get(
   "/api/messages/unread-count",
   requireAuth,
   (req, res) => {
-    const messages =
-      readJSON(
-        MESSAGES_FILE
-      );
-
     const count =
-      messages.filter(
-        message =>
-          String(
-            message.receiverId
-          ) ===
-            String(
-              req.user.id
-            ) &&
+      getMessages().filter(
+        (message) =>
+          String(message.receiverId) ===
+            String(req.user.id) &&
           !message.read
       ).length;
 
-    res.json({
+    return res.json({
       success: true,
-      count,
-      unreadCount:
-        count
+
+      unreadCount: count,
+
+      count
     });
   }
 );
 
 /* =========================================================
-   DELETE MESSAGE
+   USER STATS
 ========================================================= */
 
-app.delete(
-  "/api/messages/:id",
+app.get(
+  "/api/stats",
   requireAuth,
   (req, res) => {
-    const messages =
-      readJSON(
-        MESSAGES_FILE
-      );
+    const posts = getPosts().filter(
+      (post) =>
+        String(post.userId) ===
+        String(req.user.id)
+    );
 
-    const index =
-      messages.findIndex(
-        message =>
-          String(
-            message.id
-          ) ===
-          String(
-            req.params.id
-          )
-      );
-
-    if (index === -1) {
-      return res.status(404).json({
-        success: false,
-        message:
-          "Message not found."
-      });
-    }
-
-    const message =
-      messages[index];
-
-    if (
-      String(
-        message.senderId
-      ) !==
-      String(
-        req.user.id
-      ) &&
-      !isAdminUser(req.user)
-    ) {
-      return res.status(403).json({
-        success: false,
-        message:
-          "You cannot delete this message."
-      });
-    }
-
-    if (
-      message.image &&
-      message.image.startsWith(
-        "/uploads/messages/"
+    const postIds = new Set(
+      posts.map((post) =>
+        String(post.id)
       )
-    ) {
-      const file =
-        path.join(
-          MESSAGE_UPLOAD_DIR,
-          path.basename(
-            message.image
-          )
-        );
-
-      try {
-        if (fs.existsSync(file)) {
-          fs.unlinkSync(file);
-        }
-      } catch {}
-    }
-
-    messages.splice(
-      index,
-      1
     );
 
-    writeJSON(
-      MESSAGES_FILE,
-      messages
-    );
+    const likesReceived =
+      getLikes().filter((like) =>
+        postIds.has(
+          String(like.postId)
+        )
+      ).length;
 
-    res.json({
+    const commentsReceived =
+      getComments().filter((comment) =>
+        postIds.has(
+          String(comment.postId)
+        )
+      ).length;
+
+    return res.json({
       success: true,
-      message:
-        "Message deleted."
+
+      stats: {
+        posts: posts.length,
+
+        followers:
+          followersCount(
+            req.user.id
+          ),
+
+        following:
+          followingCount(
+            req.user.id
+          ),
+
+        likesReceived,
+
+        commentsReceived
+      }
     });
   }
 );
 
 /* =========================================================
-   VERIFICATION
+   VERIFICATION - CURRENT USER
 ========================================================= */
 
 app.get(
@@ -3107,287 +2742,263 @@ app.get(
   requireAuth,
   (req, res) => {
     const requests =
-      readJSON(
-        VERIFICATION_FILE
-      );
+      getVerificationRequests();
 
     const request =
       requests
         .filter(
-          item =>
-            String(
-              item.userId
-            ) ===
-            String(
-              req.user.id
-            )
+          (item) =>
+            String(item.userId) ===
+            String(req.user.id)
         )
         .sort(
           (a, b) =>
-            new Date(
-              b.createdAt
-            ) -
-            new Date(
-              a.createdAt
-            )
+            new Date(b.createdAt) -
+            new Date(a.createdAt)
         )[0] || null;
 
-    res.json({
+    return res.json({
       success: true,
+
       verified:
-        Boolean(
-          req.user.verified
-        ),
+        req.user.verified === true,
+
       status:
-        req.user
-          .verificationStatus ||
+        req.user.verificationStatus ||
         "none",
-      request
-    });
-  }
-);
 
-app.post(
-  "/api/verification/request",
-  requireAuth,
-  (req, res) => {
-    if (
-      req.user.verified
-    ) {
-      return res.status(400).json({
-        success: false,
-        message:
-          "Your account is already verified."
-      });
-    }
-
-    const reason =
-      clean(
-        req.body.reason || "",
-        2000
-      );
-
-    if (!reason) {
-      return res.status(400).json({
-        success: false,
-        message:
-          "Please provide a reason for verification."
-      });
-    }
-
-    const requests =
-      readJSON(
-        VERIFICATION_FILE
-      );
-
-    const existing =
-      requests.find(
-        request =>
-          String(
-            request.userId
-          ) ===
-            String(
-              req.user.id
-            ) &&
-          request.status ===
-            "pending"
-      );
-
-    if (existing) {
-      return res.status(400).json({
-        success: false,
-        message:
-          "You already have a pending verification request."
-      });
-    }
-
-    const request = {
-      id:
-        generateId("verify_"),
-
-      userId:
-        req.user.id,
-
-      reason,
-
-      status:
-        "pending",
-
-      createdAt:
-        now(),
-
-      updatedAt:
-        now()
-    };
-
-    requests.push(
-      request
-    );
-
-    writeJSON(
-      VERIFICATION_FILE,
-      requests
-    );
-
-    const users =
-      getUsers();
-
-    const index =
-      users.findIndex(
-        user =>
-          String(user.id) ===
-          String(req.user.id)
-      );
-
-    if (index >= 0) {
-      users[index]
-        .verificationStatus =
-        "pending";
-
-      writeJSON(
-        USERS_FILE,
-        users
-      );
-    }
-
-    res.json({
-      success: true,
-      message:
-        "Verification request submitted.",
       request
     });
   }
 );
 
 /* =========================================================
-   ADMIN
+   VERIFICATION REQUEST
+========================================================= */
+
+app.post(
+  "/api/verification/request",
+  requireAuth,
+  (req, res) => {
+    const users = getUsers();
+
+    const userIndex =
+      users.findIndex(
+        (user) =>
+          String(user.id) ===
+          String(req.user.id)
+      );
+
+    if (userIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        error: "User not found."
+      });
+    }
+
+    const user = users[userIndex];
+
+    if (user.verified) {
+      return res.status(400).json({
+        success: false,
+        error:
+          "Your account is already verified."
+      });
+    }
+
+    const requests =
+      getVerificationRequests();
+
+    const pending =
+      requests.find(
+        (item) =>
+          String(item.userId) ===
+            String(req.user.id) &&
+          item.status === "pending"
+      );
+
+    if (pending) {
+      return res.status(400).json({
+        success: false,
+        error:
+          "You already have a pending verification request."
+      });
+    }
+
+    const reason = clean(
+      req.body.reason,
+      2000
+    );
+
+    const request = {
+      id: generateId(),
+
+      userId: req.user.id,
+
+      reason,
+
+      status: "pending",
+
+      createdAt: now(),
+
+      updatedAt: now()
+    };
+
+    requests.push(request);
+
+    saveVerificationRequests(
+      requests
+    );
+
+    user.verificationStatus =
+      "pending";
+
+    users[userIndex] = user;
+
+    saveUsers(users);
+
+    return res.status(201).json({
+      success: true,
+
+      message:
+        "Verification request submitted.",
+
+      request
+    });
+  }
+);
+
+/* =========================================================
+   ADMIN - CURRENT USER
 ========================================================= */
 
 app.get(
   "/api/admin/me",
   requireAdmin,
   (req, res) => {
-    res.json({
+    return res.json({
       success: true,
-      admin:
-        safeUser(req.user)
+
+      admin: true,
+
+      user: safeUser(
+        req.user,
+        req.user.id
+      )
     });
   }
 );
+
+/* =========================================================
+   ADMIN STATS
+========================================================= */
 
 app.get(
   "/api/admin/stats",
   requireAdmin,
   (req, res) => {
-    const users =
-      getUsers();
+    const users = getUsers();
 
-    const posts =
-      getPosts();
+    const posts = getPosts();
 
-    const comments =
-      readJSON(
-        COMMENTS_FILE
-      );
+    const pending =
+      getVerificationRequests().filter(
+        (request) =>
+          request.status === "pending"
+      ).length;
 
-    const follows =
-      readJSON(
-        FOLLOWS_FILE
-      );
-
-    res.json({
+    return res.json({
       success: true,
 
       stats: {
-        users:
-          users.length,
+        users: users.length,
 
-        posts:
-          posts.length,
+        posts: posts.length,
 
         comments:
-          comments.length,
+          getComments().length,
+
+        likes:
+          getLikes().length,
 
         follows:
-          follows.length,
+          getFollows().length,
 
-        verifiedUsers:
-          users.filter(
-            user =>
-              user.verified
-          ).length
+        messages:
+          getMessages().length,
+
+        pendingVerification:
+          pending
       }
     });
   }
 );
 
+/* =========================================================
+   ADMIN USERS
+========================================================= */
+
 app.get(
   "/api/admin/users",
   requireAdmin,
   (req, res) => {
-    const users =
-      getUsers().map(
-        user => ({
-          ...safeUser(user),
-
-          followersCount:
-            followersCount(
-              user.id
-            ),
-
-          followingCount:
-            followingCount(
-              user.id
-            )
-        })
+    const users = getUsers()
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt) -
+          new Date(a.createdAt)
+      )
+      .map((user) =>
+        safeUser(
+          user,
+          req.user.id
+        )
       );
 
-    res.json({
+    return res.json({
       success: true,
+
       users
     });
   }
 );
+
+/* =========================================================
+   ADMIN VERIFICATION REQUESTS
+========================================================= */
 
 app.get(
   "/api/admin/verification/requests",
   requireAdmin,
   (req, res) => {
     const requests =
-      readJSON(
-        VERIFICATION_FILE
-      )
+      getVerificationRequests()
         .sort(
           (a, b) =>
-            new Date(
-              b.createdAt
-            ) -
-            new Date(
-              a.createdAt
-            )
+            new Date(b.createdAt) -
+            new Date(a.createdAt)
         )
-        .map(
-          request => ({
-            ...request,
+        .map((request) => ({
+          ...request,
 
-            user:
-              safeUser(
-                getUserById(
-                  request.userId
-                )
-              )
-          })
-        );
+          user: safeUser(
+            getUserById(
+              request.userId
+            ),
+            req.user.id
+          )
+        }));
 
-    res.json({
+    return res.json({
       success: true,
+
       requests
     });
   }
 );
 
 /* =========================================================
-   APPROVE VERIFICATION
+   ADMIN APPROVE VERIFICATION
 ========================================================= */
 
 app.post(
@@ -3395,94 +3006,87 @@ app.post(
   requireAdmin,
   (req, res) => {
     const requests =
-      readJSON(
-        VERIFICATION_FILE
-      );
+      getVerificationRequests();
 
     const index =
       requests.findIndex(
-        request =>
-          String(
-            request.id
-          ) ===
-          String(
-            req.params.requestId
-          )
+        (request) =>
+          String(request.id) ===
+          String(req.params.requestId)
       );
 
     if (index === -1) {
       return res.status(404).json({
         success: false,
-        message:
+        error:
           "Verification request not found."
       });
     }
 
-    const request =
-      requests[index];
+    const request = requests[index];
 
-    request.status =
-      "approved";
-
-    request.updatedAt =
-      now();
-
-    request.reviewedBy =
-      req.user.id;
-
-    writeJSON(
-      VERIFICATION_FILE,
-      requests
-    );
-
-    const users =
-      getUsers();
+    const users = getUsers();
 
     const userIndex =
       users.findIndex(
-        user =>
+        (user) =>
           String(user.id) ===
           String(request.userId)
       );
 
-    if (userIndex >= 0) {
-      users[userIndex]
-        .verified = true;
-
-      users[userIndex]
-        .isVerified = true;
-
-      users[userIndex]
-        .verificationStatus =
-        "approved";
-
-      writeJSON(
-        USERS_FILE,
-        users
-      );
-
-      createNotification({
-        userId:
-          users[userIndex].id,
-        actorId:
-          req.user.id,
-        type:
-          "verification",
-        text:
-          "Your account has been verified."
+    if (userIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        error: "User not found."
       });
     }
 
-    res.json({
+    users[userIndex].verified = true;
+
+    users[userIndex].isVerified = true;
+
+    users[userIndex].verificationStatus =
+      "approved";
+
+    saveUsers(users);
+
+    request.status = "approved";
+
+    request.updatedAt = now();
+
+    request.reviewedAt = now();
+
+    request.reviewedBy =
+      req.user.id;
+
+    requests[index] = request;
+
+    saveVerificationRequests(
+      requests
+    );
+
+    createNotification({
+      userId: request.userId,
+
+      fromUserId: req.user.id,
+
+      type: "verification",
+
+      text:
+        "Your verification request was approved."
+    });
+
+    return res.json({
       success: true,
+
       message:
-        "Verification approved."
+        "Verification request approved."
     });
   }
 );
 
 /* =========================================================
-   REJECT VERIFICATION
+   ADMIN REJECT VERIFICATION
 ========================================================= */
 
 app.post(
@@ -3490,82 +3094,84 @@ app.post(
   requireAdmin,
   (req, res) => {
     const requests =
-      readJSON(
-        VERIFICATION_FILE
-      );
+      getVerificationRequests();
 
     const index =
       requests.findIndex(
-        request =>
-          String(
-            request.id
-          ) ===
-          String(
-            req.params.requestId
-          )
+        (request) =>
+          String(request.id) ===
+          String(req.params.requestId)
       );
 
     if (index === -1) {
       return res.status(404).json({
         success: false,
-        message:
+        error:
           "Verification request not found."
       });
     }
 
-    const request =
-      requests[index];
+    const request = requests[index];
 
-    request.status =
-      "rejected";
-
-    request.updatedAt =
-      now();
-
-    request.reviewedBy =
-      req.user.id;
-
-    writeJSON(
-      VERIFICATION_FILE,
-      requests
-    );
-
-    const users =
-      getUsers();
+    const users = getUsers();
 
     const userIndex =
       users.findIndex(
-        user =>
+        (user) =>
           String(user.id) ===
           String(request.userId)
       );
 
-    if (userIndex >= 0) {
-      users[userIndex]
-        .verificationStatus =
+    if (userIndex !== -1) {
+      users[userIndex].verified =
+        false;
+
+      users[userIndex].isVerified =
+        false;
+
+      users[userIndex].verificationStatus =
         "rejected";
 
-      writeJSON(
-        USERS_FILE,
-        users
-      );
-
-      createNotification({
-        userId:
-          users[userIndex].id,
-        actorId:
-          req.user.id,
-        type:
-          "verification",
-        text:
-          "Your verification request was not approved."
-      });
+      saveUsers(users);
     }
 
-    res.json({
+    request.status = "rejected";
+
+    request.updatedAt = now();
+
+    request.reviewedAt = now();
+
+    request.reviewedBy =
+      req.user.id;
+
+    request.rejectionReason =
+      clean(
+        req.body.reason,
+        1000
+      );
+
+    requests[index] = request;
+
+    saveVerificationRequests(
+      requests
+    );
+
+    createNotification({
+      userId: request.userId,
+
+      fromUserId: req.user.id,
+
+      type: "verification",
+
+      text:
+        "Your verification request was rejected."
+    });
+
+    return res.json({
       success: true,
+
       message:
-        "Verification rejected."
+        "Verification request rejected."
     });
   }
 );
@@ -3578,12 +3184,19 @@ app.get(
   "/admin.html",
   requireAdmin,
   (req, res) => {
-    res.sendFile(
+    const file =
       path.join(
         PUBLIC_DIR,
         "admin.html"
-      )
-    );
+      );
+
+    if (!fs.existsSync(file)) {
+      return res.status(404).send(
+        "Admin page not found."
+      );
+    }
+
+    res.sendFile(file);
   }
 );
 
@@ -3591,12 +3204,44 @@ app.get(
   "/admin-verification.html",
   requireAdmin,
   (req, res) => {
-    res.sendFile(
+    const file =
       path.join(
         PUBLIC_DIR,
         "admin-verification.html"
-      )
-    );
+      );
+
+    if (!fs.existsSync(file)) {
+      return res.status(404).send(
+        "Admin verification page not found."
+      );
+    }
+
+    res.sendFile(file);
+  }
+);
+
+/* =========================================================
+   OPTIONAL DATA INFO
+========================================================= */
+
+app.get(
+  "/api/storage-info",
+  requireAdmin,
+  (req, res) => {
+    return res.json({
+      success: true,
+
+      storageRoot: STORAGE_ROOT,
+
+      dataDirectory: DATA_DIR,
+
+      uploadsDirectory: UPLOADS_DIR,
+
+      persistent:
+        Boolean(
+          process.env.STORAGE_ROOT
+        )
+    });
   }
 );
 
@@ -3607,16 +3252,15 @@ app.get(
 app.use(
   "/api",
   (req, res) => {
-    res.status(404).json({
+    return res.status(404).json({
       success: false,
-      message:
-        "API endpoint not found."
+      error: "API route not found."
     });
   }
 );
 
 /* =========================================================
-   ERROR HANDLER
+   MULTER / GENERAL ERROR HANDLER
 ========================================================= */
 
 app.use(
@@ -3627,41 +3271,48 @@ app.use(
     );
 
     if (
-      error instanceof
-      multer.MulterError
+      error instanceof multer.MulterError
     ) {
+      if (
+        error.code ===
+        "LIMIT_FILE_SIZE"
+      ) {
+        return res.status(400).json({
+          success: false,
+          error:
+            "The selected image is too large."
+        });
+      }
+
       return res.status(400).json({
         success: false,
-        message:
-          error.message
+        error: error.message
       });
     }
 
     if (
+      error &&
       error.message &&
-      (
-        error.message.includes(
-          "Only JPG"
-        )
+      error.message.includes(
+        "Only JPG"
       )
     ) {
       return res.status(400).json({
         success: false,
-        message:
-          error.message
+        error: error.message
       });
     }
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
-      message:
-        "Something went wrong on the server."
+      error:
+        "An unexpected server error occurred."
     });
   }
 );
 
 /* =========================================================
-   START
+   START SERVER
 ========================================================= */
 
 app.listen(
@@ -3670,34 +3321,38 @@ app.listen(
   () => {
     console.log("");
     console.log(
-      "=============================================="
+      "=========================================="
     );
     console.log(
-      "        PULSE SOCIAL SERVER ONLINE"
+      "       PULSE SOCIAL SERVER RUNNING"
     );
     console.log(
-      "=============================================="
+      "=========================================="
     );
     console.log(
-      `Local: http://localhost:${PORT}`
+      `URL: http://${HOST}:${PORT}`
     );
     console.log(
-      `Host:  ${HOST}`
+      `PORT: ${PORT}`
     );
     console.log(
-      "Storage: JSON"
+      `STORAGE_ROOT: ${STORAGE_ROOT}`
     );
     console.log(
-      "Cover Photos: ENABLED"
+      `DATA_DIR: ${DATA_DIR}`
     );
     console.log(
-      "Messaging: ENABLED"
+      `UPLOADS_DIR: ${UPLOADS_DIR}`
     );
     console.log(
-      "Message Images: ENABLED"
+      `PERSISTENT STORAGE: ${
+        process.env.STORAGE_ROOT
+          ? "ENABLED"
+          : "LOCAL DEFAULT"
+      }`
     );
     console.log(
-      "=============================================="
+      "=========================================="
     );
     console.log("");
   }
