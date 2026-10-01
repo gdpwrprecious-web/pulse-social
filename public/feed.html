@@ -2,38 +2,46 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
+  >
 
-  <title>Pulse Social — Feed</title>
-
-  <link rel="stylesheet" href="/css/style.css">
+  <title>Feed | Pulse Social</title>
 
   <style>
-    :root {
-      --pulse-blue: #1877f2;
-      --pulse-blue-dark: #0d65d9;
-      --pulse-green: #16a34a;
-      --bg: #f0f2f5;
-      --card: #ffffff;
-      --text: #1c1e21;
-      --muted: #65676b;
-      --border: #dddfe2;
-      --hover: #f2f2f2;
-      --danger: #e41e3f;
-      --shadow: 0 2px 8px rgba(0,0,0,.08);
-      --radius: 14px;
-    }
-
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
 
+    :root {
+      --blue: #1877f2;
+      --blue-dark: #166fe5;
+      --bg: #f0f2f5;
+      --card: #ffffff;
+      --text: #050505;
+      --muted: #65676b;
+      --border: #dddfe2;
+      --hover: #f2f2f2;
+      --danger: #e41e3f;
+      --green: #42b72a;
+    }
+
     body {
-      font-family: Inter, Arial, Helvetica, sans-serif;
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Helvetica,
+        Arial,
+        sans-serif;
+
       background: var(--bg);
       color: var(--text);
+      min-height: 100vh;
     }
 
     button,
@@ -44,269 +52,248 @@
 
     button {
       cursor: pointer;
-      border: 0;
     }
 
-    a {
-      text-decoration: none;
-      color: inherit;
-    }
-
-    img,
-    video {
-      max-width: 100%;
-    }
-
-    .hidden {
-      display: none !important;
-    }
-
-    /* =====================================================
-       TOP BAR
-    ===================================================== */
+    /* =========================
+       HEADER
+    ========================= */
 
     .topbar {
       height: 64px;
       background: #fff;
       border-bottom: 1px solid var(--border);
+
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      padding: 0 22px;
+
+      padding: 0 18px;
+
       position: sticky;
       top: 0;
       z-index: 1000;
+
+      box-shadow: 0 1px 3px rgba(0,0,0,.08);
     }
 
-    .brand-area {
+    .topbar-inner {
+      width: 100%;
+      max-width: 1400px;
+      margin: auto;
+
       display: flex;
       align-items: center;
-      gap: 12px;
-      min-width: 250px;
+      gap: 16px;
     }
 
     .logo {
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #1877f2, #16a34a);
       display: flex;
       align-items: center;
-      justify-content: center;
-      color: white;
-      font-weight: 900;
-      font-size: 21px;
+      gap: 8px;
+
+      text-decoration: none;
+      color: var(--blue);
+
+      font-size: 28px;
+      font-weight: 800;
     }
 
-    .brand-name {
-      font-size: 22px;
-      font-weight: 900;
-      color: var(--pulse-blue);
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+
+      border-radius: 50%;
+
+      background: var(--blue);
+      color: white;
+
+      display: grid;
+      place-items: center;
+
+      font-size: 24px;
+      font-weight: 800;
     }
 
     .search-box {
+      position: relative;
       width: 260px;
-      height: 40px;
-      background: #f0f2f5;
-      border-radius: 22px;
-      display: flex;
-      align-items: center;
-      padding: 0 15px;
-      gap: 9px;
-    }
-
-    .search-box span {
-      font-size: 18px;
     }
 
     .search-box input {
-      border: 0;
-      outline: none;
-      background: transparent;
       width: 100%;
-      font-size: 14px;
+      height: 42px;
+
+      border: none;
+      outline: none;
+
+      background: #f0f2f5;
+
+      border-radius: 22px;
+
+      padding: 0 16px 0 42px;
+
+      font-size: 15px;
     }
 
-    .top-nav {
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 11px;
+
+      color: var(--muted);
+    }
+
+    .nav-spacer {
+      flex: 1;
+    }
+
+    .top-actions {
       display: flex;
       align-items: center;
       gap: 8px;
     }
 
-    .top-nav-btn {
-      width: 45px;
-      height: 45px;
-      border-radius: 50%;
-      background: #f0f2f5;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      position: relative;
-    }
+    .icon-btn {
+      width: 42px;
+      height: 42px;
 
-    .top-nav-btn:hover {
+      border: none;
+      border-radius: 50%;
+
       background: #e4e6eb;
+
+      font-size: 20px;
+
+      display: grid;
+      place-items: center;
+
+      transition: .2s;
     }
 
-    .notification-dot {
-      position: absolute;
-      right: 3px;
-      top: 2px;
-      background: #e41e3f;
-      color: white;
-      font-size: 10px;
-      min-width: 17px;
-      height: 17px;
-      border-radius: 20px;
+    .icon-btn:hover {
+      background: #d8dadf;
+    }
+
+    .profile-mini {
       display: flex;
       align-items: center;
-      justify-content: center;
-      border: 2px solid white;
+      gap: 8px;
+
+      padding: 4px 8px 4px 4px;
+
+      border-radius: 22px;
+
+      text-decoration: none;
+      color: #111;
+
+      font-weight: 600;
     }
 
-    .top-profile {
-      width: 40px;
-      height: 40px;
+    .profile-mini:hover {
+      background: var(--hover);
+    }
+
+    .avatar-small {
+      width: 36px;
+      height: 36px;
+
       border-radius: 50%;
+
       object-fit: cover;
-      cursor: pointer;
+
+      background: #ddd;
     }
 
-    /* =====================================================
+    /* =========================
        LAYOUT
-    ===================================================== */
+    ========================= */
 
     .page {
-      max-width: 1500px;
+      max-width: 1400px;
       margin: auto;
+
       display: grid;
-      grid-template-columns: 260px minmax(450px, 680px) 280px;
-      gap: 22px;
-      padding: 22px;
-      align-items: start;
+      grid-template-columns: 280px minmax(0, 680px) 300px;
+
+      gap: 24px;
+
+      padding: 22px 18px 50px;
     }
 
-    .left-sidebar,
-    .right-sidebar {
+    /* =========================
+       LEFT SIDEBAR
+    ========================= */
+
+    .sidebar {
       position: sticky;
-      top: 86px;
+      top: 85px;
+      height: max-content;
     }
 
-    /* =====================================================
-       SIDEBAR
-    ===================================================== */
-
-    .sidebar-profile {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 10px;
-      border-radius: 12px;
-      margin-bottom: 12px;
-    }
-
-    .sidebar-profile:hover {
-      background: #e4e6eb;
-    }
-
-    .sidebar-profile img {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      object-fit: cover;
-    }
-
-    .sidebar-profile strong {
-      display: block;
-    }
-
-    .sidebar-profile small {
-      color: var(--muted);
-    }
-
-    .side-menu {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .side-menu button {
-      width: 100%;
+    .sidebar-card {
       background: transparent;
-      border-radius: 10px;
-      padding: 11px;
-      display: flex;
-      align-items: center;
-      gap: 13px;
-      text-align: left;
-      font-weight: 600;
-      color: #333;
     }
 
-    .side-menu button:hover {
+    .side-link {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+
+      padding: 10px;
+
+      border-radius: 10px;
+
+      text-decoration: none;
+      color: #111;
+
+      font-weight: 600;
+
+      transition: .2s;
+    }
+
+    .side-link:hover {
       background: #e4e6eb;
     }
 
     .side-icon {
-      width: 35px;
-      height: 35px;
+      width: 40px;
+      height: 40px;
+
       border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #e4e6eb;
-      font-size: 17px;
+
+      display: grid;
+      place-items: center;
+
+      font-size: 20px;
+
+      background: white;
     }
 
-    .sidebar-divider {
+    .side-divider {
       height: 1px;
       background: var(--border);
-      margin: 15px 0;
+      margin: 12px 0;
     }
 
-    .shortcut-title {
+    .sidebar-title {
       color: var(--muted);
-      font-size: 14px;
-      font-weight: 700;
-      padding: 0 10px 8px;
+      font-size: 17px;
+      margin: 10px;
     }
 
-    /* =====================================================
+    /* =========================
        STORIES
-    ===================================================== */
-
-    .stories-card {
-      background: var(--card);
-      border-radius: var(--radius);
-      padding: 14px;
-      box-shadow: var(--shadow);
-      margin-bottom: 18px;
-    }
-
-    .section-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-
-    .section-header h2 {
-      font-size: 18px;
-    }
-
-    .section-header button {
-      background: transparent;
-      color: var(--pulse-blue);
-      font-weight: 700;
-    }
+    ========================= */
 
     .stories {
       display: flex;
       gap: 10px;
+
       overflow-x: auto;
+
+      padding-bottom: 4px;
+      margin-bottom: 18px;
+
       scrollbar-width: none;
-      padding-bottom: 2px;
     }
 
     .stories::-webkit-scrollbar {
@@ -314,118 +301,166 @@
     }
 
     .story {
-      flex: 0 0 108px;
-      height: 175px;
+      min-width: 120px;
+      height: 190px;
+
       border-radius: 12px;
+
       overflow: hidden;
+
       position: relative;
+
+      background: #222;
+
+      box-shadow: 0 1px 3px rgba(0,0,0,.15);
+
       cursor: pointer;
-      background: linear-gradient(145deg, #1877f2, #16a34a);
-      box-shadow: 0 2px 5px rgba(0,0,0,.15);
     }
 
-    .story img,
-    .story video {
+    .story img {
       width: 100%;
       height: 100%;
+
       object-fit: cover;
     }
 
     .story::after {
       content: "";
+
       position: absolute;
       inset: 0;
-      background: linear-gradient(
-        transparent 40%,
-        rgba(0,0,0,.75)
-      );
-    }
 
-    .story-user {
-      position: absolute;
-      left: 9px;
-      bottom: 9px;
-      color: white;
-      font-size: 12px;
-      font-weight: 800;
-      z-index: 2;
-      max-width: 90px;
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
+      background:
+        linear-gradient(
+          to bottom,
+          transparent 45%,
+          rgba(0,0,0,.7)
+        );
     }
 
     .story-avatar {
       position: absolute;
-      left: 8px;
-      top: 8px;
+
+      top: 10px;
+      left: 10px;
+
       width: 38px;
       height: 38px;
+
       border-radius: 50%;
-      border: 3px solid var(--pulse-blue);
+
+      border: 3px solid var(--blue);
+
       object-fit: cover;
-      z-index: 3;
+
+      z-index: 2;
+    }
+
+    .story-name {
+      position: absolute;
+
+      bottom: 10px;
+      left: 10px;
+      right: 8px;
+
+      color: white;
+
+      font-weight: 700;
+      font-size: 13px;
+
+      z-index: 2;
     }
 
     .create-story {
       background: white;
-      border: 1px solid var(--border);
     }
 
-    .create-story::after {
-      display: none;
+    .create-story img {
+      height: 130px;
     }
 
-    .create-story .story-create-image {
-      height: 115px;
-      background: #e4e6eb;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 35px;
-      color: var(--pulse-blue);
+    .story-plus {
+      position: absolute;
+
+      bottom: 42px;
+      left: 50%;
+
+      transform: translateX(-50%);
+
+      width: 38px;
+      height: 38px;
+
+      border-radius: 50%;
+
+      background: var(--blue);
+      color: white;
+
+      display: grid;
+      place-items: center;
+
+      border: 4px solid white;
+
+      font-size: 24px;
+
+      z-index: 4;
     }
 
-    .create-story span {
-      display: block;
+    .create-story .story-name {
+      color: #111;
       text-align: center;
-      color: var(--text);
-      font-size: 12px;
-      font-weight: 800;
-      padding: 9px 2px;
+      bottom: 9px;
     }
 
-    /* =====================================================
+    /* =========================
        COMPOSER
-    ===================================================== */
+    ========================= */
+
+    .card {
+      background: var(--card);
+
+      border-radius: 10px;
+
+      box-shadow:
+        0 1px 2px rgba(0,0,0,.12);
+
+      margin-bottom: 16px;
+    }
 
     .composer {
-      background: var(--card);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 15px;
-      margin-bottom: 18px;
+      padding: 14px 16px;
     }
 
     .composer-top {
       display: flex;
-      gap: 11px;
       align-items: center;
+      gap: 10px;
     }
 
     .composer-avatar {
       width: 42px;
       height: 42px;
+
       border-radius: 50%;
+
       object-fit: cover;
+
+      background: #ddd;
     }
 
     .composer-input {
       flex: 1;
+
+      height: 42px;
+
+      border: none;
+      outline: none;
+
       background: #f0f2f5;
+
       border-radius: 22px;
-      padding: 12px 16px;
-      color: #65676b;
+
+      padding: 0 16px;
+
       cursor: pointer;
     }
 
@@ -433,825 +468,696 @@
       background: #e4e6eb;
     }
 
-    .composer-editor {
-      margin-top: 12px;
-    }
+    .composer-divider {
+      height: 1px;
+      background: var(--border);
 
-    .composer-editor textarea {
-      width: 100%;
-      min-height: 100px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 13px;
-      outline: none;
-      resize: vertical;
-    }
-
-    .composer-tools {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 10px;
-      flex-wrap: wrap;
-      gap: 8px;
+      margin: 14px 0 8px;
     }
 
     .composer-actions {
       display: flex;
-      gap: 7px;
-      flex-wrap: wrap;
+      justify-content: space-around;
     }
 
     .composer-action {
-      background: #f0f2f5;
-      padding: 9px 12px;
-      border-radius: 20px;
-      font-weight: 700;
-      font-size: 13px;
+      flex: 1;
+
+      border: none;
+      background: transparent;
+
+      padding: 10px;
+
+      border-radius: 8px;
+
+      font-weight: 600;
+
+      color: var(--muted);
     }
 
     .composer-action:hover {
-      background: #e4e6eb;
+      background: var(--hover);
     }
 
-    .post-btn {
-      background: var(--pulse-blue);
-      color: white;
-      padding: 10px 23px;
-      border-radius: 20px;
-      font-weight: 800;
+    .photo-text {
+      color: #45bd62;
     }
 
-    .post-btn:hover {
-      background: var(--pulse-blue-dark);
+    .feeling-text {
+      color: #f7b928;
     }
 
-    .image-preview {
-      margin-top: 10px;
-      position: relative;
-      display: inline-block;
-    }
-
-    .image-preview img {
-      max-height: 250px;
-      max-width: 100%;
-      border-radius: 10px;
-    }
-
-    .remove-preview {
-      position: absolute;
-      right: 8px;
-      top: 8px;
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      background: rgba(0,0,0,.7);
-      color: white;
-    }
-
-    /* =====================================================
-       FEED TABS
-    ===================================================== */
-
-    .feed-tabs {
-      background: white;
-      border-radius: 12px;
-      padding: 5px;
-      display: flex;
-      margin-bottom: 15px;
-      box-shadow: var(--shadow);
-    }
-
-    .feed-tab {
-      flex: 1;
-      background: transparent;
-      padding: 11px;
-      border-radius: 8px;
-      font-weight: 800;
-      color: var(--muted);
-    }
-
-    .feed-tab.active {
-      background: #eaf2ff;
-      color: var(--pulse-blue);
-    }
-
-    /* =====================================================
-       POSTS
-    ===================================================== */
-
-    .post {
-      background: white;
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      margin-bottom: 17px;
-      overflow: hidden;
-    }
-
-    .post-header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 14px 15px 8px;
-    }
-
-    .post-avatar {
-      width: 43px;
-      height: 43px;
-      border-radius: 50%;
-      object-fit: cover;
-      cursor: pointer;
-    }
-
-    .post-user-info {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .post-user-name {
-      font-weight: 800;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .post-user-name:hover {
-      text-decoration: underline;
-    }
-
-    .verified {
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background: var(--pulse-blue);
-      color: white;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 10px;
-      font-weight: 900;
-    }
-
-    .post-meta {
-      color: var(--muted);
-      font-size: 12px;
-      margin-top: 2px;
-    }
-
-    .post-menu {
-      width: 35px;
-      height: 35px;
-      background: transparent;
-      border-radius: 50%;
-      font-size: 20px;
-    }
-
-    .post-menu:hover {
-      background: #f0f2f5;
-    }
-
-    .follow-small {
-      background: #eaf2ff;
-      color: var(--pulse-blue);
-      padding: 6px 12px;
-      border-radius: 18px;
-      font-size: 12px;
-      font-weight: 800;
-    }
-
-    .follow-small.following {
-      background: #e4e6eb;
-      color: #333;
-    }
-
-    .post-body {
-      padding: 5px 15px 12px;
-      white-space: pre-wrap;
-      word-break: break-word;
-      line-height: 1.5;
-    }
-
-    .mention,
-    .hashtag {
-      color: var(--pulse-blue);
-      font-weight: 700;
-    }
-
-    .post-media {
-      width: 100%;
-      max-height: 650px;
-      background: #000;
-      display: block;
-      object-fit: contain;
-    }
-
-    .post-stats {
-      display: flex;
-      justify-content: space-between;
-      padding: 9px 15px;
-      color: var(--muted);
-      font-size: 13px;
-      border-bottom: 1px solid #eee;
-    }
-
-    .post-actions {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      padding: 5px 10px;
-    }
-
-    .post-action {
-      background: transparent;
-      padding: 9px;
-      border-radius: 7px;
-      color: #65676b;
-      font-weight: 700;
-    }
-
-    .post-action:hover {
-      background: #f0f2f5;
-    }
-
-    .post-action.liked {
-      color: #1877f2;
-    }
-
-    .comments {
-      border-top: 1px solid #eee;
-      padding: 10px 15px 13px;
-      display: none;
-    }
-
-    .comments.open {
-      display: block;
-    }
-
-    .comment {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 9px;
-    }
-
-    .comment img {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      object-fit: cover;
-    }
-
-    .comment-bubble {
-      background: #f0f2f5;
-      border-radius: 15px;
-      padding: 7px 10px;
-      flex: 1;
-    }
-
-    .comment-bubble strong {
-      display: block;
-      font-size: 12px;
-    }
-
-    .comment-bubble span {
-      font-size: 13px;
-      white-space: pre-wrap;
-    }
-
-    .comment-form {
-      display: flex;
-      gap: 7px;
-    }
-
-    .comment-form input {
-      flex: 1;
-      border: 0;
-      background: #f0f2f5;
-      border-radius: 20px;
-      padding: 9px 13px;
-      outline: none;
-    }
-
-    .comment-form button {
-      background: var(--pulse-blue);
-      color: white;
-      width: 38px;
-      border-radius: 50%;
-    }
-
-    /* =====================================================
-       REELS
-    ===================================================== */
-
-    .reels-card {
-      background: white;
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      margin-bottom: 18px;
-      padding: 14px;
-    }
-
-    .reels-title {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-
-    .reels-title h2 {
-      font-size: 19px;
-    }
-
-    .reels-title button {
-      background: #eaf2ff;
-      color: var(--pulse-blue);
-      border-radius: 18px;
-      padding: 7px 12px;
-      font-size: 12px;
-      font-weight: 800;
-    }
-
-    .reels {
-      display: flex;
-      gap: 10px;
-      overflow-x: auto;
-      scrollbar-width: none;
-    }
-
-    .reels::-webkit-scrollbar {
-      display: none;
-    }
-
-    .reel-card {
-      flex: 0 0 180px;
-      height: 280px;
-      border-radius: 12px;
-      overflow: hidden;
-      background: #111;
-      position: relative;
-      cursor: pointer;
-    }
-
-    .reel-card video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .reel-card::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(
-        transparent 45%,
-        rgba(0,0,0,.8)
-      );
-      pointer-events: none;
-    }
-
-    .reel-info {
-      position: absolute;
-      bottom: 10px;
-      left: 10px;
-      right: 10px;
-      color: white;
-      z-index: 2;
-    }
-
-    .reel-info strong {
-      display: block;
-      font-size: 13px;
-    }
-
-    .reel-info small {
-      opacity: .8;
-    }
-
-    .reel-play {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      background: rgba(0,0,0,.55);
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 22px;
-      z-index: 3;
-    }
-
-    /* =====================================================
-       RIGHT SIDEBAR
-    ===================================================== */
-
-    .right-card {
-      background: white;
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 14px;
-      margin-bottom: 15px;
-    }
-
-    .right-card h3 {
-      font-size: 16px;
-      margin-bottom: 13px;
-    }
-
-    .person {
-      display: flex;
-      align-items: center;
-      gap: 9px;
-      margin-bottom: 12px;
-    }
-
-    .person img {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      object-fit: cover;
-    }
-
-    .person-info {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .person-info strong {
-      display: block;
-      font-size: 13px;
-    }
-
-    .person-info small {
-      color: var(--muted);
-      font-size: 11px;
-    }
-
-    .person button {
-      background: #eaf2ff;
-      color: var(--pulse-blue);
-      border-radius: 15px;
-      padding: 6px 9px;
-      font-size: 11px;
-      font-weight: 800;
-    }
-
-    .online-dot {
-      width: 9px;
-      height: 9px;
-      border-radius: 50%;
-      background: #31a24c;
-      margin-left: auto;
-    }
-
-    /* =====================================================
-       EMPTY / LOADING
-    ===================================================== */
-
-    .loading {
-      background: white;
-      padding: 35px;
-      border-radius: var(--radius);
-      text-align: center;
-      color: var(--muted);
-      box-shadow: var(--shadow);
-    }
-
-    .empty {
-      background: white;
-      padding: 35px 20px;
-      border-radius: var(--radius);
-      text-align: center;
-      color: var(--muted);
-      box-shadow: var(--shadow);
-      margin-bottom: 15px;
-    }
-
-    .empty-icon {
-      font-size: 40px;
-      margin-bottom: 8px;
-    }
-
-    /* =====================================================
-       MODALS
-    ===================================================== */
+    /* =========================
+       CREATE POST MODAL
+    ========================= */
 
     .modal {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,.75);
-      z-index: 3000;
+
+      background: rgba(0,0,0,.55);
+
       display: none;
       align-items: center;
       justify-content: center;
-      padding: 20px;
+
+      z-index: 3000;
+
+      padding: 16px;
     }
 
-    .modal.open {
+    .modal.active {
       display: flex;
     }
 
     .modal-box {
-      background: white;
-      border-radius: 16px;
-      max-width: 520px;
       width: 100%;
-      max-height: 90vh;
-      overflow-y: auto;
+      max-width: 500px;
+
+      background: white;
+
+      border-radius: 12px;
+
+      box-shadow: 0 10px 40px rgba(0,0,0,.3);
+
+      overflow: hidden;
     }
 
     .modal-header {
+      height: 58px;
+
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      padding: 15px;
+      justify-content: center;
+
       border-bottom: 1px solid var(--border);
-    }
 
-    .modal-header h2 {
+      position: relative;
+
       font-size: 18px;
+      font-weight: 700;
     }
 
-    .modal-close {
-      width: 35px;
-      height: 35px;
+    .close-modal {
+      position: absolute;
+      right: 12px;
+
+      width: 36px;
+      height: 36px;
+
+      border: none;
       border-radius: 50%;
-      background: #f0f2f5;
-      font-size: 20px;
+
+      background: #e4e6eb;
+
+      font-size: 22px;
     }
 
     .modal-body {
       padding: 16px;
     }
 
-    .modal-body input,
-    .modal-body textarea,
-    .modal-body select {
-      width: 100%;
-      border: 1px solid var(--border);
-      border-radius: 9px;
-      padding: 11px;
-      outline: none;
+    .modal-user {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
       margin-bottom: 12px;
     }
 
-    .modal-submit {
-      width: 100%;
-      background: var(--pulse-blue);
-      color: white;
-      border-radius: 9px;
-      padding: 12px;
-      font-weight: 800;
-    }
+    .modal-user img {
+      width: 42px;
+      height: 42px;
 
-    /* STORY VIEWER */
-
-    .story-viewer {
-      max-width: 440px;
-      width: 100%;
-      height: 82vh;
-      background: #000;
-      border-radius: 15px;
-      overflow: hidden;
-      position: relative;
-    }
-
-    .story-viewer img,
-    .story-viewer video {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-    }
-
-    .story-viewer-top {
-      position: absolute;
-      top: 12px;
-      left: 12px;
-      right: 12px;
-      z-index: 5;
-      color: white;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .story-viewer-top img {
-      width: 38px;
-      height: 38px;
       border-radius: 50%;
       object-fit: cover;
     }
 
-    .story-close {
-      margin-left: auto;
-      background: rgba(0,0,0,.55);
-      color: white;
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      font-size: 20px;
-    }
-
-    .story-progress {
-      position: absolute;
-      top: 5px;
-      left: 10px;
-      right: 10px;
-      height: 3px;
-      background: rgba(255,255,255,.35);
-      z-index: 5;
-    }
-
-    .story-progress-inner {
-      width: 0%;
-      height: 100%;
-      background: white;
-      transition: width .1s linear;
-    }
-
-    /* REEL VIEWER */
-
-    .reel-viewer {
-      max-width: 430px;
-      width: 100%;
-      height: 85vh;
-      background: #000;
-      border-radius: 16px;
-      overflow: hidden;
-      position: relative;
-    }
-
-    .reel-viewer video {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-    }
-
-    .reel-viewer-close {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      z-index: 5;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: rgba(0,0,0,.6);
-      color: white;
-      font-size: 20px;
-    }
-
-    /* =====================================================
-       MOBILE NAV
-    ===================================================== */
-
-    .mobile-nav {
-      display: none;
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 62px;
-      background: white;
-      border-top: 1px solid var(--border);
-      z-index: 2000;
-      grid-template-columns: repeat(5, 1fr);
-    }
-
-    .mobile-nav button {
-      background: transparent;
-      color: #555;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 2px;
-      font-size: 18px;
-    }
-
-    .mobile-nav button span {
-      font-size: 10px;
+    .modal-user-name {
       font-weight: 700;
     }
 
-    .mobile-nav button.active {
-      color: var(--pulse-blue);
+    .post-textarea {
+      width: 100%;
+
+      min-height: 130px;
+
+      border: none;
+      outline: none;
+
+      resize: vertical;
+
+      font-size: 20px;
     }
 
-    /* =====================================================
-       RESPONSIVE
-    ===================================================== */
+    .image-preview {
+      display: none;
+
+      position: relative;
+
+      margin-top: 10px;
+    }
+
+    .image-preview img {
+      width: 100%;
+      max-height: 320px;
+
+      object-fit: cover;
+
+      border-radius: 8px;
+    }
+
+    .remove-preview {
+      position: absolute;
+
+      top: 8px;
+      right: 8px;
+
+      width: 34px;
+      height: 34px;
+
+      border: none;
+      border-radius: 50%;
+
+      background: rgba(0,0,0,.65);
+
+      color: white;
+    }
+
+    .modal-bottom {
+      border: 1px solid var(--border);
+
+      border-radius: 8px;
+
+      padding: 10px;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      margin-top: 12px;
+    }
+
+    .modal-bottom label {
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .publish-btn {
+      width: 100%;
+
+      border: none;
+
+      background: var(--blue);
+
+      color: white;
+
+      padding: 12px;
+
+      border-radius: 8px;
+
+      margin-top: 14px;
+
+      font-weight: 700;
+
+      font-size: 16px;
+    }
+
+    .publish-btn:hover {
+      background: var(--blue-dark);
+    }
+
+    .publish-btn:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
+    /* =========================
+       POST
+    ========================= */
+
+    .post {
+      padding: 0;
+
+      overflow: hidden;
+    }
+
+    .post-header {
+      display: flex;
+      align-items: center;
+
+      padding: 14px 16px 8px;
+
+      gap: 10px;
+    }
+
+    .post-avatar {
+      width: 42px;
+      height: 42px;
+
+      border-radius: 50%;
+
+      object-fit: cover;
+
+      flex-shrink: 0;
+    }
+
+    .post-user {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .post-user-line {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .post-user-name {
+      font-weight: 700;
+
+      text-decoration: none;
+      color: #111;
+    }
+
+    .verified {
+      display: inline-grid;
+      place-items: center;
+
+      width: 18px;
+      height: 18px;
+
+      border-radius: 50%;
+
+      background: var(--blue);
+
+      color: white;
+
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .post-time {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 2px;
+    }
+
+    .post-menu {
+      width: 38px;
+      height: 38px;
+
+      border: none;
+
+      border-radius: 50%;
+
+      background: transparent;
+
+      font-size: 20px;
+    }
+
+    .post-menu:hover {
+      background: var(--hover);
+    }
+
+    .post-content {
+      padding: 4px 16px 12px;
+
+      line-height: 1.45;
+
+      white-space: pre-wrap;
+
+      word-break: break-word;
+    }
+
+    .post-image {
+      width: 100%;
+
+      max-height: 650px;
+
+      display: block;
+
+      object-fit: cover;
+
+      background: #eee;
+    }
+
+    .post-stats {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      padding: 8px 16px;
+
+      color: var(--muted);
+
+      font-size: 14px;
+    }
+
+    .reaction-count {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .like-circle {
+      width: 20px;
+      height: 20px;
+
+      border-radius: 50%;
+
+      background: var(--blue);
+
+      color: white;
+
+      display: grid;
+      place-items: center;
+
+      font-size: 11px;
+    }
+
+    .post-actions {
+      display: flex;
+
+      margin: 0 12px;
+
+      border-top: 1px solid var(--border);
+    }
+
+    .post-action {
+      flex: 1;
+
+      border: none;
+
+      background: transparent;
+
+      padding: 11px 5px;
+
+      color: var(--muted);
+
+      font-weight: 600;
+
+      border-radius: 6px;
+
+      margin: 4px 0;
+    }
+
+    .post-action:hover {
+      background: var(--hover);
+    }
+
+    .post-action.liked {
+      color: var(--blue);
+    }
+
+    .comments {
+      padding: 0 16px 14px;
+    }
+
+    .comment {
+      display: flex;
+
+      gap: 8px;
+
+      margin-top: 9px;
+    }
+
+    .comment-avatar {
+      width: 32px;
+      height: 32px;
+
+      border-radius: 50%;
+
+      object-fit: cover;
+
+      flex-shrink: 0;
+    }
+
+    .comment-body {
+      background: #f0f2f5;
+
+      border-radius: 16px;
+
+      padding: 7px 11px;
+
+      flex: 1;
+    }
+
+    .comment-name {
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .comment-text {
+      font-size: 14px;
+      margin-top: 2px;
+    }
+
+    .comment-form {
+      display: flex;
+      gap: 8px;
+
+      margin-top: 10px;
+    }
+
+    .comment-input {
+      flex: 1;
+
+      border: none;
+      outline: none;
+
+      background: #f0f2f5;
+
+      border-radius: 20px;
+
+      padding: 9px 14px;
+    }
+
+    .comment-send {
+      width: 38px;
+      height: 38px;
+
+      border: none;
+      border-radius: 50%;
+
+      background: var(--blue);
+      color: white;
+    }
+
+    /* =========================
+       RIGHT SIDEBAR
+    ========================= */
+
+    .right-sidebar {
+      position: sticky;
+      top: 85px;
+      height: max-content;
+    }
+
+    .right-title {
+      color: var(--muted);
+
+      font-size: 17px;
+
+      margin-bottom: 12px;
+    }
+
+    .contact {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      padding: 8px;
+
+      border-radius: 8px;
+
+      cursor: pointer;
+    }
+
+    .contact:hover {
+      background: #e4e6eb;
+    }
+
+    .contact img {
+      width: 38px;
+      height: 38px;
+
+      border-radius: 50%;
+
+      object-fit: cover;
+    }
+
+    .online-dot {
+      width: 10px;
+      height: 10px;
+
+      background: #31a24c;
+
+      border: 2px solid white;
+
+      border-radius: 50%;
+
+      margin-left: -19px;
+      margin-top: 25px;
+    }
+
+    .contact-name {
+      font-weight: 600;
+    }
+
+    /* =========================
+       EMPTY / LOADING
+    ========================= */
+
+    .loading,
+    .empty {
+      text-align: center;
+
+      padding: 40px 20px;
+
+      color: var(--muted);
+    }
+
+    .spinner {
+      width: 30px;
+      height: 30px;
+
+      border: 3px solid #ddd;
+
+      border-top-color: var(--blue);
+
+      border-radius: 50%;
+
+      animation: spin .8s linear infinite;
+
+      margin: auto auto 10px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .toast {
+      position: fixed;
+
+      bottom: 25px;
+      left: 50%;
+
+      transform: translateX(-50%);
+
+      background: #222;
+
+      color: white;
+
+      padding: 12px 18px;
+
+      border-radius: 8px;
+
+      display: none;
+
+      z-index: 5000;
+
+      box-shadow: 0 5px 20px rgba(0,0,0,.25);
+    }
+
+    .toast.show {
+      display: block;
+    }
+
+    /* =========================
+       MOBILE
+    ========================= */
 
     @media (max-width: 1100px) {
       .page {
-        grid-template-columns: 210px minmax(420px, 680px);
+        grid-template-columns: 220px minmax(0, 680px);
       }
 
       .right-sidebar {
         display: none;
       }
-
-      .brand-area {
-        min-width: auto;
-      }
     }
 
-    @media (max-width: 800px) {
+    @media (max-width: 760px) {
       .topbar {
-        padding: 0 12px;
+        height: 58px;
+        padding: 0 10px;
       }
 
-      .brand-name {
+      .logo span {
         display: none;
       }
 
       .search-box {
-        width: 170px;
+        flex: 1;
+        width: auto;
       }
 
-      .top-nav {
-        gap: 3px;
-      }
-
-      .top-nav-btn {
-        width: 38px;
-        height: 38px;
+      .profile-mini span {
+        display: none;
       }
 
       .page {
         display: block;
-        padding: 10px 8px 75px;
+
+        padding: 10px 0 70px;
       }
 
-      .left-sidebar {
+      .sidebar {
         display: none;
       }
 
-      .mobile-nav {
-        display: grid;
+      .feed-column {
+        width: 100%;
       }
 
-      .stories-card,
-      .composer,
-      .reels-card,
-      .post,
-      .feed-tabs {
-        border-radius: 10px;
+      .stories {
+        padding: 0 10px;
       }
 
-      .story {
-        flex-basis: 95px;
-        height: 155px;
+      .card {
+        border-radius: 0;
+
+        box-shadow:
+          0 1px 2px rgba(0,0,0,.12);
       }
 
-      .reel-card {
-        flex-basis: 155px;
-        height: 250px;
+      .composer {
+        padding: 12px;
+      }
+
+      .post {
+        margin-top: 10px;
+      }
+
+      .post-image {
+        max-height: 550px;
+      }
+
+      .top-actions .icon-btn:nth-child(2) {
+        display: none;
       }
     }
 
-    @media (max-width: 520px) {
-      .search-box {
-        width: 130px;
+    @media (max-width: 450px) {
+      .top-actions {
+        gap: 2px;
       }
 
-      .top-nav-btn:nth-child(1) {
-        display: none;
+      .icon-btn {
+        width: 38px;
+        height: 38px;
       }
 
-      .top-profile {
-        width: 36px;
-        height: 36px;
+      .search-box input {
+        height: 38px;
       }
 
-      .post-body {
-        font-size: 14px;
-      }
-
-      .post-actions {
-        padding: 4px;
-      }
-
-      .post-action {
-        font-size: 12px;
-        padding: 8px 3px;
-      }
-
-      .composer-actions {
-        width: 100%;
-      }
-
-      .composer-action {
-        flex: 1;
-        text-align: center;
-      }
-
-      .composer-tools {
-        align-items: stretch;
-      }
-
-      .post-btn {
-        width: 100%;
+      .story {
+        min-width: 105px;
+        height: 170px;
       }
     }
   </style>
@@ -1259,232 +1165,211 @@
 
 <body>
 
-  <!-- =====================================================
-       TOP BAR
-  ===================================================== -->
+  <!-- =========================
+       HEADER
+  ========================== -->
 
   <header class="topbar">
 
-    <div class="brand-area">
-      <div class="logo">P</div>
-      <div class="brand-name">Pulse</div>
+    <div class="topbar-inner">
+
+      <a href="/feed.html" class="logo">
+        <div class="logo-icon">P</div>
+        <span>Pulse</span>
+      </a>
 
       <div class="search-box">
-        <span>🔍</span>
+        <span class="search-icon">🔍</span>
         <input
           id="searchInput"
           type="search"
           placeholder="Search Pulse"
-          autocomplete="off"
         >
       </div>
+
+      <div class="nav-spacer"></div>
+
+      <div class="top-actions">
+
+        <button
+          class="icon-btn"
+          onclick="location.href='/messages.html'"
+          title="Messages"
+        >
+          💬
+        </button>
+
+        <button
+          class="icon-btn"
+          onclick="location.href='/notifications.html'"
+          title="Notifications"
+        >
+          🔔
+        </button>
+
+        <a
+          href="/profile.html"
+          class="profile-mini"
+          id="miniProfile"
+        >
+          <img
+            id="miniAvatar"
+            class="avatar-small"
+            src="/images/default-avatar.png"
+            alt="Profile"
+          >
+          <span id="miniName">Profile</span>
+        </a>
+
+      </div>
+
     </div>
 
-    <nav class="top-nav">
-
-      <button
-        class="top-nav-btn"
-        title="Home"
-        onclick="goHome()"
-      >
-        🏠
-      </button>
-
-      <button
-        class="top-nav-btn"
-        title="Messages"
-        onclick="location.href='/messages.html'"
-      >
-        💬
-      </button>
-
-      <button
-        class="top-nav-btn"
-        title="Notifications"
-        onclick="location.href='/notifications.html'"
-      >
-        🔔
-        <span id="notificationDot" class="notification-dot hidden">0</span>
-      </button>
-
-      <img
-        id="topProfile"
-        class="top-profile"
-        src="/images/default-avatar.png"
-        alt="Profile"
-        onclick="goProfile()"
-      >
-
-    </nav>
   </header>
 
-  <!-- =====================================================
-       MAIN PAGE
-  ===================================================== -->
+
+  <!-- =========================
+       MAIN
+  ========================== -->
 
   <main class="page">
 
-    <!-- ===================================================
-         LEFT SIDEBAR
-    =================================================== -->
+    <!-- LEFT -->
 
-    <aside class="left-sidebar">
+    <aside class="sidebar">
 
-      <div
-        class="sidebar-profile"
-        onclick="goProfile()"
-      >
-        <img
-          id="sidebarAvatar"
-          src="/images/default-avatar.png"
-          alt=""
-        >
+      <div class="sidebar-card">
 
-        <div>
-          <strong id="sidebarName">Loading...</strong>
-          <small id="sidebarUsername">@user</small>
+        <a href="/profile.html" class="side-link">
+          <div class="side-icon">👤</div>
+          <span id="sideProfileName">Profile</span>
+        </a>
+
+        <a href="/feed.html" class="side-link">
+          <div class="side-icon">🏠</div>
+          <span>Home</span>
+        </a>
+
+        <a href="/messages.html" class="side-link">
+          <div class="side-icon">💬</div>
+          <span>Messages</span>
+        </a>
+
+        <a href="/notifications.html" class="side-link">
+          <div class="side-icon">🔔</div>
+          <span>Notifications</span>
+        </a>
+
+        <a href="/profile.html" class="side-link">
+          <div class="side-icon">👥</div>
+          <span>Friends</span>
+        </a>
+
+        <div class="side-divider"></div>
+
+        <div class="sidebar-title">
+          Your shortcuts
         </div>
-      </div>
 
-      <div class="side-menu">
+        <a href="#" class="side-link">
+          <div class="side-icon">⭐</div>
+          <span>Saved Posts</span>
+        </a>
 
-        <button onclick="goHome()">
-          <span class="side-icon">🏠</span>
-          Home
-        </button>
+        <a href="#" class="side-link">
+          <div class="side-icon">🎬</div>
+          <span>Videos</span>
+        </a>
 
-        <button onclick="setFeedMode('following')">
-          <span class="side-icon">👥</span>
-          Following
-        </button>
-
-        <button onclick="location.href='/profile.html'">
-          <span class="side-icon">👤</span>
-          Profile
-        </button>
-
-        <button onclick="location.href='/messages.html'">
-          <span class="side-icon">💬</span>
-          Messages
-        </button>
-
-        <button onclick="location.href='/notifications.html'">
-          <span class="side-icon">🔔</span>
-          Notifications
-        </button>
-
-        <button onclick="location.href='/verification.html'">
-          <span class="side-icon">✓</span>
-          Verification
-        </button>
-
-        <button onclick="openStoryCreator()">
-          <span class="side-icon">⭕</span>
-          Create Story
-        </button>
-
-        <button onclick="openReelCreator()">
-          <span class="side-icon">🎬</span>
-          Create Reel
-        </button>
-
-      </div>
-
-      <div class="sidebar-divider"></div>
-
-      <div class="shortcut-title">
-        Your shortcuts
-      </div>
-
-      <div class="side-menu">
-
-        <button onclick="setFeedMode('for-you')">
-          <span class="side-icon">✨</span>
-          For You
-        </button>
-
-        <button onclick="location.href='/profile.html'">
-          <span class="side-icon">📌</span>
-          My Profile
-        </button>
-
-        <button onclick="logout()">
-          <span class="side-icon">🚪</span>
-          Logout
-        </button>
+        <a href="#" class="side-link">
+          <div class="side-icon">📷</div>
+          <span>Photos</span>
+        </a>
 
       </div>
 
     </aside>
 
-    <!-- ===================================================
-         CENTER
-    =================================================== -->
+
+    <!-- FEED -->
 
     <section class="feed-column">
 
       <!-- STORIES -->
 
-      <section class="stories-card">
+      <div class="stories">
 
-        <div class="section-header">
-          <h2>Stories</h2>
-
-          <button onclick="loadStories()">
-            See all
-          </button>
-        </div>
-
-        <div id="stories" class="stories">
-
-          <div
-            class="story create-story"
-            onclick="openStoryCreator()"
+        <div class="story create-story">
+          <img
+            id="storyProfileImage"
+            src="/images/default-avatar.png"
+            alt=""
           >
-            <div class="story-create-image">
-              ＋
-            </div>
 
-            <span>
-              Create story
-            </span>
+          <div class="story-plus">+</div>
+
+          <div class="story-name">
+            Create Story
           </div>
-
         </div>
 
-      </section>
+        <div class="story">
+          <img
+            src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80"
+            alt=""
+          >
 
-      <!-- REELS -->
+          <img
+            class="story-avatar"
+            src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=100&q=80"
+            alt=""
+          >
 
-      <section class="reels-card">
-
-        <div class="reels-title">
-
-          <h2>
-            🎬 Reels
-          </h2>
-
-          <button onclick="openReelCreator()">
-            Create Reel
-          </button>
-
-        </div>
-
-        <div id="reels" class="reels">
-
-          <div class="empty" style="width:100%;box-shadow:none;margin:0;">
-            <div class="empty-icon">🎬</div>
-            <strong>No reels yet</strong>
-            <p>Create the first reel on Pulse.</p>
+          <div class="story-name">
+            Alex
           </div>
-
         </div>
 
-      </section>
+        <div class="story">
+          <img
+            src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80"
+            alt=""
+          >
 
-      <!-- COMPOSER -->
+          <img
+            class="story-avatar"
+            src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=100&q=80"
+            alt=""
+          >
 
-      <section class="composer">
+          <div class="story-name">
+            Sarah
+          </div>
+        </div>
+
+        <div class="story">
+          <img
+            src="https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=400&q=80"
+            alt=""
+          >
+
+          <img
+            class="story-avatar"
+            src="https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=100&q=80"
+            alt=""
+          >
+
+          <div class="story-name">
+            Daniel
+          </div>
+        </div>
+
+      </div>
+
+
+      <!-- CREATE POST -->
+
+      <div class="card composer">
 
         <div class="composer-top">
 
@@ -1492,115 +1377,56 @@
             id="composerAvatar"
             class="composer-avatar"
             src="/images/default-avatar.png"
-            alt=""
+            alt="Profile"
           >
 
-          <div
-            id="composerTrigger"
+          <input
+            id="composerInput"
             class="composer-input"
-            onclick="openPostEditor()"
-          >
-            What's on your mind?
-          </div>
-
-        </div>
-
-        <div
-          id="composerEditor"
-          class="composer-editor hidden"
-        >
-
-          <textarea
-            id="postText"
+            type="text"
+            readonly
             placeholder="What's on your mind?"
-            maxlength="5000"
-          ></textarea>
-
-          <div
-            id="imagePreview"
-            class="image-preview hidden"
+            onclick="openPostModal()"
           >
-            <img id="previewImage" src="" alt="Preview">
-
-            <button
-              class="remove-preview"
-              onclick="removeSelectedImage()"
-            >
-              ×
-            </button>
-          </div>
-
-          <div class="composer-tools">
-
-            <div class="composer-actions">
-
-              <label class="composer-action">
-                🖼️ Photo
-                <input
-                  id="postImage"
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp,image/gif"
-                  hidden
-                >
-              </label>
-
-              <button
-                class="composer-action"
-                onclick="openStoryCreator()"
-              >
-                ⭕ Story
-              </button>
-
-              <button
-                class="composer-action"
-                onclick="openReelCreator()"
-              >
-                🎬 Reel
-              </button>
-
-            </div>
-
-            <button
-              id="postButton"
-              class="post-btn"
-              onclick="createPost()"
-            >
-              Post
-            </button>
-
-          </div>
 
         </div>
 
-      </section>
+        <div class="composer-divider"></div>
 
-      <!-- FEED TABS -->
+        <div class="composer-actions">
 
-      <div class="feed-tabs">
+          <button
+            class="composer-action photo-text"
+            onclick="openPostModal(true)"
+          >
+            📷 Photo/Video
+          </button>
 
-        <button
-          id="forYouTab"
-          class="feed-tab active"
-          onclick="setFeedMode('for-you')"
-        >
-          For You
-        </button>
+          <button
+            class="composer-action"
+            onclick="openPostModal()"
+          >
+            👥 Tag People
+          </button>
 
-        <button
-          id="followingTab"
-          class="feed-tab"
-          onclick="setFeedMode('following')"
-        >
-          Following
-        </button>
+          <button
+            class="composer-action feeling-text"
+            onclick="openPostModal()"
+          >
+            😊 Feeling
+          </button>
+
+        </div>
 
       </div>
 
-      <!-- FEED -->
 
-      <div id="feed">
+      <!-- FEED POSTS -->
 
-        <div class="loading">
+      <div id="feedContainer">
+
+        <div class="card loading">
+          <div class="spinner"></div>
           Loading your feed...
         </div>
 
@@ -1608,97 +1434,53 @@
 
     </section>
 
-    <!-- ===================================================
-         RIGHT SIDEBAR
-    =================================================== -->
+
+    <!-- RIGHT -->
 
     <aside class="right-sidebar">
 
-      <section class="right-card">
+      <h3 class="right-title">
+        Contacts
+      </h3>
 
-        <h3>
-          People you may know
-        </h3>
+      <div class="contact">
+        <img
+          src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=100&q=80"
+          alt=""
+        >
+        <span class="contact-name">Alex</span>
+        <span class="online-dot"></span>
+      </div>
 
-        <div id="suggestions">
-          <div style="color:#777;font-size:13px;">
-            Loading suggestions...
-          </div>
-        </div>
+      <div class="contact">
+        <img
+          src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=100&q=80"
+          alt=""
+        >
+        <span class="contact-name">Sarah</span>
+        <span class="online-dot"></span>
+      </div>
 
-      </section>
-
-      <section class="right-card">
-
-        <h3>
-          Contacts
-        </h3>
-
-        <div id="contacts">
-
-          <div class="person">
-
-            <img src="/images/default-avatar.png">
-
-            <div class="person-info">
-              <strong>Pulse Community</strong>
-              <small>Stay connected</small>
-            </div>
-
-            <span class="online-dot"></span>
-
-          </div>
-
-        </div>
-
-      </section>
+      <div class="contact">
+        <img
+          src="https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=100&q=80"
+          alt=""
+        >
+        <span class="contact-name">Daniel</span>
+        <span class="online-dot"></span>
+      </div>
 
     </aside>
 
   </main>
 
-  <!-- =====================================================
-       MOBILE NAV
-  ===================================================== -->
 
-  <nav class="mobile-nav">
-
-    <button
-      class="active"
-      onclick="goHome()"
-    >
-      🏠
-      <span>Home</span>
-    </button>
-
-    <button onclick="openSearch()">
-      🔍
-      <span>Search</span>
-    </button>
-
-    <button onclick="openPostEditor()">
-      ＋
-      <span>Create</span>
-    </button>
-
-    <button onclick="location.href='/notifications.html'">
-      🔔
-      <span>Alerts</span>
-    </button>
-
-    <button onclick="goProfile()">
-      👤
-      <span>Profile</span>
-    </button>
-
-  </nav>
-
-  <!-- =====================================================
-       STORY CREATOR MODAL
-  ===================================================== -->
+  <!-- =========================
+       CREATE POST MODAL
+  ========================== -->
 
   <div
-    id="storyCreatorModal"
+    id="postModal"
     class="modal"
   >
 
@@ -1706,13 +1488,11 @@
 
       <div class="modal-header">
 
-        <h2>
-          Create Story
-        </h2>
+        Create Post
 
         <button
-          class="modal-close"
-          onclick="closeModal('storyCreatorModal')"
+          class="close-modal"
+          onclick="closePostModal()"
         >
           ×
         </button>
@@ -1720,2546 +1500,1243 @@
       </div>
 
       <div class="modal-body">
+
+        <div class="modal-user">
+
+          <img
+            id="modalAvatar"
+            src="/images/default-avatar.png"
+            alt=""
+          >
+
+          <div>
+
+            <div
+              id="modalName"
+              class="modal-user-name"
+            >
+              You
+            </div>
+
+          </div>
+
+        </div>
 
         <textarea
-          id="storyText"
-          placeholder="Write something for your story..."
-          maxlength="1000"
+          id="postText"
+          class="post-textarea"
+          placeholder="What's on your mind?"
         ></textarea>
 
-        <input
-          id="storyMedia"
-          type="file"
-          accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm"
-        >
 
-        <button
-          class="modal-submit"
-          onclick="createStory()"
-        >
-          Publish Story
-        </button>
-
-      </div>
-
-    </div>
-
-  </div>
-
-  <!-- =====================================================
-       REEL CREATOR MODAL
-  ===================================================== -->
-
-  <div
-    id="reelCreatorModal"
-    class="modal"
-  >
-
-    <div class="modal-box">
-
-      <div class="modal-header">
-
-        <h2>
-          Create Reel
-        </h2>
-
-        <button
-          class="modal-close"
-          onclick="closeModal('reelCreatorModal')"
-        >
-          ×
-        </button>
-
-      </div>
-
-      <div class="modal-body">
-
-        <input
-          id="reelCaption"
-          type="text"
-          placeholder="Write a caption..."
-          maxlength="1000"
-        >
-
-        <input
-          id="reelVideo"
-          type="file"
-          accept="video/mp4,video/webm,video/quicktime"
-        >
-
-        <button
-          class="modal-submit"
-          onclick="createReel()"
-        >
-          Publish Reel
-        </button>
-
-      </div>
-
-    </div>
-
-  </div>
-
-  <!-- =====================================================
-       STORY VIEWER
-  ===================================================== -->
-
-  <div
-    id="storyViewerModal"
-    class="modal"
-  >
-
-    <div class="story-viewer">
-
-      <div class="story-progress">
         <div
-          id="storyProgress"
-          class="story-progress-inner"
-        ></div>
-      </div>
-
-      <div class="story-viewer-top">
-
-        <img
-          id="storyViewerAvatar"
-          src="/images/default-avatar.png"
-          alt=""
+          id="imagePreview"
+          class="image-preview"
         >
 
-        <strong id="storyViewerName">
-          Story
-        </strong>
+          <img
+            id="previewImage"
+            src=""
+            alt="Preview"
+          >
+
+          <button
+            class="remove-preview"
+            onclick="removeImage()"
+          >
+            ×
+          </button>
+
+        </div>
+
+
+        <div class="modal-bottom">
+
+          <span>
+            Add to your post
+          </span>
+
+          <label>
+            📷
+            <input
+              id="postImage"
+              type="file"
+              accept="image/*"
+              hidden
+            >
+          </label>
+
+        </div>
 
         <button
-          class="story-close"
-          onclick="closeModal('storyViewerModal')"
+          id="publishBtn"
+          class="publish-btn"
+          onclick="createPost()"
         >
-          ×
+          Post
         </button>
 
       </div>
 
-      <div id="storyViewerContent"></div>
-
     </div>
 
   </div>
 
-  <!-- =====================================================
-       REEL VIEWER
-  ===================================================== -->
 
   <div
-    id="reelViewerModal"
-    class="modal"
-  >
+    id="toast"
+    class="toast"
+  ></div>
 
-    <div class="reel-viewer">
 
-      <video
-        id="reelViewerVideo"
-        controls
-        playsinline
-      ></video>
+<script>
 
-      <button
-        class="reel-viewer-close"
-        onclick="closeReelViewer()"
-      >
-        ×
-      </button>
+const API = "";
 
+let currentUser = null;
+
+
+/* =========================
+   API
+========================= */
+
+async function api(url, options = {}) {
+
+  const response = await fetch(API + url, {
+    credentials: "include",
+    ...options
+  });
+
+  let data = {};
+
+  try {
+    data = await response.json();
+  } catch {
+    data = {};
+  }
+
+  if (!response.ok) {
+    throw new Error(
+      data.error ||
+      data.message ||
+      "Something went wrong."
+    );
+  }
+
+  return data;
+}
+
+
+/* =========================
+   INIT
+========================= */
+
+async function init() {
+
+  try {
+
+    const me = await api("/api/me");
+
+    currentUser =
+      me.user ||
+      me;
+
+    if (!currentUser) {
+      location.href = "/login.html";
+      return;
+    }
+
+    updateUserUI();
+
+    await loadFeed();
+
+  } catch (error) {
+
+    console.error(error);
+
+    location.href = "/login.html";
+  }
+}
+
+
+/* =========================
+   USER UI
+========================= */
+
+function updateUserUI() {
+
+  const avatar =
+    currentUser.profilePicture ||
+    currentUser.profileImage ||
+    currentUser.avatar ||
+    "/images/default-avatar.png";
+
+  const name =
+    currentUser.name ||
+    currentUser.username ||
+    "Profile";
+
+  document.getElementById("miniAvatar").src = avatar;
+
+  document.getElementById("miniName").textContent = name;
+
+  document.getElementById("sideProfileName").textContent =
+    name;
+
+  document.getElementById("composerAvatar").src =
+    avatar;
+
+  document.getElementById("modalAvatar").src =
+    avatar;
+
+  document.getElementById("modalName").textContent =
+    name;
+
+  document.getElementById("storyProfileImage").src =
+    avatar;
+}
+
+
+/* =========================
+   LOAD FEED
+========================= */
+
+async function loadFeed() {
+
+  const container =
+    document.getElementById("feedContainer");
+
+  container.innerHTML = `
+    <div class="card loading">
+      <div class="spinner"></div>
+      Loading feed...
     </div>
-
-  </div>
-
-  <!-- =====================================================
-       IMAGE VIEWER
-  ===================================================== -->
-
-  <div
-    id="imageModal"
-    class="modal"
-    onclick="closeModal('imageModal')"
-  >
-
-    <img
-      id="fullImage"
-      src=""
-      alt=""
-      style="
-        max-width:95%;
-        max-height:90vh;
-        object-fit:contain;
-      "
-    >
-
-  </div>
-
-  <script>
-
-    /* =====================================================
-       GLOBAL STATE
-    ===================================================== */
-
-    let currentUser = null;
-    let currentMode = "for-you";
-    let selectedImage = null;
-    let storiesData = [];
-    let reelsData = [];
-    let currentStoryIndex = 0;
-    let storyTimer = null;
-
-    const DEFAULT_AVATAR = "/images/default-avatar.png";
-
-    /* =====================================================
-       API HELPER
-    ===================================================== */
-
-    async function api(url, options = {}) {
-
-      const config = {
-        credentials: "include",
-        ...options
-      };
-
-      if (
-        config.body &&
-        !(config.body instanceof FormData)
-      ) {
-        config.headers = {
-          "Content-Type": "application/json",
-          ...(config.headers || {})
-        };
-      }
-
-      const response = await fetch(url, config);
-
-      let data = null;
-
-      try {
-        data = await response.json();
-      } catch {
-        data = {};
-      }
-
-      if (!response.ok) {
-
-        throw new Error(
-          data.error ||
-          data.message ||
-          `Request failed (${response.status})`
-        );
-      }
-
-      return data;
-    }
-
-    /* =====================================================
-       SAFE HELPERS
-    ===================================================== */
-
-    function escapeHTML(value) {
-
-      return String(value ?? "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-    }
-
-    function avatarUrl(user) {
-
-      return (
-        user?.profilePicture ||
-        user?.avatar ||
-        user?.profileImage ||
-        DEFAULT_AVATAR
-      );
-    }
-
-    function userName(user) {
-
-      return (
-        user?.name ||
-        user?.displayName ||
-        user?.username ||
-        "Pulse User"
-      );
-    }
-
-    function username(user) {
-
-      return user?.username
-        ? `@${user.username}`
-        : "";
-    }
-
-    function verifiedBadge(user) {
-
-      if (
-        user?.verified ||
-        user?.isVerified ||
-        user?.verificationStatus === "approved"
-      ) {
-        return `<span class="verified" title="Verified">✓</span>`;
-      }
-
-      return "";
-    }
-
-    function formatDate(date) {
-
-      if (!date) return "Just now";
-
-      const d = new Date(date);
-
-      if (Number.isNaN(d.getTime())) {
-        return "Just now";
-      }
-
-      const diff =
-        Math.floor(
-          (Date.now() - d.getTime()) / 1000
-        );
-
-      if (diff < 60) {
-        return "Just now";
-      }
-
-      if (diff < 3600) {
-        return `${Math.floor(diff / 60)}m`;
-      }
-
-      if (diff < 86400) {
-        return `${Math.floor(diff / 3600)}h`;
-      }
-
-      if (diff < 604800) {
-        return `${Math.floor(diff / 86400)}d`;
-      }
-
-      return d.toLocaleDateString();
-    }
-
-    /* =====================================================
-       ME
-    ===================================================== */
-
-    async function loadMe() {
-
-      try {
-
-        const data = await api("/api/me");
-
-        if (!data.loggedIn || !data.user) {
-          location.href = "/login.html";
-          return false;
-        }
-
-        currentUser = data.user;
-
-        updateUserUI();
-
-        return true;
-
-      } catch (error) {
-
-        console.error(error);
-
-        location.href = "/login.html";
-
-        return false;
-      }
-    }
-
-    function updateUserUI() {
-
-      if (!currentUser) return;
-
-      const avatar = avatarUrl(currentUser);
-
-      const topProfile =
-        document.getElementById("topProfile");
-
-      const sidebarAvatar =
-        document.getElementById("sidebarAvatar");
-
-      const composerAvatar =
-        document.getElementById("composerAvatar");
-
-      if (topProfile) {
-        topProfile.src = avatar;
-      }
-
-      if (sidebarAvatar) {
-        sidebarAvatar.src = avatar;
-      }
-
-      if (composerAvatar) {
-        composerAvatar.src = avatar;
-      }
-
-      const name =
-        document.getElementById("sidebarName");
-
-      const usernameEl =
-        document.getElementById("sidebarUsername");
-
-      if (name) {
-        name.textContent = userName(currentUser);
-      }
-
-      if (usernameEl) {
-        usernameEl.textContent =
-          username(currentUser);
-      }
-    }
-
-    /* =====================================================
-       NAVIGATION
-    ===================================================== */
-
-    function goHome() {
-
-      if (
-        location.pathname !== "/feed.html"
-      ) {
-        location.href = "/feed.html";
-        return;
-      }
-
-      setFeedMode("for-you");
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-      });
-    }
-
-    function goProfile() {
-
-      if (!currentUser?.username) {
-        location.href = "/profile.html";
-        return;
-      }
-
-      location.href =
-        `/profile.html?username=${encodeURIComponent(
-          currentUser.username
-        )}`;
-    }
-
-    function openSearch() {
-
-      const input =
-        document.getElementById("searchInput");
-
-      input.focus();
-
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-      });
-    }
-
-    function setFeedMode(mode) {
-
-      currentMode = mode === "following"
-        ? "following"
-        : "for-you";
-
-      const forYou =
-        document.getElementById("forYouTab");
-
-      const following =
-        document.getElementById("followingTab");
-
-      forYou.classList.toggle(
-        "active",
-        currentMode === "for-you"
-      );
-
-      following.classList.toggle(
-        "active",
-        currentMode === "following"
-      );
-
-      loadFeed();
-    }
-
-    /* =====================================================
-       FEED
-    ===================================================== */
-
-    async function loadFeed() {
-
-      const feed =
-        document.getElementById("feed");
-
-      feed.innerHTML = `
-        <div class="loading">
-          Loading your feed...
+  `;
+
+  try {
+
+    const data = await api("/api/feed");
+
+    const posts =
+      Array.isArray(data)
+        ? data
+        : (
+            data.posts ||
+            data.feed ||
+            []
+          );
+
+    if (!posts.length) {
+
+      container.innerHTML = `
+        <div class="card empty">
+          <h3>No posts yet</h3>
+          <p>
+            Be the first person to share something.
+          </p>
         </div>
       `;
 
-      try {
-
-        let url =
-          "/api/feed?limit=50";
-
-        if (currentMode === "following") {
-          url += "&following=true";
-        }
-
-        const data = await api(url);
-
-        const posts =
-          Array.isArray(data)
-            ? data
-            : (
-              data.posts ||
-              data.feed ||
-              []
-            );
-
-        renderFeed(posts);
-
-      } catch (error) {
-
-        console.error(error);
-
-        feed.innerHTML = `
-          <div class="empty">
-            <div class="empty-icon">⚠️</div>
-            <strong>Unable to load feed</strong>
-            <p>${escapeHTML(error.message)}</p>
-
-            <br>
-
-            <button
-              class="post-btn"
-              onclick="loadFeed()"
-            >
-              Try Again
-            </button>
-          </div>
-        `;
-      }
+      return;
     }
 
-    function renderFeed(posts) {
+    container.innerHTML =
+      posts.map(renderPost).join("");
 
-      const feed =
-        document.getElementById("feed");
+    await loadCommentsForVisiblePosts();
 
-      if (!posts.length) {
+  } catch (error) {
 
-        feed.innerHTML = `
-          <div class="empty">
-            <div class="empty-icon">🌱</div>
-            <strong>
-              ${
-                currentMode === "following"
-                  ? "No posts from people you follow yet."
-                  : "Your Pulse feed is empty."
-              }
-            </strong>
+    console.error(error);
 
-            <p>
-              Follow people and create posts to get started.
-            </p>
-          </div>
-        `;
+    container.innerHTML = `
+      <div class="card empty">
+        <h3>Unable to load feed</h3>
+        <p>${escapeHtml(error.message)}</p>
 
-        return;
-      }
+        <button
+          onclick="loadFeed()"
+          style="
+            margin-top:12px;
+            padding:9px 16px;
+            border:none;
+            border-radius:7px;
+            background:#1877f2;
+            color:white;
+            font-weight:600;
+          "
+        >
+          Try Again
+        </button>
+      </div>
+    `;
+  }
+}
 
-      feed.innerHTML =
-        posts.map(renderPost).join("");
-    }
 
-    function renderPost(post) {
+/* =========================
+   RENDER POST
+========================= */
 
-      const user =
-        post.user ||
-        post.author ||
-        {};
+function renderPost(post) {
 
-      const postId =
-        post.id ||
-        post._id;
+  const user =
+    post.user ||
+    post.author ||
+    {};
 
-      const image =
-        post.image ||
-        post.imageUrl ||
-        post.mediaUrl ||
-        "";
+  const userName =
+    user.name ||
+    post.authorName ||
+    post.username ||
+    "User";
 
-      const text =
-        post.text ||
-        post.content ||
-        "";
+  const username =
+    user.username ||
+    post.username ||
+    "";
 
-      const likeCount =
-        Number(
-          post.likeCount ??
-          post.likesCount ??
-          post.likes ??
-          0
-        );
+  const avatar =
+    user.profilePicture ||
+    user.profileImage ||
+    user.avatar ||
+    post.profilePicture ||
+    "/images/default-avatar.png";
 
-      const commentCount =
-        Number(
-          post.commentCount ??
-          post.commentsCount ??
-          post.comments ??
-          0
-        );
+  const verified =
+    user.verified ||
+    user.isVerified ||
+    post.verified;
 
-      const liked =
-        !!(
-          post.liked ||
-          post.isLiked ||
-          post.userLiked
-        );
+  const text =
+    post.text ||
+    post.content ||
+    "";
 
-      const owner =
-        !!(
-          post.isOwner ||
-          post.owner ||
-          String(user.id) === String(currentUser?.id)
-        );
+  const image =
+    post.image ||
+    post.imageUrl ||
+    post.mediaUrl ||
+    "";
 
-      const following =
-        !!(
-          user.isFollowing ||
-          user.following
-        );
+  const likes =
+    Number(
+      post.likesCount ??
+      post.likeCount ??
+      post.likes ??
+      0
+    );
 
-      const safePostId =
-        escapeHTML(postId);
+  const comments =
+    Number(
+      post.commentsCount ??
+      post.commentCount ??
+      post.comments ??
+      0
+    );
 
-      return `
-        <article
-          class="post"
-          id="post-${safePostId}"
+  const liked =
+    Boolean(
+      post.liked ||
+      post.isLiked ||
+      post.userLiked
+    );
+
+  const postId =
+    post.id ||
+    post._id;
+
+  const time =
+    formatDate(
+      post.createdAt ||
+      post.date ||
+      post.timestamp
+    );
+
+  return `
+
+    <article
+      class="card post"
+      id="post-${escapeAttribute(postId)}"
+    >
+
+      <div class="post-header">
+
+        <img
+          class="post-avatar"
+          src="${escapeAttribute(avatar)}"
+          alt=""
+          onerror="this.src='/images/default-avatar.png'"
         >
 
-          <div class="post-header">
+        <div class="post-user">
 
-            <img
-              class="post-avatar"
-              src="${escapeHTML(avatarUrl(user))}"
-              alt=""
-              onclick="openUserProfile('${escapeHTML(user.username || "")}')"
+          <div class="post-user-line">
+
+            <a
+              class="post-user-name"
+              href="/profile.html?username=${encodeURIComponent(username)}"
             >
+              ${escapeHtml(userName)}
+            </a>
 
-            <div class="post-user-info">
+            ${
+              verified
+                ? `<span class="verified">✓</span>`
+                : ""
+            }
 
-              <div class="post-user-name">
+          </div>
 
-                <span
-                  onclick="openUserProfile('${escapeHTML(user.username || "")}')"
-                  style="cursor:pointer;"
-                >
-                  ${escapeHTML(userName(user))}
-                </span>
+          <div class="post-time">
+            ${escapeHtml(time)} · 🌐
+          </div>
 
-                ${verifiedBadge(user)}
+        </div>
 
-              </div>
+        <button
+          class="post-menu"
+          onclick="postMenu('${escapeAttribute(postId)}')"
+        >
+          ···
+        </button>
 
-              <div class="post-meta">
-                ${escapeHTML(username(user))}
-                ·
-                ${escapeHTML(
-                  formatDate(
-                    post.createdAt ||
-                    post.created_at ||
-                    post.date
-                  )
-                )}
-              </div>
+      </div>
 
+
+      ${
+        text
+          ? `
+            <div class="post-content">
+              ${escapeHtml(text)}
             </div>
+          `
+          : ""
+      }
 
-            ${
-              !owner &&
-              user.id
-                ? `
-                  <button
-                    class="follow-small ${
-                      following ? "following" : ""
-                    }"
-                    onclick="toggleFollow(
-                      '${escapeHTML(user.id)}',
-                      this
-                    )"
-                  >
-                    ${following ? "Following" : "Follow"}
-                  </button>
-                `
-                : ""
-            }
 
-            ${
-              owner
-                ? `
-                  <button
-                    class="post-menu"
-                    onclick="deletePost('${safePostId}')"
-                    title="Delete"
-                  >
-                    ⋯
-                  </button>
-                `
-                : ""
-            }
-
-          </div>
-
-          ${
-            text
-              ? `
-                <div class="post-body">
-                  ${formatPostText(text)}
-                </div>
-              `
-              : ""
-          }
-
-          ${
-            image
-              ? `
-                <img
-                  class="post-media"
-                  src="${escapeHTML(image)}"
-                  alt="Post image"
-                  loading="lazy"
-                  onclick="openImage('${escapeHTML(image)}')"
-                  style="cursor:pointer;"
-                >
-              `
-              : ""
-          }
-
-          <div class="post-stats">
-
-            <span>
-              ${
-                likeCount > 0
-                  ? `👍 ${likeCount}`
-                  : " "
-              }
-            </span>
-
-            <span>
-              ${
-                commentCount > 0
-                  ? `${commentCount} comment${commentCount === 1 ? "" : "s"}`
-                  : ""
-              }
-            </span>
-
-          </div>
-
-          <div class="post-actions">
-
-            <button
-              class="post-action ${
-                liked ? "liked" : ""
-              }"
-              onclick="toggleLike(
-                '${safePostId}',
-                this
-              )"
+      ${
+        image
+          ? `
+            <img
+              class="post-image"
+              src="${escapeAttribute(image)}"
+              alt="Post image"
+              loading="lazy"
+              onerror="this.style.display='none'"
             >
-              ${liked ? "👍 Liked" : "👍 Like"}
-            </button>
+          `
+          : ""
+      }
 
-            <button
-              class="post-action"
-              onclick="toggleComments('${safePostId}')"
-            >
-              💬 Comment
-            </button>
 
-            <button
-              class="post-action"
-              onclick="sharePost('${safePostId}')"
-            >
-              ↗️ Share
-            </button>
+      <div class="post-stats">
 
-          </div>
+        <div class="reaction-count">
 
-          <div
-            id="comments-${safePostId}"
-            class="comments"
+          <span class="like-circle">
+            👍
+          </span>
+
+          <span id="like-count-${escapeAttribute(postId)}">
+            ${likes}
+          </span>
+
+        </div>
+
+        <div>
+          ${comments} comments
+        </div>
+
+      </div>
+
+
+      <div class="post-actions">
+
+        <button
+          class="post-action ${liked ? "liked" : ""}"
+          onclick="toggleLike('${escapeAttribute(postId)}', this)"
+        >
+          👍 Like
+        </button>
+
+        <button
+          class="post-action"
+          onclick="focusComment('${escapeAttribute(postId)}')"
+        >
+          💬 Comment
+        </button>
+
+        <button
+          class="post-action"
+          onclick="sharePost('${escapeAttribute(postId)}')"
+        >
+          ↗ Share
+        </button>
+
+      </div>
+
+
+      <div
+        class="comments"
+        id="comments-${escapeAttribute(postId)}"
+      >
+
+        <div
+          class="comment-loading"
+          style="
+            text-align:center;
+            color:#65676b;
+            font-size:13px;
+            padding-top:8px;
+          "
+        >
+          Loading comments...
+        </div>
+
+        <div class="comment-form">
+
+          <img
+            class="comment-avatar"
+            src="${escapeAttribute(
+              currentUser?.profilePicture ||
+              currentUser?.profileImage ||
+              currentUser?.avatar ||
+              "/images/default-avatar.png"
+            )}"
+            alt=""
           >
 
-            <div
-              id="commentList-${safePostId}"
-            >
-              Loading comments...
-            </div>
+          <input
+            id="comment-input-${escapeAttribute(postId)}"
+            class="comment-input"
+            placeholder="Write a comment..."
+            onkeydown="
+              if(event.key === 'Enter'){
+                event.preventDefault();
+                submitComment('${escapeAttribute(postId)}');
+              }
+            "
+          >
 
-            <form
-              class="comment-form"
-              onsubmit="submitComment(event, '${safePostId}')"
-            >
+          <button
+            class="comment-send"
+            onclick="submitComment('${escapeAttribute(postId)}')"
+          >
+            ➤
+          </button>
 
-              <input
-                id="commentInput-${safePostId}"
-                placeholder="Write a comment..."
-                maxlength="1000"
-                autocomplete="off"
-              >
+        </div>
 
-              <button type="submit">
-                ➤
-              </button>
+      </div>
 
-            </form>
+    </article>
+  `;
+}
 
-          </div>
 
-        </article>
-      `;
+/* =========================
+   COMMENTS
+========================= */
+
+async function loadCommentsForVisiblePosts() {
+
+  const posts =
+    document.querySelectorAll(".post");
+
+  for (const article of posts) {
+
+    const id =
+      article.id.replace("post-", "");
+
+    await loadComments(id);
+  }
+}
+
+
+async function loadComments(postId) {
+
+  const box =
+    document.getElementById(
+      `comments-${postId}`
+    );
+
+  if (!box) return;
+
+  try {
+
+    const data =
+      await api(`/api/posts/${encodeURIComponent(postId)}/comments`);
+
+    const comments =
+      Array.isArray(data)
+        ? data
+        : (
+            data.comments ||
+            []
+          );
+
+    const form =
+      box.querySelector(".comment-form");
+
+    const loading =
+      box.querySelector(".comment-loading");
+
+    if (loading) {
+      loading.remove();
     }
 
-    function formatPostText(text) {
+    comments.forEach(comment => {
 
-      let result =
-        escapeHTML(text);
+      const html =
+        renderComment(comment);
 
-      result =
-        result.replace(
-          /(^|\s)(@[a-zA-Z0-9_]+)/g,
-          '$1<span class="mention">$2</span>'
-        );
+      form.insertAdjacentHTML(
+        "beforebegin",
+        html
+      );
+    });
 
-      result =
-        result.replace(
-          /(^|\s)(#[a-zA-Z0-9_]+)/g,
-          '$1<span class="hashtag">$2</span>'
-        );
+  } catch (error) {
 
-      return result;
+    const loading =
+      box.querySelector(".comment-loading");
+
+    if (loading) {
+      loading.textContent =
+        "Unable to load comments.";
     }
 
-    /* =====================================================
-       CREATE POST
-    ===================================================== */
+    console.error(error);
+  }
+}
 
-    function openPostEditor() {
 
-      const editor =
-        document.getElementById("composerEditor");
+function renderComment(comment) {
 
-      editor.classList.remove("hidden");
+  const user =
+    comment.user ||
+    comment.author ||
+    {};
+
+  const name =
+    user.name ||
+    comment.username ||
+    "User";
+
+  const avatar =
+    user.profilePicture ||
+    user.profileImage ||
+    user.avatar ||
+    "/images/default-avatar.png";
+
+  const text =
+    comment.text ||
+    comment.content ||
+    "";
+
+  return `
+
+    <div class="comment">
+
+      <img
+        class="comment-avatar"
+        src="${escapeAttribute(avatar)}"
+        alt=""
+        onerror="this.src='/images/default-avatar.png'"
+      >
+
+      <div class="comment-body">
+
+        <div class="comment-name">
+          ${escapeHtml(name)}
+        </div>
+
+        <div class="comment-text">
+          ${escapeHtml(text)}
+        </div>
+
+      </div>
+
+    </div>
+  `;
+}
+
+
+async function submitComment(postId) {
+
+  const input =
+    document.getElementById(
+      `comment-input-${postId}`
+    );
+
+  if (!input) return;
+
+  const text =
+    input.value.trim();
+
+  if (!text) return;
+
+  input.disabled = true;
+
+  try {
+
+    await api(
+      `/api/posts/${encodeURIComponent(postId)}/comments`,
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+          text
+        })
+      }
+    );
+
+    input.value = "";
+
+    const box =
+      document.getElementById(
+        `comments-${postId}`
+      );
+
+    const form =
+      box.querySelector(".comment-form");
+
+    const comment = {
+      text,
+      user: currentUser
+    };
+
+    form.insertAdjacentHTML(
+      "beforebegin",
+      renderComment(comment)
+    );
+
+  } catch (error) {
+
+    showToast(error.message);
+
+  } finally {
+
+    input.disabled = false;
+    input.focus();
+  }
+}
+
+
+function focusComment(postId) {
+
+  const input =
+    document.getElementById(
+      `comment-input-${postId}`
+    );
+
+  if (input) {
+
+    input.focus();
+
+    input.scrollIntoView({
+      behavior: "smooth",
+      block: "center"
+    });
+  }
+}
+
+
+/* =========================
+   LIKE
+========================= */
+
+async function toggleLike(postId, button) {
+
+  try {
+
+    const data =
+      await api(
+        `/api/posts/${encodeURIComponent(postId)}/like`,
+        {
+          method: "POST"
+        }
+      );
+
+    const liked =
+      Boolean(
+        data.liked ??
+        data.isLiked
+      );
+
+    const count =
+      Number(
+        data.likesCount ??
+        data.likeCount ??
+        data.count ??
+        0
+      );
+
+    button.classList.toggle(
+      "liked",
+      liked
+    );
+
+    button.innerHTML =
+      liked
+        ? "👍 Liked"
+        : "👍 Like";
+
+    const countElement =
+      document.getElementById(
+        `like-count-${postId}`
+      );
+
+    if (countElement) {
+      countElement.textContent =
+        count;
+    }
+
+  } catch (error) {
+
+    showToast(error.message);
+  }
+}
+
+
+/* =========================
+   SHARE
+========================= */
+
+async function sharePost(postId) {
+
+  const url =
+    `${location.origin}/feed.html#post-${postId}`;
+
+  try {
+
+    if (navigator.share) {
+
+      await navigator.share({
+        title: "Pulse Social",
+        text: "Check out this post on Pulse Social",
+        url
+      });
+
+    } else {
+
+      await navigator.clipboard.writeText(url);
+
+      showToast(
+        "Post link copied!"
+      );
+    }
+
+  } catch (error) {
+
+    console.log(error);
+  }
+}
+
+
+/* =========================
+   POST MENU
+========================= */
+
+async function postMenu(postId) {
+
+  const choice =
+    confirm(
+      "Delete this post?\n\nPress OK to delete if it belongs to you."
+    );
+
+  if (!choice) return;
+
+  try {
+
+    await api(
+      `/api/posts/${encodeURIComponent(postId)}`,
+      {
+        method: "DELETE"
+      }
+    );
+
+    const article =
+      document.getElementById(
+        `post-${postId}`
+      );
+
+    if (article) {
+      article.remove();
+    }
+
+    showToast(
+      "Post deleted."
+    );
+
+  } catch (error) {
+
+    showToast(
+      error.message
+    );
+  }
+}
+
+
+/* =========================
+   CREATE POST
+========================= */
+
+function openPostModal(focusImage = false) {
+
+  document
+    .getElementById("postModal")
+    .classList.add("active");
+
+  setTimeout(() => {
+
+    if (focusImage) {
+
+      document
+        .getElementById("postImage")
+        .click();
+
+    } else {
 
       document
         .getElementById("postText")
         .focus();
+
     }
+
+  }, 100);
+}
+
+
+function closePostModal() {
+
+  document
+    .getElementById("postModal")
+    .classList.remove("active");
+
+  document
+    .getElementById("postText")
+    .value = "";
+
+  removeImage();
+}
+
+
+document
+  .getElementById("postModal")
+  .addEventListener("click", function(event) {
+
+    if (event.target === this) {
+      closePostModal();
+    }
+
+  });
+
+
+/* =========================
+   IMAGE PREVIEW
+========================= */
+
+document
+  .getElementById("postImage")
+  .addEventListener("change", function() {
+
+    const file =
+      this.files[0];
+
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+
+      showToast(
+        "Please select an image."
+      );
+
+      this.value = "";
+      return;
+    }
+
+    const url =
+      URL.createObjectURL(file);
 
     document
-      .getElementById("postImage")
-      .addEventListener(
-        "change",
-        function () {
+      .getElementById("previewImage")
+      .src = url;
 
-          const file =
-            this.files?.[0];
+    document
+      .getElementById("imagePreview")
+      .style.display = "block";
+  });
 
-          if (!file) {
-            selectedImage = null;
-            return;
-          }
 
-          selectedImage = file;
+function removeImage() {
 
-          const reader =
-            new FileReader();
+  const input =
+    document.getElementById(
+      "postImage"
+    );
 
-          reader.onload = function (event) {
+  input.value = "";
 
-            const preview =
-              document.getElementById("imagePreview");
+  document
+    .getElementById("imagePreview")
+    .style.display = "none";
 
-            const image =
-              document.getElementById("previewImage");
+  document
+    .getElementById("previewImage")
+    .src = "";
+}
 
-            image.src =
-              event.target.result;
 
-            preview.classList.remove(
-              "hidden"
-            );
-          };
+/* =========================
+   POST
+========================= */
 
-          reader.readAsDataURL(file);
-        }
+async function createPost() {
+
+  const text =
+    document
+      .getElementById("postText")
+      .value
+      .trim();
+
+  const imageInput =
+    document.getElementById(
+      "postImage"
+    );
+
+  const file =
+    imageInput.files[0];
+
+  if (!text && !file) {
+
+    showToast(
+      "Write something or add a photo."
+    );
+
+    return;
+  }
+
+  const button =
+    document.getElementById(
+      "publishBtn"
+    );
+
+  button.disabled = true;
+
+  button.textContent =
+    "Posting...";
+
+  try {
+
+    const formData =
+      new FormData();
+
+    if (text) {
+      formData.append(
+        "text",
+        text
       );
-
-    function removeSelectedImage() {
-
-      selectedImage = null;
-
-      document.getElementById(
-        "postImage"
-      ).value = "";
-
-      document.getElementById(
-        "imagePreview"
-      ).classList.add("hidden");
     }
 
-    async function createPost() {
+    if (file) {
 
-      const text =
-        document
-          .getElementById("postText")
-          .value
-          .trim();
-
-      if (!text && !selectedImage) {
-
-        alert(
-          "Write something or choose an image."
-        );
-
-        return;
-      }
-
-      const button =
-        document.getElementById("postButton");
-
-      button.disabled = true;
-      button.textContent = "Posting...";
-
-      try {
-
-        const formData =
-          new FormData();
-
-        formData.append(
-          "text",
-          text
-        );
-
-        if (selectedImage) {
-          formData.append(
-            "image",
-            selectedImage
-          );
-        }
-
-        await api(
-          "/api/posts",
-          {
-            method: "POST",
-            body: formData
-          }
-        );
-
-        document.getElementById(
-          "postText"
-        ).value = "";
-
-        removeSelectedImage();
-
-        document
-          .getElementById(
-            "composerEditor"
-          )
-          .classList.add("hidden");
-
-        await loadFeed();
-
-        window.scrollTo({
-          top: 0,
-          behavior: "smooth"
-        });
-
-      } catch (error) {
-
-        alert(
-          `Unable to create post: ${error.message}`
-        );
-
-      } finally {
-
-        button.disabled = false;
-        button.textContent = "Post";
-      }
-    }
-
-    /* =====================================================
-       LIKES
-    ===================================================== */
-
-    async function toggleLike(
-      postId,
-      button
-    ) {
-
-      try {
-
-        button.disabled = true;
-
-        await api(
-          `/api/posts/${encodeURIComponent(postId)}/like`,
-          {
-            method: "POST"
-          }
-        );
-
-        await loadFeed();
-
-      } catch (error) {
-
-        alert(
-          `Unable to like post: ${error.message}`
-        );
-
-      } finally {
-
-        button.disabled = false;
-      }
-    }
-
-    /* =====================================================
-       COMMENTS
-    ===================================================== */
-
-    async function toggleComments(
-      postId
-    ) {
-
-      const box =
-        document.getElementById(
-          `comments-${postId}`
-        );
-
-      if (!box) return;
-
-      const opening =
-        !box.classList.contains("open");
-
-      box.classList.toggle(
-        "open",
-        opening
+      formData.append(
+        "image",
+        file
       );
+    }
 
-      if (opening) {
-        await loadComments(postId);
+    await api(
+      "/api/posts",
+      {
+        method: "POST",
+        body: formData
       }
-    }
+    );
 
-    async function loadComments(postId) {
+    closePostModal();
 
-      const list =
-        document.getElementById(
-          `commentList-${postId}`
-        );
+    await loadFeed();
 
-      if (!list) return;
+    showToast(
+      "Post published!"
+    );
 
-      list.innerHTML =
-        `<div style="color:#777;font-size:13px;">
-          Loading comments...
-        </div>`;
+  } catch (error) {
 
-      try {
+    showToast(
+      error.message
+    );
 
-        const data =
-          await api(
-            `/api/posts/${encodeURIComponent(postId)}/comments`
-          );
+  } finally {
 
-        const comments =
-          Array.isArray(data)
-            ? data
-            : (
-              data.comments ||
-              []
-            );
+    button.disabled = false;
 
-        if (!comments.length) {
+    button.textContent =
+      "Post";
+  }
+}
 
-          list.innerHTML =
-            `<div style="color:#777;font-size:13px;margin-bottom:10px;">
-              No comments yet. Be the first.
-            </div>`;
 
-          return;
-        }
+/* =========================
+   SEARCH
+========================= */
 
-        list.innerHTML =
-          comments
-            .map(renderComment)
-            .join("");
+let searchTimer;
 
-      } catch (error) {
-
-        console.error(error);
-
-        list.innerHTML =
-          `<div style="color:#d00;font-size:13px;">
-            Unable to load comments.
-          </div>`;
-      }
-    }
-
-    function renderComment(comment) {
-
-      const user =
-        comment.user ||
-        comment.author ||
-        {};
-
-      const commentId =
-        comment.id ||
-        comment._id;
-
-      const owner =
-        String(user.id) ===
-        String(currentUser?.id) ||
-        comment.isOwner;
-
-      return `
-        <div class="comment">
-
-          <img
-            src="${escapeHTML(
-              avatarUrl(user)
-            )}"
-            alt=""
-          >
-
-          <div class="comment-bubble">
-
-            <strong>
-              ${escapeHTML(
-                userName(user)
-              )}
-
-              ${verifiedBadge(user)}
-            </strong>
-
-            <span>
-              ${escapeHTML(
-                comment.text ||
-                comment.content ||
-                ""
-              )}
-            </span>
-
-            ${
-              owner
-                ? `
-                  <button
-                    onclick="deleteComment('${escapeHTML(commentId)}')"
-                    style="
-                      background:none;
-                      color:#e41e3f;
-                      font-size:11px;
-                      margin-top:4px;
-                    "
-                  >
-                    Delete
-                  </button>
-                `
-                : ""
-            }
-
-          </div>
-
-        </div>
-      `;
-    }
-
-    async function submitComment(
-      event,
-      postId
-    ) {
-
-      event.preventDefault();
-
-      const input =
-        document.getElementById(
-          `commentInput-${postId}`
-        );
-
-      const text =
-        input.value.trim();
-
-      if (!text) return;
-
-      input.disabled = true;
-
-      try {
-
-        await api(
-          `/api/posts/${encodeURIComponent(postId)}/comments`,
-          {
-            method: "POST",
-            body: JSON.stringify({
-              text
-            })
-          }
-        );
-
-        input.value = "";
-
-        await loadComments(postId);
-
-        await loadFeed();
-
-        const box =
-          document.getElementById(
-            `comments-${postId}`
-          );
-
-        if (box) {
-          box.classList.add("open");
-          await loadComments(postId);
-        }
-
-      } catch (error) {
-
-        alert(
-          `Unable to comment: ${error.message}`
-        );
-
-      } finally {
-
-        input.disabled = false;
-        input.focus();
-      }
-    }
-
-    async function deleteComment(
-      commentId
-    ) {
-
-      if (
-        !confirm(
-          "Delete this comment?"
-        )
-      ) {
-        return;
-      }
-
-      try {
-
-        await api(
-          `/api/comments/${encodeURIComponent(commentId)}`,
-          {
-            method: "DELETE"
-          }
-        );
-
-        await loadFeed();
-
-      } catch (error) {
-
-        alert(
-          `Unable to delete comment: ${error.message}`
-        );
-      }
-    }
-
-    /* =====================================================
-       FOLLOW
-    ===================================================== */
-
-    async function toggleFollow(
-      userId,
-      button
-    ) {
-
-      try {
-
-        button.disabled = true;
-
-        const data =
-          await api(
-            `/api/users/${encodeURIComponent(userId)}/follow`,
-            {
-              method: "POST"
-            }
-          );
-
-        const following =
-          !!(
-            data.following ??
-            data.isFollowing
-          );
-
-        button.textContent =
-          following
-            ? "Following"
-            : "Follow";
-
-        button.classList.toggle(
-          "following",
-          following
-        );
-
-      } catch (error) {
-
-        alert(
-          `Unable to follow user: ${error.message}`
-        );
-
-      } finally {
-
-        button.disabled = false;
-      }
-    }
-
-    /* =====================================================
-       DELETE POST
-    ===================================================== */
-
-    async function deletePost(
-      postId
-    ) {
-
-      if (
-        !confirm(
-          "Delete this post?"
-        )
-      ) {
-        return;
-      }
-
-      try {
-
-        await api(
-          `/api/posts/${encodeURIComponent(postId)}`,
-          {
-            method: "DELETE"
-          }
-        );
-
-        const post =
-          document.getElementById(
-            `post-${postId}`
-          );
-
-        if (post) {
-          post.remove();
-        }
-
-      } catch (error) {
-
-        alert(
-          `Unable to delete post: ${error.message}`
-        );
-      }
-    }
-
-    /* =====================================================
-       SHARE
-    ===================================================== */
-
-    async function sharePost(
-      postId
-    ) {
-
-      const url =
-        `${location.origin}/feed.html#post-${postId}`;
-
-      try {
-
-        if (
-          navigator.share
-        ) {
-
-          await navigator.share({
-            title: "Pulse Social",
-            text: "Check out this post on Pulse Social.",
-            url
-          });
-
-          return;
-        }
-
-        await navigator.clipboard.writeText(
-          url
-        );
-
-        alert(
-          "Post link copied."
-        );
-
-      } catch (error) {
-
-        console.error(error);
-      }
-    }
-
-    /* =====================================================
-       PROFILE
-    ===================================================== */
-
-    function openUserProfile(
-      username
-    ) {
-
-      if (!username) return;
-
-      location.href =
-        `/profile.html?username=${encodeURIComponent(username)}`;
-    }
-
-    /* =====================================================
-       STORIES
-    ===================================================== */
-
-    async function loadStories() {
-
-      const container =
-        document.getElementById("stories");
-
-      try {
-
-        const data =
-          await api(
-            "/api/stories"
-          );
-
-        storiesData =
-          Array.isArray(data)
-            ? data
-            : (
-              data.stories ||
-              []
-            );
-
-        renderStories();
-
-      } catch (error) {
-
-        console.warn(
-          "Stories API unavailable:",
-          error.message
-        );
-
-        storiesData = [];
-
-        renderStories();
-      }
-    }
-
-    function renderStories() {
-
-      const container =
-        document.getElementById("stories");
-
-      const createCard = `
-        <div
-          class="story create-story"
-          onclick="openStoryCreator()"
-        >
-          <div class="story-create-image">
-            ＋
-          </div>
-
-          <span>
-            Create story
-          </span>
-        </div>
-      `;
-
-      if (!storiesData.length) {
-
-        container.innerHTML =
-          createCard;
-
-        return;
-      }
-
-      container.innerHTML =
-        createCard +
-        storiesData
-          .map(
-            (story, index) =>
-              renderStory(
-                story,
-                index
-              )
-          )
-          .join("");
-    }
-
-    function renderStory(
-      story,
-      index
-    ) {
-
-      const user =
-        story.user ||
-        story.author ||
-        {};
-
-      const media =
-        story.mediaUrl ||
-        story.image ||
-        story.video ||
-        "";
-
-      const isVideo =
-        String(
-          story.type ||
-          story.mediaType ||
-          ""
-        ).toLowerCase() === "video" ||
-        /\.(mp4|webm|mov)$/i.test(
-          media
-        );
-
-      return `
-        <div
-          class="story"
-          onclick="openStory(${index})"
-        >
-
-          ${
-            isVideo
-              ? `
-                <video
-                  src="${escapeHTML(media)}"
-                  muted
-                  playsinline
-                  preload="metadata"
-                ></video>
-              `
-              : `
-                <img
-                  src="${escapeHTML(
-                    media ||
-                    avatarUrl(user)
-                  )}"
-                  alt=""
-                >
-              `
-          }
-
-          <img
-            class="story-avatar"
-            src="${escapeHTML(
-              avatarUrl(user)
-            )}"
-            alt=""
-          >
-
-          <div class="story-user">
-            ${escapeHTML(
-              userName(user)
-            )}
-          </div>
-
-        </div>
-      `;
-    }
-
-    function openStoryCreator() {
-
-      document
-        .getElementById(
-          "storyCreatorModal"
-        )
-        .classList.add("open");
-    }
-
-    async function createStory() {
-
-      const media =
-        document.getElementById(
-          "storyMedia"
-        ).files?.[0];
-
-      const text =
-        document
-          .getElementById(
-            "storyText"
-          )
-          .value
-          .trim();
-
-      if (!media && !text) {
-
-        alert(
-          "Add an image, video, or text."
-        );
-
-        return;
-      }
-
-      try {
-
-        const formData =
-          new FormData();
-
-        formData.append(
-          "text",
-          text
-        );
-
-        if (media) {
-          formData.append(
-            "media",
-            media
-          );
-        }
-
-        await api(
-          "/api/stories",
-          {
-            method: "POST",
-            body: formData
-          }
-        );
-
-        closeModal(
-          "storyCreatorModal"
-        );
-
-        document.getElementById(
-          "storyText"
-        ).value = "";
-
-        document.getElementById(
-          "storyMedia"
-        ).value = "";
-
-        await loadStories();
-
-        alert(
-          "Story published."
-        );
-
-      } catch (error) {
-
-        alert(
-          `Unable to create story: ${error.message}`
-        );
-      }
-    }
-
-    function openStory(
-      index
-    ) {
-
-      if (!storiesData[index]) {
-        return;
-      }
-
-      currentStoryIndex =
-        index;
-
-      showCurrentStory();
-
-      document
-        .getElementById(
-          "storyViewerModal"
-        )
-        .classList.add("open");
-    }
-
-    function showCurrentStory() {
+document
+  .getElementById("searchInput")
+  .addEventListener(
+    "input",
+    function() {
 
       clearTimeout(
-        storyTimer
+        searchTimer
       );
 
-      const story =
-        storiesData[
-          currentStoryIndex
-        ];
+      const query =
+        this.value.trim();
 
-      if (!story) return;
+      if (!query) return;
 
-      const user =
-        story.user ||
-        story.author ||
-        {};
-
-      const media =
-        story.mediaUrl ||
-        story.image ||
-        story.video ||
-        "";
-
-      const isVideo =
-        String(
-          story.type ||
-          story.mediaType ||
-          ""
-        ).toLowerCase() === "video" ||
-        /\.(mp4|webm|mov)$/i.test(
-          media
-        );
-
-      document.getElementById(
-        "storyViewerAvatar"
-      ).src =
-        avatarUrl(user);
-
-      document.getElementById(
-        "storyViewerName"
-      ).textContent =
-        userName(user);
-
-      const content =
-        document.getElementById(
-          "storyViewerContent"
-        );
-
-      if (isVideo) {
-
-        content.innerHTML = `
-          <video
-            src="${escapeHTML(media)}"
-            autoplay
-            controls
-            playsinline
-            style="
-              width:100%;
-              height:100%;
-              object-fit:contain;
-            "
-          ></video>
-        `;
-
-      } else if (media) {
-
-        content.innerHTML = `
-          <img
-            src="${escapeHTML(media)}"
-            style="
-              width:100%;
-              height:100%;
-              object-fit:contain;
-            "
-          >
-        `;
-
-      } else {
-
-        content.innerHTML = `
-          <div
-            style="
-              width:100%;
-              height:100%;
-              display:flex;
-              align-items:center;
-              justify-content:center;
-              color:white;
-              padding:35px;
-              text-align:center;
-              font-size:25px;
-              font-weight:800;
-            "
-          >
-            ${escapeHTML(
-              story.text ||
-              "Pulse Story"
-            )}
-          </div>
-        `;
-      }
-
-      const progress =
-        document.getElementById(
-          "storyProgress"
-        );
-
-      progress.style.width = "0%";
-
-      const duration =
-        isVideo
-          ? 8000
-          : 5000;
-
-      const started =
-        Date.now();
-
-      function updateProgress() {
-
-        const elapsed =
-          Date.now() - started;
-
-        const percentage =
-          Math.min(
-            100,
-            elapsed / duration * 100
-          );
-
-        progress.style.width =
-          `${percentage}%`;
-
-        if (
-          percentage < 100
-        ) {
-
-          storyTimer =
-            setTimeout(
-              updateProgress,
-              50
-            );
-
-        } else {
-
-          nextStory();
-        }
-      }
-
-      updateProgress();
-    }
-
-    function nextStory() {
-
-      if (
-        currentStoryIndex <
-        storiesData.length - 1
-      ) {
-
-        currentStoryIndex++;
-
-        showCurrentStory();
-
-      } else {
-
-        closeModal(
-          "storyViewerModal"
-        );
-      }
-    }
-
-    /* =====================================================
-       REELS
-    ===================================================== */
-
-    async function loadReels() {
-
-      const container =
-        document.getElementById(
-          "reels"
-        );
-
-      try {
-
-        const data =
-          await api(
-            "/api/reels"
-          );
-
-        reelsData =
-          Array.isArray(data)
-            ? data
-            : (
-              data.reels ||
-              []
-            );
-
-        renderReels();
-
-      } catch (error) {
-
-        console.warn(
-          "Reels API unavailable:",
-          error.message
-        );
-
-        reelsData = [];
-
-        renderReels();
-      }
-    }
-
-    function renderReels() {
-
-      const container =
-        document.getElementById(
-          "reels"
-        );
-
-      if (!reelsData.length) {
-
-        container.innerHTML = `
-          <div
-            class="empty"
-            style="
-              width:100%;
-              box-shadow:none;
-              margin:0;
-            "
-          >
-            <div class="empty-icon">
-              🎬
-            </div>
-
-            <strong>
-              No reels yet
-            </strong>
-
-            <p>
-              Create the first reel on Pulse.
-            </p>
-          </div>
-        `;
-
-        return;
-      }
-
-      container.innerHTML =
-        reelsData
-          .map(
-            (reel, index) =>
-              renderReel(
-                reel,
-                index
-              )
-          )
-          .join("");
-    }
-
-    function renderReel(
-      reel,
-      index
-    ) {
-
-      const user =
-        reel.user ||
-        reel.author ||
-        {};
-
-      const video =
-        reel.videoUrl ||
-        reel.video ||
-        reel.mediaUrl ||
-        "";
-
-      return `
-        <div
-          class="reel-card"
-          onclick="openReel(${index})"
-        >
-
-          <video
-            src="${escapeHTML(video)}"
-            muted
-            playsinline
-            preload="metadata"
-          ></video>
-
-          <div class="reel-play">
-            ▶
-          </div>
-
-          <div class="reel-info">
-
-            <strong>
-              ${escapeHTML(
-                userName(user)
-              )}
-              ${verifiedBadge(user)}
-            </strong>
-
-            <small>
-              ${
-                escapeHTML(
-                  reel.caption ||
-                  reel.text ||
-                  "Pulse Reel"
-                )
-              }
-            </small>
-
-          </div>
-
-        </div>
-      `;
-    }
-
-    function openReelCreator() {
-
-      document
-        .getElementById(
-          "reelCreatorModal"
-        )
-        .classList.add("open");
-    }
-
-    async function createReel() {
-
-      const video =
-        document.getElementById(
-          "reelVideo"
-        ).files?.[0];
-
-      const caption =
-        document
-          .getElementById(
-            "reelCaption"
-          )
-          .value
-          .trim();
-
-      if (!video) {
-
-        alert(
-          "Choose a video for your reel."
-        );
-
-        return;
-      }
-
-      try {
-
-        const formData =
-          new FormData();
-
-        formData.append(
-          "caption",
-          caption
-        );
-
-        formData.append(
-          "video",
-          video
-        );
-
-        await api(
-          "/api/reels",
-          {
-            method: "POST",
-            body: formData
-          }
-        );
-
-        closeModal(
-          "reelCreatorModal"
-        );
-
-        document.getElementById(
-          "reelCaption"
-        ).value = "";
-
-        document.getElementById(
-          "reelVideo"
-        ).value = "";
-
-        await loadReels();
-
-        alert(
-          "Reel published."
-        );
-
-      } catch (error) {
-
-        alert(
-          `Unable to create reel: ${error.message}`
-        );
-      }
-    }
-
-    function openReel(
-      index
-    ) {
-
-      const reel =
-        reelsData[index];
-
-      if (!reel) return;
-
-      const video =
-        reel.videoUrl ||
-        reel.video ||
-        reel.mediaUrl;
-
-      if (!video) return;
-
-      const player =
-        document.getElementById(
-          "reelViewerVideo"
-        );
-
-      player.src =
-        video;
-
-      document
-        .getElementById(
-          "reelViewerModal"
-        )
-        .classList.add("open");
-
-      player.play().catch(() => {});
-    }
-
-    function closeReelViewer() {
-
-      const player =
-        document.getElementById(
-          "reelViewerVideo"
-        );
-
-      player.pause();
-      player.removeAttribute("src");
-      player.load();
-
-      closeModal(
-        "reelViewerModal"
-      );
-    }
-
-    /* =====================================================
-       SUGGESTIONS
-    ===================================================== */
-
-    async function loadSuggestions() {
-
-      const container =
-        document.getElementById(
-          "suggestions"
-        );
-
-      try {
-
-        const data =
-          await api(
-            "/api/search?q=a"
-          );
-
-        let users =
-          Array.isArray(data)
-            ? data
-            : (
-              data.users ||
-              data.results ||
-              []
-            );
-
-        users =
-          users.filter(
-            user =>
-              String(user.id) !==
-              String(currentUser?.id)
-          );
-
-        users =
-          users.slice(0, 5);
-
-        if (!users.length) {
-
-          container.innerHTML = `
-            <div
-              style="
-                color:#777;
-                font-size:13px;
-              "
-            >
-              No suggestions right now.
-            </div>
-          `;
-
-          return;
-        }
-
-        container.innerHTML =
-          users
-            .map(
-              renderSuggestion
-            )
-            .join("");
-
-      } catch (error) {
-
-        console.warn(
-          "Suggestions unavailable:",
-          error.message
-        );
-
-        container.innerHTML = `
-          <div
-            style="
-              color:#777;
-              font-size:13px;
-            "
-          >
-            Connect with people on Pulse.
-          </div>
-        `;
-      }
-    }
-
-    function renderSuggestion(
-      user
-    ) {
-
-      const following =
-        !!(
-          user.isFollowing ||
-          user.following
-        );
-
-      return `
-        <div class="person">
-
-          <img
-            src="${escapeHTML(
-              avatarUrl(user)
-            )}"
-            alt=""
-            onclick="openUserProfile('${escapeHTML(user.username || "")}')"
-            style="cursor:pointer;"
-          >
-
-          <div class="person-info">
-
-            <strong>
-              ${escapeHTML(
-                userName(user)
-              )}
-              ${verifiedBadge(user)}
-            </strong>
-
-            <small>
-              ${escapeHTML(
-                username(user)
-              )}
-            </small>
-
-          </div>
-
-          <button
-            onclick="toggleFollow(
-              '${escapeHTML(user.id)}',
-              this
-            )"
-          >
-            ${
-              following
-                ? "Following"
-                : "Follow"
-            }
-          </button>
-
-        </div>
-      `;
-    }
-
-    /* =====================================================
-       SEARCH
-    ===================================================== */
-
-    let searchTimer = null;
-
-    document
-      .getElementById("searchInput")
-      .addEventListener(
-        "input",
-        function () {
-
-          clearTimeout(
-            searchTimer
-          );
-
-          const query =
-            this.value.trim();
-
-          if (!query) {
-            return;
-          }
-
-          searchTimer =
-            setTimeout(
-              () => performSearch(query),
-              400
-            );
-        }
-      );
-
-    async function performSearch(
-      query
-    ) {
-
-      try {
-
-        const data =
-          await api(
-            `/api/search?q=${encodeURIComponent(query)}`
-          );
-
-        const users =
-          Array.isArray(data)
-            ? data
-            : (
-              data.users ||
-              data.results ||
-              []
-            );
-
-        if (!users.length) {
-          return;
-        }
-
-        const first =
-          users[0];
-
-        if (
-          first.username
-        ) {
-
-          location.href =
-            `/profile.html?username=${encodeURIComponent(
-              first.username
-            )}`;
-        }
-
-      } catch (error) {
-
-        console.error(
-          "Search failed:",
-          error
-        );
-      }
-    }
-
-    /* =====================================================
-       NOTIFICATIONS
-    ===================================================== */
-
-    async function loadNotificationCount() {
-
-      try {
-
-        const data =
-          await api(
-            "/api/notifications"
-          );
-
-        const notifications =
-          Array.isArray(data)
-            ? data
-            : (
-              data.notifications ||
-              []
-            );
-
-        const unread =
-          notifications.filter(
-            notification =>
-              !notification.read &&
-              !notification.isRead
-          ).length;
-
-        const dot =
-          document.getElementById(
-            "notificationDot"
-          );
-
-        if (unread > 0) {
-
-          dot.textContent =
-            unread > 99
-              ? "99+"
-              : unread;
-
-          dot.classList.remove(
-            "hidden"
-          );
-
-        } else {
-
-          dot.classList.add(
-            "hidden"
-          );
-        }
-
-      } catch (error) {
-
-        console.warn(
-          "Notification count unavailable"
-        );
-      }
-    }
-
-    /* =====================================================
-       IMAGE VIEWER
-    ===================================================== */
-
-    function openImage(
-      src
-    ) {
-
-      document.getElementById(
-        "fullImage"
-      ).src = src;
-
-      document
-        .getElementById(
-          "imageModal"
-        )
-        .classList.add("open");
-    }
-
-    /* =====================================================
-       MODALS
-    ===================================================== */
-
-    function closeModal(
-      id
-    ) {
-
-      const modal =
-        document.getElementById(id);
-
-      if (modal) {
-        modal.classList.remove(
-          "open"
-        );
-      }
-
-      if (
-        id === "storyViewerModal"
-      ) {
-
-        clearTimeout(
-          storyTimer
-        );
-      }
-    }
-
-    document
-      .querySelectorAll(".modal")
-      .forEach(
-        modal => {
-
-          modal.addEventListener(
-            "click",
-            event => {
-
-              if (
-                event.target === modal
-              ) {
-
-                modal.classList.remove(
-                  "open"
-                );
-
-                if (
-                  modal.id ===
-                  "storyViewerModal"
-                ) {
-
-                  clearTimeout(
-                    storyTimer
-                  );
-                }
-
-                if (
-                  modal.id ===
-                  "reelViewerModal"
-                ) {
-
-                  closeReelViewer();
-                }
-              }
-            }
-          );
-        }
-      );
-
-    /* =====================================================
-       LOGOUT
-    ===================================================== */
-
-    async function logout() {
-
-      try {
-
-        await api(
-          "/api/logout",
-          {
-            method: "POST"
-          }
-        );
-
-      } catch (error) {
-
-        console.error(
-          "Logout error:",
-          error
-        );
-
-      } finally {
-
-        location.href =
-          "/login.html";
-      }
-    }
-
-    /* =====================================================
-       INIT
-    ===================================================== */
-
-    async function init() {
-
-      const loggedIn =
-        await loadMe();
-
-      if (!loggedIn) {
-        return;
-      }
-
-      await Promise.all([
-        loadFeed(),
-        loadStories(),
-        loadReels(),
-        loadSuggestions(),
-        loadNotificationCount()
-      ]);
-
-      const hash =
-        location.hash;
-
-      if (
-        hash.startsWith("#post-")
-      ) {
-
+      searchTimer =
         setTimeout(
-          () => {
-
-            const element =
-              document.querySelector(
-                hash
-              );
-
-            if (element) {
-
-              element.scrollIntoView({
-                behavior: "smooth",
-                block: "center"
-              });
-            }
-
-          },
+          () => searchUsers(query),
           500
         );
-      }
     }
+  );
 
-    init();
 
-  </script>
+async function searchUsers(query) {
+
+  try {
+
+    const data =
+      await api(
+        `/api/search?q=${encodeURIComponent(query)}`
+      );
+
+    console.log(
+      "Search results:",
+      data
+    );
+
+  } catch (error) {
+
+    console.error(
+      error
+    );
+  }
+}
+
+
+/* =========================
+   HELPERS
+========================= */
+
+function formatDate(value) {
+
+  if (!value) {
+    return "Just now";
+  }
+
+  const date =
+    new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "Just now";
+  }
+
+  const seconds =
+    Math.floor(
+      (Date.now() - date.getTime()) / 1000
+    );
+
+  if (seconds < 60) {
+    return "Just now";
+  }
+
+  const minutes =
+    Math.floor(seconds / 60);
+
+  if (minutes < 60) {
+    return `${minutes}m`;
+  }
+
+  const hours =
+    Math.floor(minutes / 60);
+
+  if (hours < 24) {
+    return `${hours}h`;
+  }
+
+  const days =
+    Math.floor(hours / 24);
+
+  if (days < 7) {
+    return `${days}d`;
+  }
+
+  return date.toLocaleDateString();
+}
+
+
+function escapeHtml(value) {
+
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+
+function escapeAttribute(value) {
+
+  return escapeHtml(value)
+    .replace(/`/g, "&#096;");
+}
+
+
+function showToast(message) {
+
+  const toast =
+    document.getElementById(
+      "toast"
+    );
+
+  toast.textContent =
+    message;
+
+  toast.classList.add(
+    "show"
+  );
+
+  setTimeout(() => {
+
+    toast.classList.remove(
+      "show"
+    );
+
+  }, 3000);
+}
+
+
+/* =========================
+   START
+========================= */
+
+init();
+
+</script>
 
 </body>
 </html>
