@@ -4,10 +4,10 @@
   <meta charset="UTF-8">
   <meta
     name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
   >
 
-  <title>Feed | Pulse Social</title>
+  <title>Pulse Social</title>
 
   <style>
     * {
@@ -16,32 +16,14 @@
       padding: 0;
     }
 
-    :root {
-      --blue: #1877f2;
-      --blue-dark: #166fe5;
-      --bg: #f0f2f5;
-      --card: #ffffff;
-      --text: #050505;
-      --muted: #65676b;
-      --border: #dddfe2;
-      --hover: #f2f2f2;
-      --danger: #e41e3f;
-      --green: #42b72a;
-    }
-
+    html,
     body {
-      font-family:
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        Roboto,
-        Helvetica,
-        Arial,
-        sans-serif;
-
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #000;
+      color: #fff;
     }
 
     button,
@@ -51,986 +33,512 @@
     }
 
     button {
+      border: 0;
       cursor: pointer;
     }
 
-    /* =========================
-       HEADER
-    ========================= */
-
-    .topbar {
-      height: 64px;
-      background: #fff;
-      border-bottom: 1px solid var(--border);
-
-      display: flex;
-      align-items: center;
-
-      padding: 0 18px;
-
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-
-      box-shadow: 0 1px 3px rgba(0,0,0,.08);
-    }
-
-    .topbar-inner {
-      width: 100%;
-      max-width: 1400px;
-      margin: auto;
-
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-
+    a {
+      color: inherit;
       text-decoration: none;
-      color: var(--blue);
-
-      font-size: 28px;
-      font-weight: 800;
     }
 
-    .logo-icon {
-      width: 40px;
-      height: 40px;
+    /* =====================================================
+       APP
+    ===================================================== */
 
-      border-radius: 50%;
-
-      background: var(--blue);
-      color: white;
-
-      display: grid;
-      place-items: center;
-
-      font-size: 24px;
-      font-weight: 800;
-    }
-
-    .search-box {
+    .app {
+      width: 100%;
+      height: 100vh;
+      background: #000;
       position: relative;
-      width: 260px;
+      overflow: hidden;
     }
 
-    .search-box input {
+    .feed {
       width: 100%;
-      height: 42px;
+      height: 100%;
+      overflow-y: auto;
+      overflow-x: hidden;
 
-      border: none;
-      outline: none;
-
-      background: #f0f2f5;
-
-      border-radius: 22px;
-
-      padding: 0 16px 0 42px;
-
-      font-size: 15px;
-    }
-
-    .search-icon {
-      position: absolute;
-      left: 14px;
-      top: 11px;
-
-      color: var(--muted);
-    }
-
-    .nav-spacer {
-      flex: 1;
-    }
-
-    .top-actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .icon-btn {
-      width: 42px;
-      height: 42px;
-
-      border: none;
-      border-radius: 50%;
-
-      background: #e4e6eb;
-
-      font-size: 20px;
-
-      display: grid;
-      place-items: center;
-
-      transition: .2s;
-    }
-
-    .icon-btn:hover {
-      background: #d8dadf;
-    }
-
-    .profile-mini {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-
-      padding: 4px 8px 4px 4px;
-
-      border-radius: 22px;
-
-      text-decoration: none;
-      color: #111;
-
-      font-weight: 600;
-    }
-
-    .profile-mini:hover {
-      background: var(--hover);
-    }
-
-    .avatar-small {
-      width: 36px;
-      height: 36px;
-
-      border-radius: 50%;
-
-      object-fit: cover;
-
-      background: #ddd;
-    }
-
-    /* =========================
-       LAYOUT
-    ========================= */
-
-    .page {
-      max-width: 1400px;
-      margin: auto;
-
-      display: grid;
-      grid-template-columns: 280px minmax(0, 680px) 300px;
-
-      gap: 24px;
-
-      padding: 22px 18px 50px;
-    }
-
-    /* =========================
-       LEFT SIDEBAR
-    ========================= */
-
-    .sidebar {
-      position: sticky;
-      top: 85px;
-      height: max-content;
-    }
-
-    .sidebar-card {
-      background: transparent;
-    }
-
-    .side-link {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-
-      padding: 10px;
-
-      border-radius: 10px;
-
-      text-decoration: none;
-      color: #111;
-
-      font-weight: 600;
-
-      transition: .2s;
-    }
-
-    .side-link:hover {
-      background: #e4e6eb;
-    }
-
-    .side-icon {
-      width: 40px;
-      height: 40px;
-
-      border-radius: 50%;
-
-      display: grid;
-      place-items: center;
-
-      font-size: 20px;
-
-      background: white;
-    }
-
-    .side-divider {
-      height: 1px;
-      background: var(--border);
-      margin: 12px 0;
-    }
-
-    .sidebar-title {
-      color: var(--muted);
-      font-size: 17px;
-      margin: 10px;
-    }
-
-    /* =========================
-       STORIES
-    ========================= */
-
-    .stories {
-      display: flex;
-      gap: 10px;
-
-      overflow-x: auto;
-
-      padding-bottom: 4px;
-      margin-bottom: 18px;
+      scroll-snap-type: y mandatory;
+      scroll-behavior: smooth;
 
       scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
     }
 
-    .stories::-webkit-scrollbar {
+    .feed::-webkit-scrollbar {
       display: none;
     }
 
-    .story {
-      min-width: 120px;
-      height: 190px;
+    /* =====================================================
+       POST
+    ===================================================== */
 
-      border-radius: 12px;
-
-      overflow: hidden;
+    .post {
+      width: 100%;
+      height: 100vh;
+      min-height: 100vh;
 
       position: relative;
 
-      background: #222;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
 
-      box-shadow: 0 1px 3px rgba(0,0,0,.15);
-
-      cursor: pointer;
+      overflow: hidden;
+      background: #111;
     }
 
-    .story img {
+    .post-media {
+      position: absolute;
+      inset: 0;
+
       width: 100%;
       height: 100%;
 
       object-fit: cover;
+      background: #111;
     }
 
-    .story::after {
-      content: "";
+    .post-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      background: #000;
+    }
 
+    .post-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .media-gradient {
       position: absolute;
       inset: 0;
 
       background:
         linear-gradient(
           to bottom,
-          transparent 45%,
-          rgba(0,0,0,.7)
+          rgba(0, 0, 0, .42) 0%,
+          transparent 24%,
+          transparent 48%,
+          rgba(0, 0, 0, .15) 58%,
+          rgba(0, 0, 0, .9) 100%
         );
+
+      pointer-events: none;
     }
 
-    .story-avatar {
-      position: absolute;
+    .empty-media {
+      width: 100%;
+      height: 100%;
 
-      top: 10px;
-      left: 10px;
-
-      width: 38px;
-      height: 38px;
-
-      border-radius: 50%;
-
-      border: 3px solid var(--blue);
-
-      object-fit: cover;
-
-      z-index: 2;
-    }
-
-    .story-name {
-      position: absolute;
-
-      bottom: 10px;
-      left: 10px;
-      right: 8px;
-
-      color: white;
-
-      font-weight: 700;
-      font-size: 13px;
-
-      z-index: 2;
-    }
-
-    .create-story {
-      background: white;
-    }
-
-    .create-story img {
-      height: 130px;
-    }
-
-    .story-plus {
-      position: absolute;
-
-      bottom: 42px;
-      left: 50%;
-
-      transform: translateX(-50%);
-
-      width: 38px;
-      height: 38px;
-
-      border-radius: 50%;
-
-      background: var(--blue);
-      color: white;
-
-      display: grid;
-      place-items: center;
-
-      border: 4px solid white;
-
-      font-size: 24px;
-
-      z-index: 4;
-    }
-
-    .create-story .story-name {
-      color: #111;
-      text-align: center;
-      bottom: 9px;
-    }
-
-    /* =========================
-       COMPOSER
-    ========================= */
-
-    .card {
-      background: var(--card);
-
-      border-radius: 10px;
-
-      box-shadow:
-        0 1px 2px rgba(0,0,0,.12);
-
-      margin-bottom: 16px;
-    }
-
-    .composer {
-      padding: 14px 16px;
-    }
-
-    .composer-top {
       display: flex;
       align-items: center;
-      gap: 10px;
+      justify-content: center;
+
+      background:
+        radial-gradient(circle at 30% 20%, #252525, #080808 65%);
     }
 
-    .composer-avatar {
-      width: 42px;
-      height: 42px;
-
-      border-radius: 50%;
-
-      object-fit: cover;
-
-      background: #ddd;
+    .empty-media span {
+      font-size: 80px;
+      font-weight: 900;
+      opacity: .08;
     }
 
-    .composer-input {
-      flex: 1;
+    /* =====================================================
+       TOP BAR
+    ===================================================== */
 
-      height: 42px;
-
-      border: none;
-      outline: none;
-
-      background: #f0f2f5;
-
-      border-radius: 22px;
-
-      padding: 0 16px;
-
-      cursor: pointer;
-    }
-
-    .composer-input:hover {
-      background: #e4e6eb;
-    }
-
-    .composer-divider {
-      height: 1px;
-      background: var(--border);
-
-      margin: 14px 0 8px;
-    }
-
-    .composer-actions {
-      display: flex;
-      justify-content: space-around;
-    }
-
-    .composer-action {
-      flex: 1;
-
-      border: none;
-      background: transparent;
-
-      padding: 10px;
-
-      border-radius: 8px;
-
-      font-weight: 600;
-
-      color: var(--muted);
-    }
-
-    .composer-action:hover {
-      background: var(--hover);
-    }
-
-    .photo-text {
-      color: #45bd62;
-    }
-
-    .feeling-text {
-      color: #f7b928;
-    }
-
-    /* =========================
-       CREATE POST MODAL
-    ========================= */
-
-    .modal {
+    .top-bar {
       position: fixed;
-      inset: 0;
+      z-index: 100;
 
-      background: rgba(0,0,0,.55);
+      top: 0;
+      left: 0;
+      right: 0;
 
-      display: none;
-      align-items: center;
-      justify-content: center;
-
-      z-index: 3000;
-
-      padding: 16px;
-    }
-
-    .modal.active {
-      display: flex;
-    }
-
-    .modal-box {
-      width: 100%;
-      max-width: 500px;
-
-      background: white;
-
-      border-radius: 12px;
-
-      box-shadow: 0 10px 40px rgba(0,0,0,.3);
-
-      overflow: hidden;
-    }
-
-    .modal-header {
-      height: 58px;
+      height: 72px;
 
       display: flex;
       align-items: center;
       justify-content: center;
 
-      border-bottom: 1px solid var(--border);
+      padding: 0 18px;
 
-      position: relative;
+      background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, .5),
+        transparent
+      );
 
-      font-size: 18px;
-      font-weight: 700;
+      pointer-events: none;
     }
 
-    .close-modal {
-      position: absolute;
-      right: 12px;
-
-      width: 36px;
-      height: 36px;
-
-      border: none;
-      border-radius: 50%;
-
-      background: #e4e6eb;
-
-      font-size: 22px;
-    }
-
-    .modal-body {
-      padding: 16px;
-    }
-
-    .modal-user {
+    .top-tabs {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 24px;
 
-      margin-bottom: 12px;
+      pointer-events: auto;
     }
 
-    .modal-user img {
-      width: 42px;
-      height: 42px;
-
-      border-radius: 50%;
-      object-fit: cover;
-    }
-
-    .modal-user-name {
-      font-weight: 700;
-    }
-
-    .post-textarea {
-      width: 100%;
-
-      min-height: 130px;
-
-      border: none;
-      outline: none;
-
-      resize: vertical;
-
-      font-size: 20px;
-    }
-
-    .image-preview {
-      display: none;
-
+    .tab {
       position: relative;
 
-      margin-top: 10px;
-    }
-
-    .image-preview img {
-      width: 100%;
-      max-height: 320px;
-
-      object-fit: cover;
-
-      border-radius: 8px;
-    }
-
-    .remove-preview {
-      position: absolute;
-
-      top: 8px;
-      right: 8px;
-
-      width: 34px;
-      height: 34px;
-
-      border: none;
-      border-radius: 50%;
-
-      background: rgba(0,0,0,.65);
-
-      color: white;
-    }
-
-    .modal-bottom {
-      border: 1px solid var(--border);
-
-      border-radius: 8px;
-
-      padding: 10px;
-
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-
-      margin-top: 12px;
-    }
-
-    .modal-bottom label {
-      cursor: pointer;
-      font-weight: 600;
-    }
-
-    .publish-btn {
-      width: 100%;
-
-      border: none;
-
-      background: var(--blue);
-
-      color: white;
-
-      padding: 12px;
-
-      border-radius: 8px;
-
-      margin-top: 14px;
-
-      font-weight: 700;
+      background: none;
+      color: rgba(255,255,255,.65);
 
       font-size: 16px;
+      font-weight: 600;
+
+      padding: 12px 2px;
     }
 
-    .publish-btn:hover {
-      background: var(--blue-dark);
-    }
-
-    .publish-btn:disabled {
-      opacity: .5;
-      cursor: not-allowed;
-    }
-
-    /* =========================
-       POST
-    ========================= */
-
-    .post {
-      padding: 0;
-
-      overflow: hidden;
-    }
-
-    .post-header {
-      display: flex;
-      align-items: center;
-
-      padding: 14px 16px 8px;
-
-      gap: 10px;
-    }
-
-    .post-avatar {
-      width: 42px;
-      height: 42px;
-
-      border-radius: 50%;
-
-      object-fit: cover;
-
-      flex-shrink: 0;
-    }
-
-    .post-user {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .post-user-line {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .post-user-name {
-      font-weight: 700;
-
-      text-decoration: none;
-      color: #111;
-    }
-
-    .verified {
-      display: inline-grid;
-      place-items: center;
-
-      width: 18px;
-      height: 18px;
-
-      border-radius: 50%;
-
-      background: var(--blue);
-
-      color: white;
-
-      font-size: 11px;
+    .tab.active {
+      color: #fff;
       font-weight: 800;
     }
 
-    .post-time {
-      color: var(--muted);
-      font-size: 13px;
-      margin-top: 2px;
+    .tab.active::after {
+      content: "";
+
+      position: absolute;
+      left: 50%;
+      bottom: 2px;
+
+      width: 28px;
+      height: 3px;
+
+      transform: translateX(-50%);
+
+      background: #fff;
+      border-radius: 10px;
     }
 
-    .post-menu {
+    .top-search {
+      position: absolute;
+      right: 18px;
+
       width: 38px;
       height: 38px;
 
-      border: none;
-
       border-radius: 50%;
 
-      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
 
-      font-size: 20px;
+      background: rgba(0,0,0,.28);
+
+      font-size: 21px;
     }
 
-    .post-menu:hover {
-      background: var(--hover);
+    /* =====================================================
+       RIGHT ACTIONS
+    ===================================================== */
+
+    .actions {
+      position: absolute;
+
+      right: 10px;
+      bottom: 94px;
+
+      z-index: 20;
+
+      width: 62px;
+
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+
+      gap: 18px;
     }
 
-    .post-content {
-      padding: 4px 16px 12px;
-
-      line-height: 1.45;
-
-      white-space: pre-wrap;
-
-      word-break: break-word;
+    .profile-action {
+      position: relative;
+      width: 50px;
+      height: 50px;
     }
 
-    .post-image {
-      width: 100%;
+    .action-avatar {
+      width: 48px;
+      height: 48px;
 
-      max-height: 650px;
-
-      display: block;
+      border-radius: 50%;
 
       object-fit: cover;
 
-      background: #eee;
+      border: 2px solid #fff;
+      background: #222;
     }
 
-    .post-stats {
+    .follow-plus {
+      position: absolute;
+
+      left: 50%;
+      bottom: -9px;
+
+      transform: translateX(-50%);
+
+      width: 21px;
+      height: 21px;
+
       display: flex;
       align-items: center;
-      justify-content: space-between;
-
-      padding: 8px 16px;
-
-      color: var(--muted);
-
-      font-size: 14px;
-    }
-
-    .reaction-count {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-
-    .like-circle {
-      width: 20px;
-      height: 20px;
+      justify-content: center;
 
       border-radius: 50%;
 
-      background: var(--blue);
-
+      background: #fe2c55;
       color: white;
 
-      display: grid;
-      place-items: center;
+      font-size: 16px;
+      font-weight: 900;
 
-      font-size: 11px;
+      border: 2px solid #000;
     }
 
-    .post-actions {
+    .follow-plus.following {
+      background: #fff;
+      color: #111;
+    }
+
+    .action {
+      width: 58px;
+
       display: flex;
+      flex-direction: column;
+      align-items: center;
 
-      margin: 0 12px;
+      gap: 4px;
 
-      border-top: 1px solid var(--border);
-    }
-
-    .post-action {
-      flex: 1;
-
-      border: none;
+      color: #fff;
 
       background: transparent;
 
-      padding: 11px 5px;
-
-      color: var(--muted);
-
-      font-weight: 600;
-
-      border-radius: 6px;
-
-      margin: 4px 0;
+      text-shadow: 0 1px 4px rgba(0,0,0,.7);
     }
 
-    .post-action:hover {
-      background: var(--hover);
-    }
+    .action-icon {
+      width: 48px;
+      height: 48px;
 
-    .post-action.liked {
-      color: var(--blue);
-    }
-
-    .comments {
-      padding: 0 16px 14px;
-    }
-
-    .comment {
       display: flex;
+      align-items: center;
+      justify-content: center;
 
-      gap: 8px;
+      font-size: 31px;
 
-      margin-top: 9px;
+      transition: transform .15s ease;
     }
 
-    .comment-avatar {
-      width: 32px;
-      height: 32px;
-
-      border-radius: 50%;
-
-      object-fit: cover;
-
-      flex-shrink: 0;
+    .action:active .action-icon {
+      transform: scale(.82);
     }
 
-    .comment-body {
-      background: #f0f2f5;
-
-      border-radius: 16px;
-
-      padding: 7px 11px;
-
-      flex: 1;
+    .action.liked .action-icon {
+      color: #fe2c55;
     }
 
-    .comment-name {
-      font-size: 13px;
+    .action-count {
+      font-size: 12px;
       font-weight: 700;
     }
 
-    .comment-text {
-      font-size: 14px;
-      margin-top: 2px;
+    /* =====================================================
+       BOTTOM POST INFO
+    ===================================================== */
+
+    .post-info {
+      position: absolute;
+
+      left: 16px;
+      right: 84px;
+      bottom: 92px;
+
+      z-index: 15;
     }
 
-    .comment-form {
-      display: flex;
-      gap: 8px;
-
-      margin-top: 10px;
-    }
-
-    .comment-input {
-      flex: 1;
-
-      border: none;
-      outline: none;
-
-      background: #f0f2f5;
-
-      border-radius: 20px;
-
-      padding: 9px 14px;
-    }
-
-    .comment-send {
-      width: 38px;
-      height: 38px;
-
-      border: none;
-      border-radius: 50%;
-
-      background: var(--blue);
-      color: white;
-    }
-
-    /* =========================
-       RIGHT SIDEBAR
-    ========================= */
-
-    .right-sidebar {
-      position: sticky;
-      top: 85px;
-      height: max-content;
-    }
-
-    .right-title {
-      color: var(--muted);
-
-      font-size: 17px;
-
-      margin-bottom: 12px;
-    }
-
-    .contact {
+    .username-row {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 6px;
 
-      padding: 8px;
-
-      border-radius: 8px;
-
-      cursor: pointer;
+      margin-bottom: 9px;
     }
 
-    .contact:hover {
-      background: #e4e6eb;
+    .username {
+      font-size: 17px;
+      font-weight: 800;
+
+      text-shadow: 0 1px 5px rgba(0,0,0,.7);
     }
 
-    .contact img {
-      width: 38px;
-      height: 38px;
+    .verified {
+      width: 17px;
+      height: 17px;
 
       border-radius: 50%;
 
-      object-fit: cover;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+
+      background: #20d5ec;
+      color: #fff;
+
+      font-size: 10px;
+      font-weight: 900;
     }
 
-    .online-dot {
-      width: 10px;
-      height: 10px;
+    .caption {
+      font-size: 15px;
+      line-height: 1.4;
 
-      background: #31a24c;
+      max-width: 480px;
 
-      border: 2px solid white;
+      margin-bottom: 10px;
 
-      border-radius: 50%;
-
-      margin-left: -19px;
-      margin-top: 25px;
+      text-shadow: 0 1px 5px rgba(0,0,0,.8);
     }
 
-    .contact-name {
+    .hashtags {
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .sound-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      font-size: 13px;
+      font-weight: 600;
+
+      max-width: 300px;
+
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .music-icon {
+      font-size: 16px;
+    }
+
+    /* =====================================================
+       BOTTOM NAVIGATION
+    ===================================================== */
+
+    .bottom-nav {
+      position: fixed;
+
+      z-index: 200;
+
+      left: 0;
+      right: 0;
+      bottom: 0;
+
+      height: 70px;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+
+      background: linear-gradient(
+        to bottom,
+        transparent,
+        rgba(0,0,0,.92) 35%
+      );
+
+      padding: 7px 7px 5px;
+    }
+
+    .nav-item {
+      width: 20%;
+
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+
+      gap: 3px;
+
+      color: rgba(255,255,255,.7);
+
+      background: transparent;
+
+      font-size: 10px;
       font-weight: 600;
     }
 
-    /* =========================
-       EMPTY / LOADING
-    ========================= */
-
-    .loading,
-    .empty {
-      text-align: center;
-
-      padding: 40px 20px;
-
-      color: var(--muted);
+    .nav-item.active {
+      color: #fff;
     }
 
-    .spinner {
-      width: 30px;
-      height: 30px;
+    .nav-icon {
+      font-size: 23px;
+      line-height: 1;
+    }
 
-      border: 3px solid #ddd;
+    .nav-label {
+      font-size: 10px;
+    }
 
-      border-top-color: var(--blue);
+    .create-button {
+      position: relative;
+
+      width: 48px;
+      height: 32px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 10px;
+
+      background: #fff;
+      color: #000;
+
+      font-size: 25px;
+      font-weight: 400;
+
+      box-shadow:
+        -5px 0 0 #20d5ec,
+        5px 0 0 #fe2c55;
+    }
+
+    /* =====================================================
+       LOADING
+    ===================================================== */
+
+    .loading {
+      position: fixed;
+
+      inset: 0;
+
+      z-index: 500;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      background: #000;
+    }
+
+    .loader {
+      width: 40px;
+      height: 40px;
+
+      border: 4px solid rgba(255,255,255,.2);
+      border-top-color: #fff;
 
       border-radius: 50%;
 
       animation: spin .8s linear infinite;
-
-      margin: auto auto 10px;
     }
 
     @keyframes spin {
@@ -1039,125 +547,380 @@
       }
     }
 
-    .toast {
-      position: fixed;
+    .hidden {
+      display: none !important;
+    }
 
-      bottom: 25px;
-      left: 50%;
+    /* =====================================================
+       EMPTY STATE
+    ===================================================== */
 
-      transform: translateX(-50%);
+    .empty {
+      position: absolute;
+      inset: 0;
 
-      background: #222;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
 
-      color: white;
+      background: #000;
 
-      padding: 12px 18px;
+      text-align: center;
+
+      padding: 30px;
+    }
+
+    .empty-logo {
+      width: 70px;
+      height: 70px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 20px;
+
+      background: #fff;
+      color: #000;
+
+      font-size: 38px;
+      font-weight: 900;
+
+      margin-bottom: 20px;
+    }
+
+    .empty h2 {
+      font-size: 22px;
+      margin-bottom: 8px;
+    }
+
+    .empty p {
+      color: #999;
+      margin-bottom: 20px;
+    }
+
+    .empty button {
+      padding: 12px 22px;
 
       border-radius: 8px;
 
-      display: none;
+      background: #fe2c55;
+      color: #fff;
 
-      z-index: 5000;
-
-      box-shadow: 0 5px 20px rgba(0,0,0,.25);
+      font-weight: 700;
     }
 
-    .toast.show {
-      display: block;
+    /* =====================================================
+       COMMENTS
+    ===================================================== */
+
+    .comments-overlay {
+      position: fixed;
+      inset: 0;
+
+      z-index: 700;
+
+      background: rgba(0,0,0,.55);
+
+      display: flex;
+      align-items: flex-end;
+
+      opacity: 1;
+      transition: opacity .2s ease;
     }
 
-    /* =========================
-       MOBILE
-    ========================= */
-
-    @media (max-width: 1100px) {
-      .page {
-        grid-template-columns: 220px minmax(0, 680px);
-      }
-
-      .right-sidebar {
-        display: none;
-      }
+    .comments-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
     }
 
-    @media (max-width: 760px) {
-      .topbar {
-        height: 58px;
-        padding: 0 10px;
+    .comments-panel {
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
+
+      height: 68vh;
+
+      background: #fff;
+      color: #111;
+
+      border-radius: 18px 18px 0 0;
+
+      display: flex;
+      flex-direction: column;
+
+      overflow: hidden;
+    }
+
+    .comments-header {
+      height: 55px;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      padding: 0 18px;
+
+      border-bottom: 1px solid #eee;
+
+      font-weight: 800;
+    }
+
+    .close-comments {
+      width: 34px;
+      height: 34px;
+
+      border-radius: 50%;
+
+      background: #f2f2f2;
+
+      font-size: 18px;
+    }
+
+    .comments-list {
+      flex: 1;
+
+      overflow-y: auto;
+
+      padding: 12px 16px;
+    }
+
+    .comment {
+      display: flex;
+      gap: 10px;
+
+      margin-bottom: 18px;
+    }
+
+    .comment-avatar {
+      width: 36px;
+      height: 36px;
+
+      border-radius: 50%;
+
+      object-fit: cover;
+
+      background: #ddd;
+      flex-shrink: 0;
+    }
+
+    .comment-body {
+      flex: 1;
+    }
+
+    .comment-name {
+      font-size: 13px;
+      font-weight: 800;
+
+      margin-bottom: 4px;
+    }
+
+    .comment-text {
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
+    .no-comments {
+      text-align: center;
+      color: #888;
+      padding: 40px 10px;
+    }
+
+    .comment-form {
+      display: flex;
+      gap: 8px;
+
+      padding: 10px;
+
+      border-top: 1px solid #eee;
+    }
+
+    .comment-input {
+      flex: 1;
+
+      border: 0;
+      outline: none;
+
+      background: #f1f1f1;
+
+      border-radius: 22px;
+
+      padding: 12px 15px;
+    }
+
+    .comment-submit {
+      width: 44px;
+      height: 44px;
+
+      border-radius: 50%;
+
+      background: #fe2c55;
+      color: white;
+
+      font-size: 18px;
+    }
+
+    /* =====================================================
+       CREATE SHEET
+    ===================================================== */
+
+    .create-overlay {
+      position: fixed;
+      inset: 0;
+
+      z-index: 800;
+
+      background: rgba(0,0,0,.65);
+
+      display: flex;
+      align-items: flex-end;
+
+      transition: opacity .2s ease;
+    }
+
+    .create-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .create-panel {
+      width: 100%;
+      max-width: 600px;
+
+      margin: 0 auto;
+
+      background: #fff;
+      color: #111;
+
+      border-radius: 20px 20px 0 0;
+
+      padding: 20px;
+
+      max-height: 80vh;
+
+      overflow-y: auto;
+    }
+
+    .create-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      margin-bottom: 20px;
+    }
+
+    .create-header h2 {
+      font-size: 20px;
+    }
+
+    .create-close {
+      width: 34px;
+      height: 34px;
+
+      border-radius: 50%;
+
+      background: #eee;
+    }
+
+    .create-input,
+    .create-textarea {
+      width: 100%;
+
+      border: 1px solid #ddd;
+      outline: none;
+
+      border-radius: 10px;
+
+      padding: 13px;
+
+      margin-bottom: 12px;
+    }
+
+    .create-textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .create-file {
+      margin-bottom: 15px;
+    }
+
+    .create-submit {
+      width: 100%;
+
+      padding: 14px;
+
+      border-radius: 10px;
+
+      background: #fe2c55;
+      color: white;
+
+      font-weight: 800;
+    }
+
+    /* =====================================================
+       DESKTOP
+    ===================================================== */
+
+    @media (min-width: 700px) {
+      body {
+        background: #111;
       }
 
-      .logo span {
-        display: none;
-      }
+      .app {
+        width: 430px;
+        height: 100vh;
 
-      .search-box {
-        flex: 1;
-        width: auto;
-      }
-
-      .profile-mini span {
-        display: none;
-      }
-
-      .page {
-        display: block;
-
-        padding: 10px 0 70px;
-      }
-
-      .sidebar {
-        display: none;
-      }
-
-      .feed-column {
-        width: 100%;
-      }
-
-      .stories {
-        padding: 0 10px;
-      }
-
-      .card {
-        border-radius: 0;
+        margin: 0 auto;
 
         box-shadow:
-          0 1px 2px rgba(0,0,0,.12);
+          0 0 60px rgba(0,0,0,.8);
       }
 
-      .composer {
-        padding: 12px;
+      .top-bar {
+        left: calc(50% - 215px);
+        right: calc(50% - 215px);
       }
 
-      .post {
-        margin-top: 10px;
+      .bottom-nav {
+        left: calc(50% - 215px);
+        right: calc(50% - 215px);
       }
 
-      .post-image {
-        max-height: 550px;
+      .comments-overlay,
+      .create-overlay {
+        justify-content: center;
+        align-items: center;
       }
 
-      .top-actions .icon-btn:nth-child(2) {
-        display: none;
+      .comments-panel,
+      .create-panel {
+        border-radius: 18px;
       }
     }
 
-    @media (max-width: 450px) {
-      .top-actions {
-        gap: 2px;
+    /* =====================================================
+       SAFE AREA
+    ===================================================== */
+
+    @supports (padding: env(safe-area-inset-bottom)) {
+      .bottom-nav {
+        padding-bottom: calc(
+          5px + env(safe-area-inset-bottom)
+        );
       }
 
-      .icon-btn {
-        width: 38px;
-        height: 38px;
+      .post-info {
+        bottom: calc(
+          92px + env(safe-area-inset-bottom)
+        );
       }
 
-      .search-box input {
-        height: 38px;
-      }
-
-      .story {
-        min-width: 105px;
-        height: 170px;
+      .actions {
+        bottom: calc(
+          94px + env(safe-area-inset-bottom)
+        );
       }
     }
   </style>
@@ -1165,1576 +928,1491 @@
 
 <body>
 
-  <!-- =========================
-       HEADER
-  ========================== -->
+<div class="app">
 
-  <header class="topbar">
+  <!-- ===================================================
+       TOP BAR
+  ==================================================== -->
 
-    <div class="topbar-inner">
+  <header class="top-bar">
 
-      <a href="/feed.html" class="logo">
-        <div class="logo-icon">P</div>
-        <span>Pulse</span>
-      </a>
+    <div class="top-tabs">
 
-      <div class="search-box">
-        <span class="search-icon">🔍</span>
-        <input
-          id="searchInput"
-          type="search"
-          placeholder="Search Pulse"
-        >
-      </div>
+      <button
+        class="tab"
+        id="followingTab"
+        onclick="switchFeed('following')"
+      >
+        Following
+      </button>
 
-      <div class="nav-spacer"></div>
-
-      <div class="top-actions">
-
-        <button
-          class="icon-btn"
-          onclick="location.href='/messages.html'"
-          title="Messages"
-        >
-          💬
-        </button>
-
-        <button
-          class="icon-btn"
-          onclick="location.href='/notifications.html'"
-          title="Notifications"
-        >
-          🔔
-        </button>
-
-        <a
-          href="/profile.html"
-          class="profile-mini"
-          id="miniProfile"
-        >
-          <img
-            id="miniAvatar"
-            class="avatar-small"
-            src="/images/default-avatar.png"
-            alt="Profile"
-          >
-          <span id="miniName">Profile</span>
-        </a>
-
-      </div>
+      <button
+        class="tab active"
+        id="forYouTab"
+        onclick="switchFeed('foryou')"
+      >
+        For You
+      </button>
 
     </div>
+
+    <button
+      class="top-search"
+      onclick="goToSearch()"
+      aria-label="Search"
+    >
+      🔍
+    </button>
 
   </header>
 
-
-  <!-- =========================
-       MAIN
-  ========================== -->
-
-  <main class="page">
-
-    <!-- LEFT -->
-
-    <aside class="sidebar">
-
-      <div class="sidebar-card">
-
-        <a href="/profile.html" class="side-link">
-          <div class="side-icon">👤</div>
-          <span id="sideProfileName">Profile</span>
-        </a>
-
-        <a href="/feed.html" class="side-link">
-          <div class="side-icon">🏠</div>
-          <span>Home</span>
-        </a>
-
-        <a href="/messages.html" class="side-link">
-          <div class="side-icon">💬</div>
-          <span>Messages</span>
-        </a>
-
-        <a href="/notifications.html" class="side-link">
-          <div class="side-icon">🔔</div>
-          <span>Notifications</span>
-        </a>
-
-        <a href="/profile.html" class="side-link">
-          <div class="side-icon">👥</div>
-          <span>Friends</span>
-        </a>
-
-        <div class="side-divider"></div>
-
-        <div class="sidebar-title">
-          Your shortcuts
-        </div>
-
-        <a href="#" class="side-link">
-          <div class="side-icon">⭐</div>
-          <span>Saved Posts</span>
-        </a>
-
-        <a href="#" class="side-link">
-          <div class="side-icon">🎬</div>
-          <span>Videos</span>
-        </a>
-
-        <a href="#" class="side-link">
-          <div class="side-icon">📷</div>
-          <span>Photos</span>
-        </a>
-
-      </div>
-
-    </aside>
-
-
-    <!-- FEED -->
-
-    <section class="feed-column">
-
-      <!-- STORIES -->
-
-      <div class="stories">
-
-        <div class="story create-story">
-          <img
-            id="storyProfileImage"
-            src="/images/default-avatar.png"
-            alt=""
-          >
-
-          <div class="story-plus">+</div>
-
-          <div class="story-name">
-            Create Story
-          </div>
-        </div>
-
-        <div class="story">
-          <img
-            src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80"
-            alt=""
-          >
-
-          <img
-            class="story-avatar"
-            src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=100&q=80"
-            alt=""
-          >
-
-          <div class="story-name">
-            Alex
-          </div>
-        </div>
-
-        <div class="story">
-          <img
-            src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80"
-            alt=""
-          >
-
-          <img
-            class="story-avatar"
-            src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=100&q=80"
-            alt=""
-          >
-
-          <div class="story-name">
-            Sarah
-          </div>
-        </div>
-
-        <div class="story">
-          <img
-            src="https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=400&q=80"
-            alt=""
-          >
-
-          <img
-            class="story-avatar"
-            src="https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=100&q=80"
-            alt=""
-          >
-
-          <div class="story-name">
-            Daniel
-          </div>
-        </div>
-
-      </div>
-
-
-      <!-- CREATE POST -->
-
-      <div class="card composer">
-
-        <div class="composer-top">
-
-          <img
-            id="composerAvatar"
-            class="composer-avatar"
-            src="/images/default-avatar.png"
-            alt="Profile"
-          >
-
-          <input
-            id="composerInput"
-            class="composer-input"
-            type="text"
-            readonly
-            placeholder="What's on your mind?"
-            onclick="openPostModal()"
-          >
-
-        </div>
-
-        <div class="composer-divider"></div>
-
-        <div class="composer-actions">
-
-          <button
-            class="composer-action photo-text"
-            onclick="openPostModal(true)"
-          >
-            📷 Photo/Video
-          </button>
-
-          <button
-            class="composer-action"
-            onclick="openPostModal()"
-          >
-            👥 Tag People
-          </button>
-
-          <button
-            class="composer-action feeling-text"
-            onclick="openPostModal()"
-          >
-            😊 Feeling
-          </button>
-
-        </div>
-
-      </div>
-
-
-      <!-- FEED POSTS -->
-
-      <div id="feedContainer">
-
-        <div class="card loading">
-          <div class="spinner"></div>
-          Loading your feed...
-        </div>
-
-      </div>
-
-    </section>
-
-
-    <!-- RIGHT -->
-
-    <aside class="right-sidebar">
-
-      <h3 class="right-title">
-        Contacts
-      </h3>
-
-      <div class="contact">
-        <img
-          src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=100&q=80"
-          alt=""
-        >
-        <span class="contact-name">Alex</span>
-        <span class="online-dot"></span>
-      </div>
-
-      <div class="contact">
-        <img
-          src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=100&q=80"
-          alt=""
-        >
-        <span class="contact-name">Sarah</span>
-        <span class="online-dot"></span>
-      </div>
-
-      <div class="contact">
-        <img
-          src="https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=100&q=80"
-          alt=""
-        >
-        <span class="contact-name">Daniel</span>
-        <span class="online-dot"></span>
-      </div>
-
-    </aside>
-
-  </main>
-
-
-  <!-- =========================
-       CREATE POST MODAL
-  ========================== -->
-
-  <div
-    id="postModal"
-    class="modal"
+  <!-- ===================================================
+       FEED
+  ==================================================== -->
+
+  <main
+    id="feed"
+    class="feed"
+  ></main>
+
+  <!-- ===================================================
+       BOTTOM NAV
+  ==================================================== -->
+
+  <nav class="bottom-nav">
+
+    <button
+      class="nav-item active"
+      onclick="goHome()"
+    >
+      <span class="nav-icon">⌂</span>
+      <span class="nav-label">Home</span>
+    </button>
+
+    <button
+      class="nav-item"
+      onclick="goFriends()"
+    >
+      <span class="nav-icon">◎</span>
+      <span class="nav-label">Friends</span>
+    </button>
+
+    <button
+      class="nav-item"
+      onclick="openCreate()"
+    >
+      <span class="create-button">+</span>
+      <span class="nav-label">Create</span>
+    </button>
+
+    <button
+      class="nav-item"
+      onclick="goMessages()"
+    >
+      <span class="nav-icon">▢</span>
+      <span class="nav-label">Inbox</span>
+    </button>
+
+    <button
+      class="nav-item"
+      onclick="goProfile()"
+    >
+      <span class="nav-icon">◉</span>
+      <span class="nav-label">Profile</span>
+    </button>
+
+  </nav>
+
+</div>
+
+<!-- =====================================================
+     LOADING
+====================================================== -->
+
+<div
+  id="loading"
+  class="loading"
+>
+  <div class="loader"></div>
+</div>
+
+<!-- =====================================================
+     COMMENTS
+====================================================== -->
+
+<div
+  id="commentsOverlay"
+  class="comments-overlay hidden"
+  onclick="closeComments(event)"
+>
+
+  <section
+    class="comments-panel"
+    onclick="event.stopPropagation()"
   >
 
-    <div class="modal-box">
+    <header class="comments-header">
 
-      <div class="modal-header">
+      <span id="commentsTitle">
+        Comments
+      </span>
 
-        Create Post
+      <button
+        class="close-comments"
+        onclick="closeComments()"
+      >
+        ✕
+      </button>
 
-        <button
-          class="close-modal"
-          onclick="closePostModal()"
-        >
-          ×
-        </button>
+    </header>
 
-      </div>
+    <div
+      id="commentsList"
+      class="comments-list"
+    ></div>
 
-      <div class="modal-body">
+    <form
+      class="comment-form"
+      onsubmit="submitComment(event)"
+    >
 
-        <div class="modal-user">
+      <input
+        id="commentInput"
+        class="comment-input"
+        type="text"
+        placeholder="Add comment..."
+        autocomplete="off"
+        maxlength="500"
+      >
 
-          <img
-            id="modalAvatar"
-            src="/images/default-avatar.png"
-            alt=""
-          >
+      <button
+        class="comment-submit"
+        type="submit"
+      >
+        ➤
+      </button>
 
-          <div>
+    </form>
 
-            <div
-              id="modalName"
-              class="modal-user-name"
-            >
-              You
-            </div>
+  </section>
 
-          </div>
+</div>
 
-        </div>
+<!-- =====================================================
+     CREATE
+====================================================== -->
 
-        <textarea
-          id="postText"
-          class="post-textarea"
-          placeholder="What's on your mind?"
-        ></textarea>
+<div
+  id="createOverlay"
+  class="create-overlay hidden"
+  onclick="closeCreate(event)"
+>
 
+  <section
+    class="create-panel"
+    onclick="event.stopPropagation()"
+  >
 
-        <div
-          id="imagePreview"
-          class="image-preview"
-        >
+    <header class="create-header">
 
-          <img
-            id="previewImage"
-            src=""
-            alt="Preview"
-          >
+      <h2>Create post</h2>
 
-          <button
-            class="remove-preview"
-            onclick="removeImage()"
-          >
-            ×
-          </button>
+      <button
+        class="create-close"
+        onclick="closeCreate()"
+      >
+        ✕
+      </button>
 
-        </div>
+    </header>
 
+    <form
+      id="createForm"
+      onsubmit="createPost(event)"
+    >
 
-        <div class="modal-bottom">
+      <textarea
+        id="createText"
+        class="create-textarea"
+        placeholder="What's happening?"
+        maxlength="1000"
+      ></textarea>
 
-          <span>
-            Add to your post
-          </span>
+      <input
+        id="createImage"
+        class="create-file"
+        type="file"
+        accept="image/*,video/*"
+      >
 
-          <label>
-            📷
-            <input
-              id="postImage"
-              type="file"
-              accept="image/*"
-              hidden
-            >
-          </label>
+      <button
+        class="create-submit"
+        type="submit"
+      >
+        Post
+      </button>
 
-        </div>
+    </form>
 
-        <button
-          id="publishBtn"
-          class="publish-btn"
-          onclick="createPost()"
-        >
-          Post
-        </button>
+  </section>
 
-      </div>
-
-    </div>
-
-  </div>
-
-
-  <div
-    id="toast"
-    class="toast"
-  ></div>
-
+</div>
 
 <script>
+  /* =====================================================
+     STATE
+  ===================================================== */
 
-const API = "";
+  let currentUser = null;
+  let posts = [];
 
-let currentUser = null;
+  let activeFeed = "foryou";
 
+  let currentCommentPostId = null;
 
-/* =========================
-   API
-========================= */
+  let observer = null;
 
-async function api(url, options = {}) {
+  /* =====================================================
+     API
+  ===================================================== */
 
-  const response = await fetch(API + url, {
-    credentials: "include",
-    ...options
-  });
+  async function api(url, options = {}) {
 
-  let data = {};
+    const config = {
+      credentials: "include",
+      ...options
+    };
 
-  try {
-    data = await response.json();
-  } catch {
-    data = {};
-  }
+    config.headers = {
+      ...(options.headers || {})
+    };
 
-  if (!response.ok) {
-    throw new Error(
-      data.error ||
-      data.message ||
-      "Something went wrong."
-    );
-  }
+    const response = await fetch(url, config);
 
-  return data;
-}
+    let data = null;
 
-
-/* =========================
-   INIT
-========================= */
-
-async function init() {
-
-  try {
-
-    const me = await api("/api/me");
-
-    currentUser =
-      me.user ||
-      me;
-
-    if (!currentUser) {
-      location.href = "/login.html";
-      return;
+    try {
+      data = await response.json();
+    } catch {
+      data = {};
     }
 
-    updateUserUI();
+    if (!response.ok) {
 
-    await loadFeed();
+      throw new Error(
+        data.error ||
+        data.message ||
+        "Request failed"
+      );
 
-  } catch (error) {
+    }
 
-    console.error(error);
-
-    location.href = "/login.html";
+    return data;
   }
-}
 
+  /* =====================================================
+     INIT
+  ===================================================== */
 
-/* =========================
-   USER UI
-========================= */
+  document.addEventListener(
+    "DOMContentLoaded",
+    init
+  );
 
-function updateUserUI() {
+  async function init() {
 
-  const avatar =
-    currentUser.profilePicture ||
-    currentUser.profileImage ||
-    currentUser.avatar ||
-    "/images/default-avatar.png";
+    try {
 
-  const name =
-    currentUser.name ||
-    currentUser.username ||
-    "Profile";
+      const me = await api("/api/me");
 
-  document.getElementById("miniAvatar").src = avatar;
+      if (!me.loggedIn || !me.user) {
 
-  document.getElementById("miniName").textContent = name;
+        window.location.href = "/login.html";
+        return;
 
-  document.getElementById("sideProfileName").textContent =
-    name;
+      }
 
-  document.getElementById("composerAvatar").src =
-    avatar;
+      currentUser = me.user;
 
-  document.getElementById("modalAvatar").src =
-    avatar;
+      await loadFeed();
 
-  document.getElementById("modalName").textContent =
-    name;
+    } catch (error) {
 
-  document.getElementById("storyProfileImage").src =
-    avatar;
-}
+      console.error(error);
 
+      window.location.href = "/login.html";
 
-/* =========================
-   LOAD FEED
-========================= */
+    }
+  }
 
-async function loadFeed() {
+  /* =====================================================
+     LOAD FEED
+  ===================================================== */
 
-  const container =
-    document.getElementById("feedContainer");
+  async function loadFeed() {
 
-  container.innerHTML = `
-    <div class="card loading">
-      <div class="spinner"></div>
-      Loading feed...
-    </div>
-  `;
+    const feed = document.getElementById("feed");
 
-  try {
+    feed.innerHTML = "";
 
-    const data = await api("/api/feed");
+    try {
 
-    const posts =
-      Array.isArray(data)
-        ? data
-        : (
-            data.posts ||
-            data.feed ||
-            []
+      const data = await api("/api/feed");
+
+      posts = Array.isArray(data.posts)
+        ? data.posts
+        : [];
+
+      /*
+        Current backend returns the main feed.
+
+        Following is filtered client-side using
+        isFollowing when available.
+      */
+
+      let displayPosts = posts;
+
+      if (activeFeed === "following") {
+
+        displayPosts = posts.filter(post => {
+
+          return (
+            post.user &&
+            (
+              post.user.isFollowing === true ||
+              post.isFollowing === true
+            )
           );
 
-    if (!posts.length) {
+        });
 
-      container.innerHTML = `
-        <div class="card empty">
-          <h3>No posts yet</h3>
+      }
+
+      renderPosts(displayPosts);
+
+    } catch (error) {
+
+      console.error(error);
+
+      feed.innerHTML = `
+        <div class="empty">
+          <div class="empty-logo">P</div>
+          <h2>Unable to load your feed</h2>
+          <p>${escapeHtml(error.message)}</p>
+          <button onclick="loadFeed()">Try again</button>
+        </div>
+      `;
+
+    } finally {
+
+      document
+        .getElementById("loading")
+        .classList.add("hidden");
+
+    }
+  }
+
+  /* =====================================================
+     RENDER POSTS
+  ===================================================== */
+
+  function renderPosts(list) {
+
+    const feed = document.getElementById("feed");
+
+    feed.innerHTML = "";
+
+    if (!list.length) {
+
+      feed.innerHTML = `
+        <div class="empty">
+          <div class="empty-logo">P</div>
+
+          <h2>
+            ${
+              activeFeed === "following"
+                ? "No posts from people you follow"
+                : "Your For You feed is empty"
+            }
+          </h2>
+
           <p>
-            Be the first person to share something.
+            ${
+              activeFeed === "following"
+                ? "Follow people to see their posts here."
+                : "Be the first to create something."
+            }
           </p>
+
+          <button onclick="openCreate()">
+            Create post
+          </button>
         </div>
       `;
 
       return;
     }
 
-    container.innerHTML =
-      posts.map(renderPost).join("");
+    list.forEach((post, index) => {
 
-    await loadCommentsForVisiblePosts();
+      const element = createPostElement(
+        post,
+        index
+      );
 
-  } catch (error) {
+      feed.appendChild(element);
 
-    console.error(error);
+    });
 
-    container.innerHTML = `
-      <div class="card empty">
-        <h3>Unable to load feed</h3>
-        <p>${escapeHtml(error.message)}</p>
+    setupMediaObserver();
 
-        <button
-          onclick="loadFeed()"
-          style="
-            margin-top:12px;
-            padding:9px 16px;
-            border:none;
-            border-radius:7px;
-            background:#1877f2;
-            color:white;
-            font-weight:600;
-          "
-        >
-          Try Again
-        </button>
-      </div>
-    `;
   }
-}
 
+  /* =====================================================
+     CREATE POST ELEMENT
+  ===================================================== */
 
-/* =========================
-   RENDER POST
-========================= */
+  function createPostElement(post, index) {
 
-function renderPost(post) {
+    const article = document.createElement("article");
 
-  const user =
-    post.user ||
-    post.author ||
-    {};
+    article.className = "post";
 
-  const userName =
-    user.name ||
-    post.authorName ||
-    post.username ||
-    "User";
+    article.dataset.id = post.id;
 
-  const username =
-    user.username ||
-    post.username ||
-    "";
+    const user = post.user || post.author || {};
 
-  const avatar =
-    user.profilePicture ||
-    user.profileImage ||
-    user.avatar ||
-    post.profilePicture ||
-    "/images/default-avatar.png";
+    const avatar =
+      user.profilePicture ||
+      user.profileImage ||
+      user.avatar ||
+      "/images/default-avatar.png";
 
-  const verified =
-    user.verified ||
-    user.isVerified ||
-    post.verified;
+    const username =
+      user.username ||
+      "user";
 
-  const text =
-    post.text ||
-    post.content ||
-    "";
+    const name =
+      user.name ||
+      username;
 
-  const image =
-    post.image ||
-    post.imageUrl ||
-    post.mediaUrl ||
-    "";
+    const verified =
+      user.verified ||
+      user.isVerified;
 
-  const likes =
-    Number(
-      post.likesCount ??
-      post.likeCount ??
-      post.likes ??
-      0
-    );
-
-  const comments =
-    Number(
-      post.commentsCount ??
-      post.commentCount ??
-      post.comments ??
-      0
-    );
-
-  const liked =
-    Boolean(
+    const liked =
       post.liked ||
-      post.isLiked ||
-      post.userLiked
-    );
+      post.isLiked;
 
-  const postId =
-    post.id ||
-    post._id;
+    const following =
+      user.isFollowing ||
+      post.isFollowing;
 
-  const time =
-    formatDate(
-      post.createdAt ||
-      post.date ||
-      post.timestamp
-    );
-
-  return `
-
-    <article
-      class="card post"
-      id="post-${escapeAttribute(postId)}"
-    >
-
-      <div class="post-header">
-
-        <img
-          class="post-avatar"
-          src="${escapeAttribute(avatar)}"
-          alt=""
-          onerror="this.src='/images/default-avatar.png'"
-        >
-
-        <div class="post-user">
-
-          <div class="post-user-line">
-
-            <a
-              class="post-user-name"
-              href="/profile.html?username=${encodeURIComponent(username)}"
-            >
-              ${escapeHtml(userName)}
-            </a>
-
-            ${
-              verified
-                ? `<span class="verified">✓</span>`
-                : ""
-            }
-
-          </div>
-
-          <div class="post-time">
-            ${escapeHtml(time)} · 🌐
-          </div>
-
-        </div>
-
-        <button
-          class="post-menu"
-          onclick="postMenu('${escapeAttribute(postId)}')"
-        >
-          ···
-        </button>
-
-      </div>
-
-
-      ${
-        text
-          ? `
-            <div class="post-content">
-              ${escapeHtml(text)}
-            </div>
-          `
-          : ""
-      }
-
-
-      ${
-        image
-          ? `
-            <img
-              class="post-image"
-              src="${escapeAttribute(image)}"
-              alt="Post image"
-              loading="lazy"
-              onerror="this.style.display='none'"
-            >
-          `
-          : ""
-      }
-
-
-      <div class="post-stats">
-
-        <div class="reaction-count">
-
-          <span class="like-circle">
-            👍
-          </span>
-
-          <span id="like-count-${escapeAttribute(postId)}">
-            ${likes}
-          </span>
-
-        </div>
-
-        <div>
-          ${comments} comments
-        </div>
-
-      </div>
-
-
-      <div class="post-actions">
-
-        <button
-          class="post-action ${liked ? "liked" : ""}"
-          onclick="toggleLike('${escapeAttribute(postId)}', this)"
-        >
-          👍 Like
-        </button>
-
-        <button
-          class="post-action"
-          onclick="focusComment('${escapeAttribute(postId)}')"
-        >
-          💬 Comment
-        </button>
-
-        <button
-          class="post-action"
-          onclick="sharePost('${escapeAttribute(postId)}')"
-        >
-          ↗ Share
-        </button>
-
-      </div>
-
-
-      <div
-        class="comments"
-        id="comments-${escapeAttribute(postId)}"
-      >
-
-        <div
-          class="comment-loading"
-          style="
-            text-align:center;
-            color:#65676b;
-            font-size:13px;
-            padding-top:8px;
-          "
-        >
-          Loading comments...
-        </div>
-
-        <div class="comment-form">
-
-          <img
-            class="comment-avatar"
-            src="${escapeAttribute(
-              currentUser?.profilePicture ||
-              currentUser?.profileImage ||
-              currentUser?.avatar ||
-              "/images/default-avatar.png"
-            )}"
-            alt=""
-          >
-
-          <input
-            id="comment-input-${escapeAttribute(postId)}"
-            class="comment-input"
-            placeholder="Write a comment..."
-            onkeydown="
-              if(event.key === 'Enter'){
-                event.preventDefault();
-                submitComment('${escapeAttribute(postId)}');
-              }
-            "
-          >
-
-          <button
-            class="comment-send"
-            onclick="submitComment('${escapeAttribute(postId)}')"
-          >
-            ➤
-          </button>
-
-        </div>
-
-      </div>
-
-    </article>
-  `;
-}
-
-
-/* =========================
-   COMMENTS
-========================= */
-
-async function loadCommentsForVisiblePosts() {
-
-  const posts =
-    document.querySelectorAll(".post");
-
-  for (const article of posts) {
-
-    const id =
-      article.id.replace("post-", "");
-
-    await loadComments(id);
-  }
-}
-
-
-async function loadComments(postId) {
-
-  const box =
-    document.getElementById(
-      `comments-${postId}`
-    );
-
-  if (!box) return;
-
-  try {
-
-    const data =
-      await api(`/api/posts/${encodeURIComponent(postId)}/comments`);
+    const likes =
+      Number(
+        post.likesCount ??
+        post.likeCount ??
+        0
+      );
 
     const comments =
-      Array.isArray(data)
-        ? data
-        : (
-            data.comments ||
-            []
-          );
-
-    const form =
-      box.querySelector(".comment-form");
-
-    const loading =
-      box.querySelector(".comment-loading");
-
-    if (loading) {
-      loading.remove();
-    }
-
-    comments.forEach(comment => {
-
-      const html =
-        renderComment(comment);
-
-      form.insertAdjacentHTML(
-        "beforebegin",
-        html
+      Number(
+        post.commentsCount ??
+        post.commentCount ??
+        0
       );
-    });
 
-  } catch (error) {
+    const text =
+      post.text ||
+      post.caption ||
+      "";
 
-    const loading =
-      box.querySelector(".comment-loading");
+    const media =
+      getMedia(post);
 
-    if (loading) {
-      loading.textContent =
-        "Unable to load comments.";
-    }
+    article.innerHTML = `
 
-    console.error(error);
-  }
-}
+      ${media}
 
+      <div class="media-gradient"></div>
 
-function renderComment(comment) {
+      <!-- RIGHT ACTIONS -->
 
-  const user =
-    comment.user ||
-    comment.author ||
-    {};
+      <aside class="actions">
 
-  const name =
-    user.name ||
-    comment.username ||
-    "User";
+        <button
+          class="profile-action"
+          onclick="openUserProfile('${escapeAttr(username)}')"
+        >
 
-  const avatar =
-    user.profilePicture ||
-    user.profileImage ||
-    user.avatar ||
-    "/images/default-avatar.png";
+          <img
+            class="action-avatar"
+            src="${escapeAttr(avatar)}"
+            alt="${escapeAttr(name)}"
+            onerror="this.src='/images/default-avatar.png'"
+          >
 
-  const text =
-    comment.text ||
-    comment.content ||
-    "";
+          ${
+            user.id !== currentUser.id
+              ? `
+                <span
+                  class="follow-plus ${
+                    following ? "following" : ""
+                  }"
+                  onclick="toggleFollow(event, '${escapeAttr(user.id)}', this)"
+                >
+                  ${following ? "✓" : "+"}
+                </span>
+              `
+              : ""
+          }
 
-  return `
+        </button>
 
-    <div class="comment">
+        <button
+          class="action ${liked ? "liked" : ""}"
+          onclick="toggleLike('${escapeAttr(post.id)}', this)"
+        >
 
-      <img
-        class="comment-avatar"
-        src="${escapeAttribute(avatar)}"
-        alt=""
-        onerror="this.src='/images/default-avatar.png'"
-      >
+          <span class="action-icon">
+            ${liked ? "♥" : "♡"}
+          </span>
 
-      <div class="comment-body">
+          <span class="action-count">
+            ${formatCount(likes)}
+          </span>
 
-        <div class="comment-name">
-          ${escapeHtml(name)}
+        </button>
+
+        <button
+          class="action"
+          onclick="openComments('${escapeAttr(post.id)}')"
+        >
+
+          <span class="action-icon">
+            💬
+          </span>
+
+          <span class="action-count">
+            ${formatCount(comments)}
+          </span>
+
+        </button>
+
+        <button
+          class="action"
+          onclick="sharePost('${escapeAttr(post.id)}', '${escapeAttr(username)}')"
+        >
+
+          <span class="action-icon">
+            ↗
+          </span>
+
+          <span class="action-count">
+            Share
+          </span>
+
+        </button>
+
+        ${
+          user.id === currentUser.id
+            ? `
+              <button
+                class="action"
+                onclick="deletePost('${escapeAttr(post.id)}')"
+              >
+                <span class="action-icon">
+                  ⋯
+                </span>
+
+                <span class="action-count">
+                  Delete
+                </span>
+              </button>
+            `
+            : ""
+        }
+
+      </aside>
+
+      <!-- POST INFO -->
+
+      <div class="post-info">
+
+        <div class="username-row">
+
+          <span class="username">
+            @${escapeHtml(username)}
+          </span>
+
+          ${
+            verified
+              ? `
+                <span
+                  class="verified"
+                  title="Verified"
+                >
+                  ✓
+                </span>
+              `
+              : ""
+          }
+
         </div>
 
-        <div class="comment-text">
-          ${escapeHtml(text)}
+        ${
+          text
+            ? `
+              <div class="caption">
+                ${formatCaption(text)}
+              </div>
+            `
+            : ""
+        }
+
+        <div class="sound-row">
+
+          <span class="music-icon">
+            ♪
+          </span>
+
+          <span>
+            Original sound · ${escapeHtml(username)}
+          </span>
+
         </div>
 
       </div>
 
-    </div>
-  `;
-}
+    `;
 
+    return article;
+  }
 
-async function submitComment(postId) {
+  /* =====================================================
+     MEDIA
+  ===================================================== */
 
-  const input =
-    document.getElementById(
-      `comment-input-${postId}`
-    );
+  function getMedia(post) {
 
-  if (!input) return;
+    const video =
+      post.video ||
+      post.videoUrl ||
+      post.mediaType === "video"
+        ? (
+            post.video ||
+            post.videoUrl ||
+            post.mediaUrl
+          )
+        : null;
 
-  const text =
-    input.value.trim();
+    const image =
+      post.image ||
+      post.imageUrl ||
+      post.mediaUrl;
 
-  if (!text) return;
+    if (video) {
 
-  input.disabled = true;
+      return `
+        <video
+          class="post-media post-video"
+          src="${escapeAttr(video)}"
+          loop
+          muted
+          playsinline
+          preload="metadata"
+        ></video>
+      `;
 
-  try {
+    }
 
-    await api(
-      `/api/posts/${encodeURIComponent(postId)}/comments`,
+    if (image) {
+
+      return `
+        <img
+          class="post-media post-image"
+          src="${escapeAttr(image)}"
+          alt="Post"
+          loading="lazy"
+          onerror="this.style.display='none'"
+        >
+      `;
+
+    }
+
+    return `
+      <div class="post-media empty-media">
+        <span>Pulse</span>
+      </div>
+    `;
+
+  }
+
+  /* =====================================================
+     VIDEO OBSERVER
+  ===================================================== */
+
+  function setupMediaObserver() {
+
+    if (observer) {
+      observer.disconnect();
+    }
+
+    const videos =
+      document.querySelectorAll(".post-video");
+
+    observer = new IntersectionObserver(
+      entries => {
+
+        entries.forEach(entry => {
+
+          const video = entry.target;
+
+          if (entry.isIntersecting) {
+
+            video.play().catch(() => {});
+
+          } else {
+
+            video.pause();
+
+          }
+
+        });
+
+      },
       {
-        method: "POST",
-
-        headers: {
-          "Content-Type": "application/json"
-        },
-
-        body: JSON.stringify({
-          text
-        })
+        threshold: .65
       }
     );
 
-    input.value = "";
+    videos.forEach(video => {
 
-    const box =
-      document.getElementById(
-        `comments-${postId}`
+      observer.observe(video);
+
+    });
+
+  }
+
+  /* =====================================================
+     FEED TABS
+  ===================================================== */
+
+  function switchFeed(type) {
+
+    activeFeed = type;
+
+    document
+      .getElementById("forYouTab")
+      .classList.toggle(
+        "active",
+        type === "foryou"
       );
 
-    const form =
-      box.querySelector(".comment-form");
+    document
+      .getElementById("followingTab")
+      .classList.toggle(
+        "active",
+        type === "following"
+      );
 
-    const comment = {
-      text,
-      user: currentUser
-    };
+    loadFeed();
 
-    form.insertAdjacentHTML(
-      "beforebegin",
-      renderComment(comment)
-    );
-
-  } catch (error) {
-
-    showToast(error.message);
-
-  } finally {
-
-    input.disabled = false;
-    input.focus();
   }
-}
 
+  /* =====================================================
+     LIKE
+  ===================================================== */
 
-function focusComment(postId) {
+  async function toggleLike(postId, button) {
 
-  const input =
-    document.getElementById(
-      `comment-input-${postId}`
-    );
+    try {
 
-  if (input) {
-
-    input.focus();
-
-    input.scrollIntoView({
-      behavior: "smooth",
-      block: "center"
-    });
-  }
-}
-
-
-/* =========================
-   LIKE
-========================= */
-
-async function toggleLike(postId, button) {
-
-  try {
-
-    const data =
-      await api(
+      const data = await api(
         `/api/posts/${encodeURIComponent(postId)}/like`,
         {
           method: "POST"
         }
       );
 
-    const liked =
-      Boolean(
+      const liked =
         data.liked ??
-        data.isLiked
-      );
+        data.isLiked ??
+        false;
 
-    const count =
-      Number(
+      const count =
         data.likesCount ??
-        data.likeCount ??
-        data.count ??
-        0
+        data.likeCount;
+
+      button.classList.toggle(
+        "liked",
+        liked
       );
 
-    button.classList.toggle(
-      "liked",
-      liked
-    );
+      const icon =
+        button.querySelector(".action-icon");
 
-    button.innerHTML =
-      liked
-        ? "👍 Liked"
-        : "👍 Like";
-
-    const countElement =
-      document.getElementById(
-        `like-count-${postId}`
-      );
-
-    if (countElement) {
-      countElement.textContent =
-        count;
-    }
-
-  } catch (error) {
-
-    showToast(error.message);
-  }
-}
-
-
-/* =========================
-   SHARE
-========================= */
-
-async function sharePost(postId) {
-
-  const url =
-    `${location.origin}/feed.html#post-${postId}`;
-
-  try {
-
-    if (navigator.share) {
-
-      await navigator.share({
-        title: "Pulse Social",
-        text: "Check out this post on Pulse Social",
-        url
-      });
-
-    } else {
-
-      await navigator.clipboard.writeText(url);
-
-      showToast(
-        "Post link copied!"
-      );
-    }
-
-  } catch (error) {
-
-    console.log(error);
-  }
-}
-
-
-/* =========================
-   POST MENU
-========================= */
-
-async function postMenu(postId) {
-
-  const choice =
-    confirm(
-      "Delete this post?\n\nPress OK to delete if it belongs to you."
-    );
-
-  if (!choice) return;
-
-  try {
-
-    await api(
-      `/api/posts/${encodeURIComponent(postId)}`,
-      {
-        method: "DELETE"
+      if (icon) {
+        icon.textContent =
+          liked ? "♥" : "♡";
       }
-    );
 
-    const article =
-      document.getElementById(
-        `post-${postId}`
-      );
+      if (count !== undefined) {
 
-    if (article) {
-      article.remove();
+        const counter =
+          button.querySelector(".action-count");
+
+        if (counter) {
+          counter.textContent =
+            formatCount(count);
+        }
+
+      }
+
+    } catch (error) {
+
+      console.error(error);
+
     }
 
-    showToast(
-      "Post deleted."
-    );
-
-  } catch (error) {
-
-    showToast(
-      error.message
-    );
   }
-}
 
+  /* =====================================================
+     FOLLOW
+  ===================================================== */
 
-/* =========================
-   CREATE POST
-========================= */
+  async function toggleFollow(
+    event,
+    userId,
+    element
+  ) {
 
-function openPostModal(focusImage = false) {
+    event.stopPropagation();
 
-  document
-    .getElementById("postModal")
-    .classList.add("active");
-
-  setTimeout(() => {
-
-    if (focusImage) {
-
-      document
-        .getElementById("postImage")
-        .click();
-
-    } else {
-
-      document
-        .getElementById("postText")
-        .focus();
-
-    }
-
-  }, 100);
-}
-
-
-function closePostModal() {
-
-  document
-    .getElementById("postModal")
-    .classList.remove("active");
-
-  document
-    .getElementById("postText")
-    .value = "";
-
-  removeImage();
-}
-
-
-document
-  .getElementById("postModal")
-  .addEventListener("click", function(event) {
-
-    if (event.target === this) {
-      closePostModal();
-    }
-
-  });
-
-
-/* =========================
-   IMAGE PREVIEW
-========================= */
-
-document
-  .getElementById("postImage")
-  .addEventListener("change", function() {
-
-    const file =
-      this.files[0];
-
-    if (!file) return;
-
-    if (!file.type.startsWith("image/")) {
-
-      showToast(
-        "Please select an image."
-      );
-
-      this.value = "";
+    if (!userId) {
       return;
     }
 
-    const url =
-      URL.createObjectURL(file);
+    try {
 
-    document
-      .getElementById("previewImage")
-      .src = url;
+      const data = await api(
+        `/api/users/${encodeURIComponent(userId)}/follow`,
+        {
+          method: "POST"
+        }
+      );
 
-    document
-      .getElementById("imagePreview")
-      .style.display = "block";
-  });
+      const following =
+        data.following ??
+        data.isFollowing ??
+        false;
 
+      element.classList.toggle(
+        "following",
+        following
+      );
 
-function removeImage() {
+      element.textContent =
+        following ? "✓" : "+";
 
-  const input =
-    document.getElementById(
-      "postImage"
-    );
+    } catch (error) {
 
-  input.value = "";
+      console.error(error);
 
-  document
-    .getElementById("imagePreview")
-    .style.display = "none";
+    }
 
-  document
-    .getElementById("previewImage")
-    .src = "";
-}
-
-
-/* =========================
-   POST
-========================= */
-
-async function createPost() {
-
-  const text =
-    document
-      .getElementById("postText")
-      .value
-      .trim();
-
-  const imageInput =
-    document.getElementById(
-      "postImage"
-    );
-
-  const file =
-    imageInput.files[0];
-
-  if (!text && !file) {
-
-    showToast(
-      "Write something or add a photo."
-    );
-
-    return;
   }
 
-  const button =
-    document.getElementById(
-      "publishBtn"
-    );
+  /* =====================================================
+     COMMENTS
+  ===================================================== */
 
-  button.disabled = true;
+  async function openComments(postId) {
 
-  button.textContent =
-    "Posting...";
+    currentCommentPostId = postId;
 
-  try {
+    const overlay =
+      document.getElementById(
+        "commentsOverlay"
+      );
 
-    const formData =
-      new FormData();
+    const list =
+      document.getElementById(
+        "commentsList"
+      );
 
-    if (text) {
-      formData.append(
+    overlay.classList.remove("hidden");
+
+    list.innerHTML = `
+      <div class="no-comments">
+        Loading comments...
+      </div>
+    `;
+
+    try {
+
+      const data = await api(
+        `/api/posts/${encodeURIComponent(postId)}/comments`
+      );
+
+      const comments =
+        Array.isArray(data.comments)
+          ? data.comments
+          : [];
+
+      renderComments(comments);
+
+    } catch (error) {
+
+      list.innerHTML = `
+        <div class="no-comments">
+          Unable to load comments.
+          <br><br>
+          ${escapeHtml(error.message)}
+        </div>
+      `;
+
+    }
+
+  }
+
+  function renderComments(comments) {
+
+    const list =
+      document.getElementById(
+        "commentsList"
+      );
+
+    if (!comments.length) {
+
+      list.innerHTML = `
+        <div class="no-comments">
+          No comments yet.<br>
+          Be the first to comment.
+        </div>
+      `;
+
+      return;
+    }
+
+    list.innerHTML = comments
+      .map(comment => {
+
+        const user =
+          comment.user ||
+          comment.author ||
+          {};
+
+        const avatar =
+          user.profilePicture ||
+          user.profileImage ||
+          user.avatar ||
+          "/images/default-avatar.png";
+
+        const username =
+          user.username ||
+          "user";
+
+        const text =
+          comment.text ||
+          comment.content ||
+          "";
+
+        return `
+          <div class="comment">
+
+            <img
+              class="comment-avatar"
+              src="${escapeAttr(avatar)}"
+              onerror="this.src='/images/default-avatar.png'"
+            >
+
+            <div class="comment-body">
+
+              <div class="comment-name">
+                @${escapeHtml(username)}
+              </div>
+
+              <div class="comment-text">
+                ${escapeHtml(text)}
+              </div>
+
+            </div>
+
+          </div>
+        `;
+
+      })
+      .join("");
+
+  }
+
+  async function submitComment(event) {
+
+    event.preventDefault();
+
+    if (!currentCommentPostId) {
+      return;
+    }
+
+    const input =
+      document.getElementById(
+        "commentInput"
+      );
+
+    const text =
+      input.value.trim();
+
+    if (!text) {
+      return;
+    }
+
+    input.disabled = true;
+
+    try {
+
+      await api(
+        `/api/posts/${encodeURIComponent(currentCommentPostId)}/comments`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            text
+          })
+        }
+      );
+
+      input.value = "";
+
+      await openComments(
+        currentCommentPostId
+      );
+
+    } catch (error) {
+
+      alert(
+        error.message ||
+        "Unable to add comment."
+      );
+
+    } finally {
+
+      input.disabled = false;
+
+      input.focus();
+
+    }
+
+  }
+
+  function closeComments(event) {
+
+    if (
+      event &&
+      event.target !==
+        document.getElementById(
+          "commentsOverlay"
+        )
+    ) {
+      return;
+    }
+
+    document
+      .getElementById("commentsOverlay")
+      .classList.add("hidden");
+
+    currentCommentPostId = null;
+
+  }
+
+  /* =====================================================
+     SHARE
+  ===================================================== */
+
+  async function sharePost(
+    postId,
+    username
+  ) {
+
+    const url =
+      `${window.location.origin}/feed.html#post-${postId}`;
+
+    const shareData = {
+      title: `Pulse Social`,
+      text: `Check out @${username}'s post on Pulse Social`,
+      url
+    };
+
+    try {
+
+      if (
+        navigator.share &&
+        navigator.canShare
+          ? navigator.canShare(shareData)
+          : navigator.share
+      ) {
+
+        await navigator.share(
+          shareData
+        );
+
+        return;
+
+      }
+
+    } catch (error) {
+
+      if (error.name === "AbortError") {
+        return;
+      }
+
+    }
+
+    try {
+
+      await navigator.clipboard.writeText(
+        url
+      );
+
+      alert(
+        "Post link copied."
+      );
+
+    } catch {
+
+      alert(url);
+
+    }
+
+  }
+
+  /* =====================================================
+     DELETE POST
+  ===================================================== */
+
+  async function deletePost(postId) {
+
+    const confirmed =
+      confirm(
+        "Delete this post?"
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+
+      await api(
+        `/api/posts/${encodeURIComponent(postId)}`,
+        {
+          method: "DELETE"
+        }
+      );
+
+      await loadFeed();
+
+    } catch (error) {
+
+      alert(
+        error.message ||
+        "Unable to delete post."
+      );
+
+    }
+
+  }
+
+  /* =====================================================
+     CREATE
+  ===================================================== */
+
+  function openCreate() {
+
+    document
+      .getElementById("createOverlay")
+      .classList.remove("hidden");
+
+  }
+
+  function closeCreate(event) {
+
+    if (
+      event &&
+      event.target !==
+        document.getElementById(
+          "createOverlay"
+        )
+    ) {
+      return;
+    }
+
+    document
+      .getElementById("createOverlay")
+      .classList.add("hidden");
+
+  }
+
+  async function createPost(event) {
+
+    event.preventDefault();
+
+    const text =
+      document
+        .getElementById("createText")
+        .value
+        .trim();
+
+    const file =
+      document
+        .getElementById("createImage")
+        .files[0];
+
+    if (!text && !file) {
+
+      alert(
+        "Write something or choose a photo/video."
+      );
+
+      return;
+
+    }
+
+    const button =
+      document.querySelector(
+        ".create-submit"
+      );
+
+    button.disabled = true;
+    button.textContent = "Posting...";
+
+    try {
+
+      const form =
+        new FormData();
+
+      form.append(
         "text",
         text
       );
-    }
 
-    if (file) {
+      if (file) {
 
-      formData.append(
-        "image",
-        file
-      );
-    }
+        /*
+          Current server expects "image".
+          Video upload support can be added
+          to server.js next.
+        */
 
-    await api(
-      "/api/posts",
-      {
-        method: "POST",
-        body: formData
-      }
-    );
-
-    closePostModal();
-
-    await loadFeed();
-
-    showToast(
-      "Post published!"
-    );
-
-  } catch (error) {
-
-    showToast(
-      error.message
-    );
-
-  } finally {
-
-    button.disabled = false;
-
-    button.textContent =
-      "Post";
-  }
-}
-
-
-/* =========================
-   SEARCH
-========================= */
-
-let searchTimer;
-
-document
-  .getElementById("searchInput")
-  .addEventListener(
-    "input",
-    function() {
-
-      clearTimeout(
-        searchTimer
-      );
-
-      const query =
-        this.value.trim();
-
-      if (!query) return;
-
-      searchTimer =
-        setTimeout(
-          () => searchUsers(query),
-          500
+        form.append(
+          "image",
+          file
         );
-    }
-  );
 
+      }
 
-async function searchUsers(query) {
-
-  try {
-
-    const data =
       await api(
-        `/api/search?q=${encodeURIComponent(query)}`
+        "/api/posts",
+        {
+          method: "POST",
+          body: form
+        }
       );
 
-    console.log(
-      "Search results:",
-      data
-    );
+      document
+        .getElementById("createForm")
+        .reset();
 
-  } catch (error) {
+      closeCreate();
 
-    console.error(
-      error
-    );
-  }
-}
+      activeFeed = "foryou";
 
+      document
+        .getElementById("forYouTab")
+        .classList.add("active");
 
-/* =========================
-   HELPERS
-========================= */
+      document
+        .getElementById("followingTab")
+        .classList.remove("active");
 
-function formatDate(value) {
+      await loadFeed();
 
-  if (!value) {
-    return "Just now";
-  }
+    } catch (error) {
 
-  const date =
-    new Date(value);
+      alert(
+        error.message ||
+        "Unable to create post."
+      );
 
-  if (Number.isNaN(date.getTime())) {
-    return "Just now";
-  }
+    } finally {
 
-  const seconds =
-    Math.floor(
-      (Date.now() - date.getTime()) / 1000
-    );
+      button.disabled = false;
+      button.textContent = "Post";
 
-  if (seconds < 60) {
-    return "Just now";
+    }
+
   }
 
-  const minutes =
-    Math.floor(seconds / 60);
+  /* =====================================================
+     NAVIGATION
+  ===================================================== */
 
-  if (minutes < 60) {
-    return `${minutes}m`;
+  function goHome() {
+
+    window.location.href =
+      "/feed.html";
+
   }
 
-  const hours =
-    Math.floor(minutes / 60);
+  function goFriends() {
 
-  if (hours < 24) {
-    return `${hours}h`;
+    /*
+      Friends can use search for now.
+    */
+
+    window.location.href =
+      "/feed.html#friends";
+
   }
 
-  const days =
-    Math.floor(hours / 24);
+  function goMessages() {
 
-  if (days < 7) {
-    return `${days}d`;
+    window.location.href =
+      "/messages.html";
+
   }
 
-  return date.toLocaleDateString();
-}
+  function goProfile() {
 
+    if (!currentUser) {
+      return;
+    }
 
-function escapeHtml(value) {
+    const username =
+      currentUser.username;
 
-  return String(value ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
+    if (!username) {
+      return;
+    }
 
+    window.location.href =
+      `/profile.html?username=${encodeURIComponent(username)}`;
 
-function escapeAttribute(value) {
+  }
 
-  return escapeHtml(value)
-    .replace(/`/g, "&#096;");
-}
+  function openUserProfile(username) {
 
+    if (!username) {
+      return;
+    }
 
-function showToast(message) {
+    window.location.href =
+      `/profile.html?username=${encodeURIComponent(username)}`;
 
-  const toast =
-    document.getElementById(
-      "toast"
-    );
+  }
 
-  toast.textContent =
-    message;
+  function goToSearch() {
 
-  toast.classList.add(
-    "show"
+    window.location.href =
+      "/feed.html#search";
+
+  }
+
+  /* =====================================================
+     HELPERS
+  ===================================================== */
+
+  function formatCount(number) {
+
+    number =
+      Number(number) || 0;
+
+    if (number >= 1000000) {
+
+      return (
+        (number / 1000000)
+          .toFixed(1)
+          .replace(".0", "") +
+        "M"
+      );
+
+    }
+
+    if (number >= 1000) {
+
+      return (
+        (number / 1000)
+          .toFixed(1)
+          .replace(".0", "") +
+        "K"
+      );
+
+    }
+
+    return String(number);
+
+  }
+
+  function formatCaption(text) {
+
+    let safe =
+      escapeHtml(text);
+
+    safe =
+      safe.replace(
+        /(^|\s)(#[a-zA-Z0-9_]+)/g,
+        '$1<span class="hashtags">$2</span>'
+      );
+
+    safe =
+      safe.replace(
+        /\n/g,
+        "<br>"
+      );
+
+    return safe;
+
+  }
+
+  function escapeHtml(value) {
+
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+
+  }
+
+  function escapeAttr(value) {
+
+    return escapeHtml(value);
+
+  }
+
+  /* =====================================================
+     KEYBOARD
+  ===================================================== */
+
+  document.addEventListener(
+    "keydown",
+    event => {
+
+      if (
+        event.key === "Escape"
+      ) {
+
+        closeComments();
+
+        closeCreate();
+
+      }
+
+    }
   );
-
-  setTimeout(() => {
-
-    toast.classList.remove(
-      "show"
-    );
-
-  }, 3000);
-}
-
-
-/* =========================
-   START
-========================= */
-
-init();
 
 </script>
 
