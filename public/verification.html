@@ -1,32 +1,675 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Request Verification • Pulse</title>
-<style>
-*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f0f2f5;color:#1c1e21}.top{height:64px;background:#fff;border-bottom:1px solid #ddd;display:flex;align-items:center;justify-content:space-between;padding:0 6%;position:sticky;top:0;z-index:5}.brand{font-size:26px;font-weight:800;color:#1877f2}.back{color:#1877f2;text-decoration:none;font-weight:700}.wrap{max-width:720px;margin:45px auto;padding:0 18px}.card{background:#fff;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,.08);padding:32px}.badge{width:72px;height:72px;border-radius:50%;background:#e7f3ff;color:#1877f2;display:flex;align-items:center;justify-content:center;font-size:38px;font-weight:800;margin-bottom:18px}.verified{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#1877f2;color:#fff;font-size:13px;font-weight:800}.muted{color:#65676b;line-height:1.6}textarea{width:100%;min-height:170px;border:1px solid #ccd0d5;border-radius:10px;padding:14px;font:inherit;resize:vertical;margin-top:10px}button{width:100%;border:0;border-radius:8px;background:#1877f2;color:#fff;font-size:16px;font-weight:700;padding:13px;margin-top:16px;cursor:pointer}button:disabled{opacity:.6;cursor:not-allowed}.status{margin-top:20px;padding:14px;border-radius:10px;background:#f5f6f7;line-height:1.5}.pending{background:#fff4d6}.approved{background:#e9f7e7}.rejected{background:#ffe9e9}.hidden{display:none}.small{font-size:13px;color:#65676b;margin-top:8px}@media(max-width:600px){.card{padding:22px}.wrap{margin:25px auto}}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verification • Pulse Social</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f0f2f5;
+      color: #1c1e21;
+    }
+
+    .topbar {
+      height: 64px;
+      background: #fff;
+      border-bottom: 1px solid #dddfe2;
+      display: flex;
+      align-items: center;
+      padding: 0 22px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      font-size: 28px;
+      font-weight: 800;
+      color: #1877f2;
+      text-decoration: none;
+    }
+
+    .back {
+      margin-left: auto;
+      text-decoration: none;
+      color: #65676b;
+      font-weight: 600;
+    }
+
+    .back:hover {
+      color: #1877f2;
+    }
+
+    .page {
+      width: min(700px, calc(100% - 30px));
+      margin: 35px auto;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.15);
+      padding: 30px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .check {
+      width: 78px;
+      height: 78px;
+      border-radius: 50%;
+      background: #e7f3ff;
+      color: #1877f2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 42px;
+      font-weight: bold;
+      margin: 0 auto 18px;
+    }
+
+    h1 {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      color: #65676b;
+      line-height: 1.5;
+    }
+
+    .profile {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: #f5f6f7;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 25px;
+    }
+
+    .avatar {
+      width: 55px;
+      height: 55px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #ddd;
+    }
+
+    .profile-name {
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .username {
+      color: #65676b;
+      margin-top: 3px;
+    }
+
+    .verified {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 19px;
+      height: 19px;
+      border-radius: 50%;
+      background: #1877f2;
+      color: white;
+      font-size: 12px;
+      margin-left: 4px;
+    }
+
+    .status {
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 22px;
+      line-height: 1.5;
+    }
+
+    .status.pending {
+      background: #fff4cc;
+      color: #795600;
+    }
+
+    .status.approved {
+      background: #e7f7ed;
+      color: #187a3d;
+    }
+
+    .status.rejected {
+      background: #ffebe9;
+      color: #b42318;
+    }
+
+    .status.none {
+      background: #e7f3ff;
+      color: #1558a6;
+    }
+
+    .status-title {
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 150px;
+      border: 1px solid #ccd0d5;
+      border-radius: 8px;
+      padding: 13px;
+      font-family: inherit;
+      font-size: 15px;
+      resize: vertical;
+      outline: none;
+    }
+
+    textarea:focus {
+      border-color: #1877f2;
+      box-shadow: 0 0 0 2px #e7f3ff;
+    }
+
+    .hint {
+      color: #65676b;
+      font-size: 13px;
+      margin-top: 7px;
+      line-height: 1.4;
+    }
+
+    button {
+      width: 100%;
+      border: none;
+      border-radius: 8px;
+      padding: 13px;
+      margin-top: 18px;
+      background: #1877f2;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #166fe5;
+    }
+
+    button:disabled {
+      background: #9bbce8;
+      cursor: not-allowed;
+    }
+
+    .message {
+      margin-top: 15px;
+      text-align: center;
+      font-size: 14px;
+      min-height: 20px;
+    }
+
+    .error {
+      color: #d93025;
+    }
+
+    .success {
+      color: #188038;
+    }
+
+    .requirements {
+      margin-top: 28px;
+      padding-top: 22px;
+      border-top: 1px solid #dddfe2;
+    }
+
+    .requirements h2 {
+      font-size: 18px;
+      margin-bottom: 12px;
+    }
+
+    .requirements ul {
+      padding-left: 20px;
+      color: #65676b;
+      line-height: 1.8;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #65676b;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 600px) {
+      .topbar {
+        padding: 0 15px;
+      }
+
+      .page {
+        width: calc(100% - 16px);
+        margin: 16px auto;
+      }
+
+      .card {
+        padding: 20px;
+        border-radius: 10px;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+
+      .back {
+        font-size: 14px;
+      }
+    }
+  </style>
 </head>
+
 <body>
-<header class="top"><div class="brand">Pulse</div><a class="back" href="/profile.html">Back to profile</a></header>
-<main class="wrap"><section class="card">
-<div class="badge">✓</div>
-<h1>Request verification</h1>
-<p class="muted">Verification confirms that Pulse has reviewed your account. Tell us why your account should be verified. Do not include passwords or other sensitive account credentials.</p>
-<div id="status" class="status">Loading your verification status...</div>
-<form id="form" class="hidden">
-<label for="reason"><strong>Why should this account be verified?</strong></label>
-<textarea id="reason" maxlength="2000" placeholder="Explain your public presence, identity, organization, or other reason for requesting verification..."></textarea>
-<div class="small">Minimum 20 characters. Maximum 2,000 characters.</div>
-<button id="submitBtn" type="submit">Submit verification request</button>
-</form>
-</section></main>
+
+  <header class="topbar">
+    <a href="/feed.html" class="logo">Pulse</a>
+    <a href="/profile.html" class="back">← Back to Profile</a>
+  </header>
+
+  <main class="page">
+
+    <div id="loading" class="card loading">
+      Loading verification information...
+    </div>
+
+    <section id="content" class="card hidden">
+
+      <div class="header">
+        <div class="check">✓</div>
+        <h1>Get Verified</h1>
+        <p class="subtitle">
+          Request verification for your Pulse Social account.
+        </p>
+      </div>
+
+      <div class="profile">
+        <img
+          id="avatar"
+          class="avatar"
+          src="/images/default-avatar.png"
+          alt="Profile picture"
+        >
+
+        <div>
+          <div class="profile-name">
+            <span id="name">User</span>
+            <span id="verifiedBadge" class="verified hidden">✓</span>
+          </div>
+
+          <div class="username" id="username">@username</div>
+        </div>
+      </div>
+
+      <div id="statusBox" class="status none">
+        <div class="status-title" id="statusTitle">
+          Verification not requested
+        </div>
+
+        <div id="statusText">
+          You can submit a verification request below.
+        </div>
+      </div>
+
+      <div id="formArea">
+
+        <label for="reason">
+          Why should your account be verified?
+        </label>
+
+        <textarea
+          id="reason"
+          maxlength="1000"
+          placeholder="Tell us why your account should be verified..."
+        ></textarea>
+
+        <div class="hint">
+          Explain who you are, what you use Pulse Social for, and why people
+          should be able to identify your account as authentic.
+        </div>
+
+        <button id="submitBtn">
+          Submit Verification Request
+        </button>
+
+        <div id="message" class="message"></div>
+
+      </div>
+
+      <div class="requirements">
+        <h2>Verification information</h2>
+
+        <ul>
+          <li>Your account should represent a real person, creator, organization, or public identity.</li>
+          <li>Provide a clear reason for requesting verification.</li>
+          <li>Verification requests are reviewed by Pulse administrators.</li>
+          <li>Approval adds a verified badge to your account.</li>
+        </ul>
+      </div>
+
+    </section>
+
+  </main>
+
 <script>
-const statusBox=document.getElementById('status');const form=document.getElementById('form');const reason=document.getElementById('reason');const btn=document.getElementById('submitBtn');
-function esc(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
-async function load(){try{const r=await fetch('/api/verification/status');const d=await r.json();if(!r.ok){location.href='/login.html';return}if(d.verified){statusBox.className='status approved';statusBox.innerHTML='<strong>✓ Verified</strong><br>Your account is already verified.';return}if(d.status==='pending'){statusBox.className='status pending';statusBox.innerHTML='<strong>Request pending</strong><br>Your verification request is waiting for review.';return}if(d.status==='rejected'){statusBox.className='status rejected';statusBox.innerHTML='<strong>Request reviewed</strong><br>Your previous request was rejected.'+(d.request?.adminNote?'<br><br><strong>Admin note:</strong> '+esc(d.request.adminNote):'');}else{statusBox.className='status';statusBox.innerHTML='<strong>Not requested</strong><br>You can submit a verification request below.'}form.classList.remove('hidden');}catch(e){statusBox.className='status rejected';statusBox.textContent='Unable to load verification status.'}}
-form.addEventListener('submit',async e=>{e.preventDefault();const value=reason.value.trim();if(value.length<20){alert('Please provide at least 20 characters.');return}btn.disabled=true;btn.textContent='Submitting...';try{const r=await fetch('/api/verification/request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({reason:value})});const d=await r.json();if(!r.ok)throw new Error(d.message||'Unable to submit request');alert(d.message);await load();reason.value='';}catch(e){alert(e.message)}finally{btn.disabled=false;btn.textContent='Submit verification request'}});load();
+  const loading = document.getElementById("loading");
+  const content = document.getElementById("content");
+
+  const avatar = document.getElementById("avatar");
+  const nameEl = document.getElementById("name");
+  const usernameEl = document.getElementById("username");
+  const verifiedBadge = document.getElementById("verifiedBadge");
+
+  const statusBox = document.getElementById("statusBox");
+  const statusTitle = document.getElementById("statusTitle");
+  const statusText = document.getElementById("statusText");
+
+  const formArea = document.getElementById("formArea");
+  const reason = document.getElementById("reason");
+  const submitBtn = document.getElementById("submitBtn");
+  const message = document.getElementById("message");
+
+  let currentUser = null;
+  let verification = null;
+
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function getAvatar(user) {
+    return (
+      user?.profilePicture ||
+      user?.profileImage ||
+      user?.avatar ||
+      "/images/default-avatar.png"
+    );
+  }
+
+  function getVerified(user) {
+    return (
+      user?.verified === true ||
+      user?.isVerified === true ||
+      user?.verificationStatus === "approved"
+    );
+  }
+
+  function showMessage(text, type = "") {
+    message.textContent = text;
+    message.className = "message " + type;
+  }
+
+  function setStatus(type, title, text) {
+    statusBox.className = "status " + type;
+    statusTitle.textContent = title;
+    statusText.textContent = text;
+  }
+
+  function getVerificationStatus(data) {
+    if (!data) return null;
+
+    return (
+      data.status ||
+      data.verificationStatus ||
+      data.request?.status ||
+      data.verification?.status ||
+      null
+    );
+  }
+
+  async function loadPage() {
+    try {
+      const meResponse = await fetch("/api/me", {
+        credentials: "include"
+      });
+
+      if (!meResponse.ok) {
+        window.location.href = "/login.html";
+        return;
+      }
+
+      const meData = await meResponse.json();
+
+      currentUser =
+        meData.user ||
+        meData.currentUser ||
+        meData;
+
+      if (!currentUser || !currentUser.id) {
+        window.location.href = "/login.html";
+        return;
+      }
+
+      nameEl.textContent =
+        currentUser.name ||
+        currentUser.displayName ||
+        currentUser.username ||
+        "User";
+
+      usernameEl.textContent =
+        "@" + (currentUser.username || "");
+
+      avatar.src = getAvatar(currentUser);
+
+      if (getVerified(currentUser)) {
+        verifiedBadge.classList.remove("hidden");
+      }
+
+      await loadVerification();
+
+      loading.classList.add("hidden");
+      content.classList.remove("hidden");
+
+    } catch (error) {
+      console.error("Verification load error:", error);
+
+      loading.innerHTML = `
+        <strong>Unable to load verification.</strong>
+        <br><br>
+        Please refresh the page and try again.
+      `;
+    }
+  }
+
+  async function loadVerification() {
+    try {
+      const response = await fetch("/api/verification/me", {
+        credentials: "include"
+      });
+
+      if (!response.ok) {
+        verification = null;
+        updateUI();
+        return;
+      }
+
+      const data = await response.json();
+
+      verification =
+        data.verification ||
+        data.request ||
+        data;
+
+      updateUI();
+
+    } catch (error) {
+      console.error("Verification status error:", error);
+
+      verification = null;
+      updateUI();
+    }
+  }
+
+  function updateUI() {
+    const alreadyVerified = getVerified(currentUser);
+
+    if (alreadyVerified) {
+      setStatus(
+        "approved",
+        "✓ You are verified",
+        "Your Pulse Social account has been verified."
+      );
+
+      formArea.classList.add("hidden");
+      return;
+    }
+
+    const status = getVerificationStatus(verification);
+
+    if (status === "pending") {
+      setStatus(
+        "pending",
+        "Verification request pending",
+        "Your request has been submitted and is waiting for an administrator to review it."
+      );
+
+      if (verification?.reason) {
+        reason.value = verification.reason;
+      }
+
+      submitBtn.textContent = "Request Already Submitted";
+      submitBtn.disabled = true;
+
+      return;
+    }
+
+    if (status === "rejected") {
+      setStatus(
+        "rejected",
+        "Verification request rejected",
+        verification?.message ||
+        verification?.reason ||
+        "Your previous verification request was rejected. You may submit another request."
+      );
+
+      if (verification?.reason) {
+        reason.value = verification.reason;
+      }
+
+      submitBtn.textContent = "Submit New Request";
+      submitBtn.disabled = false;
+
+      return;
+    }
+
+    setStatus(
+      "none",
+      "Verification not requested",
+      "You have not submitted a verification request yet."
+    );
+
+    submitBtn.textContent = "Submit Verification Request";
+    submitBtn.disabled = false;
+  }
+
+  async function submitVerification() {
+    const text = reason.value.trim();
+
+    if (!text) {
+      showMessage(
+        "Please explain why your account should be verified.",
+        "error"
+      );
+      reason.focus();
+      return;
+    }
+
+    if (text.length < 20) {
+      showMessage(
+        "Please provide a little more information.",
+        "error"
+      );
+      reason.focus();
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Submitting...";
+    showMessage("");
+
+    try {
+      const response = await fetch("/api/verification/request", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          reason: text,
+          message: text,
+          details: text
+        })
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(
+          data.message ||
+          data.error ||
+          "Unable to submit verification request."
+        );
+      }
+
+      verification =
+        data.verification ||
+        data.request ||
+        data;
+
+      showMessage(
+        "Verification request submitted successfully.",
+        "success"
+      );
+
+      updateUI();
+
+    } catch (error) {
+      console.error("Verification submit error:", error);
+
+      showMessage(
+        error.message || "Unable to submit verification request.",
+        "error"
+      );
+
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Submit Verification Request";
+    }
+  }
+
+  submitBtn.addEventListener("click", submitVerification);
+
+  avatar.addEventListener("error", () => {
+    avatar.src = "/images/default-avatar.png";
+  });
+
+  loadPage();
 </script>
+
 </body>
 </html>
