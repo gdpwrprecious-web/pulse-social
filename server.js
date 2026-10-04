@@ -1,124 +1,80 @@
-/*
-===========================================================
- PULSE SOCIAL
- Complete Social Media Server
- Node.js + Express + JSON Storage
-
- FEATURES
- - Signup / Login / Logout
- - Secure bcrypt passwords
- - Persistent JSON storage
- - Railway Volume support
- - Profiles
- - Profile pictures
- - Cover photos
- - Posts
- - Image posts
- - Video posts
- - TikTok-style For You feed
- - TikTok-style Following feed
- - Likes
- - Comments
- - Follow / unfollow
- - Verified accounts
- - Notifications
- - Messages
- - Search
- - Verification requests
- - Admin dashboard
- - Admin verification
- - Post deletion
- - User deletion
- - Storage information
- - Health endpoint
-
- LOCAL STORAGE:
- ./storage
-
- RAILWAY:
- STORAGE_ROOT=/app/storage
-
- START:
- npm install
- node server.js
-===========================================================
-*/
-
-"use strict";
-
-/* =========================================================
-   IMPORTS
-========================================================= */
+require("dotenv").config();
 
 const express = require("express");
 const session = require("express-session");
 const bcrypt = require("bcryptjs");
-const dotenv = require("dotenv");
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 const crypto = require("crypto");
 
-dotenv.config();
-
-/* =========================================================
-   APP
-========================================================= */
-
 const app = express();
-
-app.set("trust proxy", 1);
 
 const PORT = Number(process.env.PORT || 3000);
 const HOST = process.env.HOST || "0.0.0.0";
+const IS_PRODUCTION = process.env.NODE_ENV === "production";
 
-const IS_PRODUCTION =
-  process.env.NODE_ENV === "production";
-
-/* =========================================================
-   STORAGE
-========================================================= */
-
-const ROOT_DIR = __dirname;
+const ROOT = __dirname;
 
 const STORAGE_ROOT = path.resolve(
-  process.env.STORAGE_ROOT ||
-  path.join(ROOT_DIR, "storage")
+  process.env.STORAGE_ROOT || path.join(ROOT, "storage")
 );
 
-const DATA_DIR = path.join(
+const DATA_DIR = path.join(STORAGE_ROOT, "data");
+const UPLOADS_DIR = path.join(STORAGE_ROOT, "uploads");
+
+const PROFILE_UPLOADS = path.join(UPLOADS_DIR, "profiles");
+const COVER_UPLOADS = path.join(UPLOADS_DIR, "covers");
+const POST_UPLOADS = path.join(UPLOADS_DIR, "posts");
+const MESSAGE_UPLOADS = path.join(UPLOADS_DIR, "messages");
+
+[
   STORAGE_ROOT,
-  "data"
-);
-
-const UPLOADS_DIR = path.join(
-  STORAGE_ROOT,
-  "uploads"
-);
-
-const PROFILE_UPLOADS_DIR =
-  path.join(UPLOADS_DIR, "profiles");
-
-const COVER_UPLOADS_DIR =
-  path.join(UPLOADS_DIR, "covers");
-
-const POST_UPLOADS_DIR =
-  path.join(UPLOADS_DIR, "posts");
-
-const VIDEO_UPLOADS_DIR =
-  path.join(UPLOADS_DIR, "videos");
-
-const MESSAGE_UPLOADS_DIR =
-  path.join(UPLOADS_DIR, "messages");
-
-const SESSION_FILE =
-  path.join(
-    STORAGE_ROOT,
-    "sessions.json"
-  );
+  DATA_DIR,
+  UPLOADS_DIR,
+  PROFILE_UPLOADS,
+  COVER_UPLOADS,
+  POST_UPLOADS,
+  MESSAGE_UPLOADS
+].forEach((dir) => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+});
 
 /* =========================================================
-   DATA FILES
+   EXPRESS
+========================================================= */
+
+app.set("trust proxy", 1);
+
+app.use(express.json({ limit: "20mb" }));
+app.use(express.urlencoded({ extended: true, limit: "20mb" }));
+
+/* =========================================================
+   SESSION
+========================================================= */
+
+const SESSION_SECRET =
+  process.env.SESSION_SECRET || "pulse-social-development-secret";
+
+app.use(
+  session({
+    secret: SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    rolling: true,
+    cookie: {
+      maxAge: 1000 * 60 * 60 * 24 * 30,
+      httpOnly: true,
+      sameSite: "lax",
+      secure: IS_PRODUCTION
+    }
+  })
+);
+
+/* =========================================================
+   JSON DATABASE
 ========================================================= */
 
 const FILES = {
@@ -127,71 +83,18 @@ const FILES = {
   comments: path.join(DATA_DIR, "comments.json"),
   likes: path.join(DATA_DIR, "likes.json"),
   follows: path.join(DATA_DIR, "follows.json"),
-  notifications: path.join(
-    DATA_DIR,
-    "notifications.json"
-  ),
-  messages: path.join(
-    DATA_DIR,
-    "messages.json"
-  ),
-  verificationRequests: path.join(
-    DATA_DIR,
-    "verification_requests.json"
-  )
+  notifications: path.join(DATA_DIR, "notifications.json"),
+  messages: path.join(DATA_DIR, "messages.json"),
+  verification: path.join(DATA_DIR, "verification_requests.json")
 };
 
-/* =========================================================
-   CREATE DIRECTORIES
-========================================================= */
-
-function ensureDirectory(directory) {
-  if (!fs.existsSync(directory)) {
-    fs.mkdirSync(directory, {
-      recursive: true
-    });
-  }
-}
-
-ensureDirectory(STORAGE_ROOT);
-ensureDirectory(DATA_DIR);
-ensureDirectory(UPLOADS_DIR);
-ensureDirectory(PROFILE_UPLOADS_DIR);
-ensureDirectory(COVER_UPLOADS_DIR);
-ensureDirectory(POST_UPLOADS_DIR);
-ensureDirectory(VIDEO_UPLOADS_DIR);
-ensureDirectory(MESSAGE_UPLOADS_DIR);
-
-/* =========================================================
-   JSON HELPERS
-========================================================= */
-
-function ensureJsonFile(file, fallback = []) {
+function ensureJsonFile(file, defaultValue = []) {
   if (!fs.existsSync(file)) {
-    fs.writeFileSync(
-      file,
-      JSON.stringify(
-        fallback,
-        null,
-        2
-      ),
-      "utf8"
-    );
+    fs.writeFileSync(file, JSON.stringify(defaultValue, null, 2));
   }
 }
 
-Object.values(FILES).forEach(file => {
-  ensureJsonFile(file, []);
-});
-
-ensureJsonFile(
-  SESSION_FILE,
-  []
-);
-
-/* =========================================================
-   DATABASE HELPERS
-========================================================= */
+Object.values(FILES).forEach((file) => ensureJsonFile(file, []));
 
 function readJson(file, fallback = []) {
   try {
@@ -199,326 +102,152 @@ function readJson(file, fallback = []) {
       return fallback;
     }
 
-    const raw =
-      fs.readFileSync(
-        file,
-        "utf8"
-      );
+    const raw = fs.readFileSync(file, "utf8");
 
     if (!raw.trim()) {
       return fallback;
     }
 
-    const parsed =
-      JSON.parse(raw);
-
-    return parsed;
+    return JSON.parse(raw);
   } catch (error) {
-    console.error(
-      "JSON READ ERROR:",
-      file,
-      error.message
-    );
-
+    console.error("JSON READ ERROR:", file, error.message);
     return fallback;
   }
 }
 
 function writeJson(file, data) {
-  const tempFile =
-    `${file}.tmp`;
+  const tempFile = `${file}.tmp`;
 
   fs.writeFileSync(
     tempFile,
-    JSON.stringify(
-      data,
-      null,
-      2
-    ),
+    JSON.stringify(data, null, 2),
     "utf8"
   );
 
-  fs.renameSync(
-    tempFile,
-    file
-  );
-}
-
-/* =========================================================
-   DATA LOADERS
-========================================================= */
-
-function getUsers() {
-  return readJson(
-    FILES.users,
-    []
-  );
-}
-
-function saveUsers(users) {
-  writeJson(
-    FILES.users,
-    users
-  );
-}
-
-function getPosts() {
-  return readJson(
-    FILES.posts,
-    []
-  );
-}
-
-function savePosts(posts) {
-  writeJson(
-    FILES.posts,
-    posts
-  );
-}
-
-function getComments() {
-  return readJson(
-    FILES.comments,
-    []
-  );
-}
-
-function saveComments(comments) {
-  writeJson(
-    FILES.comments,
-    comments
-  );
-}
-
-function getLikes() {
-  return readJson(
-    FILES.likes,
-    []
-  );
-}
-
-function saveLikes(likes) {
-  writeJson(
-    FILES.likes,
-    likes
-  );
-}
-
-function getFollows() {
-  return readJson(
-    FILES.follows,
-    []
-  );
-}
-
-function saveFollows(follows) {
-  writeJson(
-    FILES.follows,
-    follows
-  );
-}
-
-function getNotifications() {
-  return readJson(
-    FILES.notifications,
-    []
-  );
-}
-
-function saveNotifications(notifications) {
-  writeJson(
-    FILES.notifications,
-    notifications
-  );
-}
-
-function getMessages() {
-  return readJson(
-    FILES.messages,
-    []
-  );
-}
-
-function saveMessages(messages) {
-  writeJson(
-    FILES.messages,
-    messages
-  );
-}
-
-function getVerificationRequests() {
-  return readJson(
-    FILES.verificationRequests,
-    []
-  );
-}
-
-function saveVerificationRequests(
-  requests
-) {
-  writeJson(
-    FILES.verificationRequests,
-    requests
-  );
-}
-
-/* =========================================================
-   GENERAL HELPERS
-========================================================= */
-
-function makeId(prefix = "") {
-  return (
-    prefix +
-    crypto.randomBytes(12).toString("hex")
-  );
+  fs.renameSync(tempFile, file);
 }
 
 function now() {
   return new Date().toISOString();
 }
 
-function cleanText(value, max = 5000) {
-  if (
-    value === undefined ||
-    value === null
-  ) {
-    return "";
-  }
-
-  return String(value)
-    .trim()
-    .slice(0, max);
-}
-
-function normalizeUsername(username) {
-  return cleanText(
-    username,
-    50
-  )
-    .toLowerCase()
-    .replace(/^@/, "");
-}
-
-function findUserById(id) {
-  if (!id) {
-    return null;
-  }
-
-  return getUsers().find(
-    user =>
-      String(user.id) ===
-      String(id)
-  ) || null;
-}
-
-function findUserByUsername(username) {
-  const normalized =
-    normalizeUsername(username);
-
-  return getUsers().find(
-    user =>
-      normalizeUsername(
-        user.username
-      ) === normalized
-  ) || null;
-}
-
-function findUserByEmail(email) {
-  const normalized =
-    cleanText(email, 200)
-      .toLowerCase();
-
-  return getUsers().find(
-    user =>
-      String(user.email || "")
-        .toLowerCase() ===
-      normalized
-  ) || null;
+function makeId(prefix = "id") {
+  return `${prefix}_${Date.now()}_${crypto.randomBytes(5).toString("hex")}`;
 }
 
 /* =========================================================
-   ADMIN
+   DATABASE HELPERS
 ========================================================= */
 
-function isAdmin(user) {
-  if (!user) {
-    return false;
-  }
+function users() {
+  return readJson(FILES.users, []);
+}
 
-  const adminUsername =
-    normalizeUsername(
-      process.env.ADMIN_USERNAME || ""
-    );
+function posts() {
+  return readJson(FILES.posts, []);
+}
 
-  return (
-    user.role === "admin" ||
-    user.role === "superadmin" ||
-    (
-      adminUsername &&
-      normalizeUsername(
-        user.username
-      ) === adminUsername
-    )
-  );
+function comments() {
+  return readJson(FILES.comments, []);
+}
+
+function likes() {
+  return readJson(FILES.likes, []);
+}
+
+function follows() {
+  return readJson(FILES.follows, []);
+}
+
+function notifications() {
+  return readJson(FILES.notifications, []);
+}
+
+function messages() {
+  return readJson(FILES.messages, []);
+}
+
+function verificationRequests() {
+  return readJson(FILES.verification, []);
 }
 
 /* =========================================================
-   FOLLOW HELPERS
+   NORMALIZATION
 ========================================================= */
 
-function isFollowing(
-  followerId,
-  followingId
-) {
-  if (
-    !followerId ||
-    !followingId
-  ) {
-    return false;
+function normalizeUser(user) {
+  if (!user) return null;
+
+  if (!user.id) {
+    user.id = makeId("user");
   }
 
-  return getFollows().some(
-    follow =>
-      String(follow.followerId) ===
-        String(followerId) &&
-      String(follow.followingId) ===
-        String(followingId)
+  if (!user.username) {
+    user.username =
+      String(user.name || "user")
+        .toLowerCase()
+        .replace(/[^a-z0-9_]/g, "")
+        .slice(0, 25) || `user${Date.now()}`;
+  }
+
+  return user;
+}
+
+function getUserById(id) {
+  return users().find((u) => String(u.id) === String(id));
+}
+
+function getUserByUsername(username) {
+  const target = String(username || "").replace(/^@/, "").toLowerCase();
+
+  return users().find(
+    (u) => String(u.username || "").toLowerCase() === target
   );
 }
 
-function getFollowerCount(userId) {
-  return getFollows().filter(
-    follow =>
-      String(follow.followingId) ===
-      String(userId)
+function getPostById(id) {
+  return posts().find((p) => String(p.id) === String(id));
+}
+
+/* =========================================================
+   COUNTS
+========================================================= */
+
+function followerCount(userId) {
+  return follows().filter(
+    (f) => String(f.followingId) === String(userId)
   ).length;
 }
 
-function getFollowingCount(userId) {
-  return getFollows().filter(
-    follow =>
-      String(follow.followerId) ===
-      String(userId)
+function followingCount(userId) {
+  return follows().filter(
+    (f) => String(f.followerId) === String(userId)
   ).length;
 }
 
-/* =========================================================
-   POST COUNTS
-========================================================= */
-
-function getPostLikes(postId) {
-  return getLikes().filter(
-    like =>
-      String(like.postId) ===
-      String(postId)
-  );
+function postCount(userId) {
+  return posts().filter(
+    (p) => String(p.userId) === String(userId)
+  ).length;
 }
 
-function getPostComments(postId) {
-  return getComments().filter(
-    comment =>
-      String(comment.postId) ===
-      String(postId)
+function likeCount(postId) {
+  return likes().filter(
+    (l) => String(l.postId) === String(postId)
+  ).length;
+}
+
+function commentCount(postId) {
+  return comments().filter(
+    (c) => String(c.postId) === String(postId)
+  ).length;
+}
+
+function isFollowing(followerId, followingId) {
+  return follows().some(
+    (f) =>
+      String(f.followerId) === String(followerId) &&
+      String(f.followingId) === String(followingId)
   );
 }
 
@@ -526,37 +255,25 @@ function getPostComments(postId) {
    SAFE USER
 ========================================================= */
 
-function safeUser(
-  user,
-  viewer = null
-) {
-  if (!user) {
-    return null;
-  }
-
-  const posts =
-    getPosts().filter(
-      post =>
-        String(post.userId) ===
-        String(user.id)
-    );
+function safeUser(user, viewerId = null) {
+  if (!user) return null;
 
   return {
     id: user.id,
-
-    name:
+    name: user.name || user.displayName || user.username || "User",
+    displayName:
+      user.displayName ||
       user.name ||
       user.username ||
       "User",
 
-    username:
-      user.username || "",
+    username: user.username || "user",
 
-    email:
-      user.email || "",
+    email: user.email || "",
 
-    bio:
-      user.bio || "",
+    bio: user.bio || "",
+
+    website: user.website || "",
 
     profilePicture:
       user.profilePicture ||
@@ -594,50 +311,37 @@ function safeUser(
       user.coverImage ||
       "",
 
-    role:
-      user.role || "user",
+    role: user.role || "user",
 
-    verified:
-      Boolean(
-        user.verified ||
-        user.isVerified
-      ),
+    verified: Boolean(
+      user.verified ||
+      user.isVerified ||
+      user.verificationStatus === "approved"
+    ),
 
-    isVerified:
-      Boolean(
-        user.isVerified ||
-        user.verified
-      ),
+    isVerified: Boolean(
+      user.verified ||
+      user.isVerified ||
+      user.verificationStatus === "approved"
+    ),
 
     verificationStatus:
-      user.verificationStatus ||
-      "none",
+      user.verificationStatus || "none",
 
-    createdAt:
-      user.createdAt || null,
+    createdAt: user.createdAt || null,
 
-    isAdmin:
-      isAdmin(user),
-
-    followersCount:
-      getFollowerCount(
-        user.id
-      ),
-
-    followingCount:
-      getFollowingCount(
-        user.id
-      ),
-
-    postsCount:
-      posts.length,
+    followersCount: followerCount(user.id),
+    followingCount: followingCount(user.id),
+    postsCount: postCount(user.id),
 
     isFollowing:
-      viewer
-        ? isFollowing(
-            viewer.id,
-            user.id
-          )
+      viewerId && String(viewerId) !== String(user.id)
+        ? isFollowing(viewerId, user.id)
+        : false,
+
+    isMe:
+      viewerId
+        ? String(viewerId) === String(user.id)
         : false
   };
 }
@@ -646,55 +350,31 @@ function safeUser(
    SAFE POST
 ========================================================= */
 
-function safePost(
-  post,
-  viewer = null
-) {
-  const user =
-    findUserById(
-      post.userId
-    );
+function safePost(post, viewerId = null) {
+  const author = getUserById(post.userId);
 
-  const likes =
-    getPostLikes(
-      post.id
-    );
-
-  const comments =
-    getPostComments(
-      post.id
-    );
-
-  const liked =
-    viewer
-      ? likes.some(
-          like =>
-            String(
-              like.userId
-            ) ===
-            String(
-              viewer.id
-            )
-        )
-      : false;
+  const postLikes = likes().filter(
+    (l) => String(l.postId) === String(post.id)
+  );
 
   return {
     id: post.id,
 
-    userId:
-      post.userId,
+    userId: post.userId,
 
-    user:
-      safeUser(
-        user,
-        viewer
-      ),
+    author: safeUser(author, viewerId),
 
-    text:
-      post.text || "",
+    user: safeUser(author, viewerId),
+
+    content:
+      post.content ||
+      post.caption ||
+      post.text ||
+      "",
 
     caption:
       post.caption ||
+      post.content ||
       post.text ||
       "",
 
@@ -718,119 +398,1481 @@ function safePost(
       post.video ||
       null,
 
-    mediaUrl:
-      post.mediaUrl ||
-      post.image ||
-      post.video ||
-      null,
-
     mediaType:
       post.mediaType ||
-      (
-        post.video ||
-        post.videoUrl
-          ? "video"
-          : "image"
-      ),
+      (post.video || post.videoUrl ? "video" : "image"),
 
-    sound:
-      post.sound ||
-      null,
-
-    hashtags:
-      Array.isArray(
-        post.hashtags
-      )
-        ? post.hashtags
-        : [],
+    visibility:
+      post.visibility || "public",
 
     createdAt:
-      post.createdAt ||
-      null,
+      post.createdAt || now(),
 
     updatedAt:
-      post.updatedAt ||
-      null,
+      post.updatedAt || post.createdAt || now(),
 
-    likesCount:
-      likes.length,
+    likesCount: postLikes.length,
 
-    likeCount:
-      likes.length,
+    likeCount: postLikes.length,
 
-    commentsCount:
-      comments.length,
+    commentsCount: commentCount(post.id),
 
-    commentCount:
-      comments.length,
+    commentCount: commentCount(post.id),
 
-    liked,
+    liked:
+      viewerId
+        ? postLikes.some(
+            (l) => String(l.userId) === String(viewerId)
+          )
+        : false,
 
     isLiked:
-      liked
+      viewerId
+        ? postLikes.some(
+            (l) => String(l.userId) === String(viewerId)
+          )
+        : false
   };
 }
 
 /* =========================================================
-   AUTH MIDDLEWARE
+   AUTH
 ========================================================= */
 
-function requireAuth(
-  req,
-  res,
-  next
-) {
-  if (
-    !req.session ||
-    !req.session.userId
-  ) {
+function requireAuth(req, res, next) {
+  if (!req.session.userId) {
     return res.status(401).json({
-      error:
-        "You must be logged in."
+      success: false,
+      message: "Please log in."
     });
   }
 
-  const user =
-    findUserById(
-      req.session.userId
-    );
+  next();
+}
 
-  if (!user) {
+function isAdminUser(user) {
+  if (!user) return false;
 
-    req.session.destroy(() => {});
+  const adminUsername =
+    process.env.ADMIN_USERNAME || "";
 
-    return res.status(401).json({
-      error:
-        "Your session is no longer valid."
+  return (
+    user.role === "admin" ||
+    user.role === "superadmin" ||
+    String(user.username).toLowerCase() ===
+      String(adminUsername).toLowerCase()
+  );
+}
+
+function requireAdmin(req, res, next) {
+  const user = getUserById(req.session.userId);
+
+  if (!user || !isAdminUser(user)) {
+    return res.status(403).json({
+      success: false,
+      message: "Administrator access required."
     });
   }
-
-  req.user = user;
 
   next();
 }
 
 /* =========================================================
-   ADMIN MIDDLEWARE
+   MULTER
 ========================================================= */
 
-function requireAdmin(
-  req,
-  res,
-  next
-) {
-  if (
-    !req.user ||
-    !isAdmin(req.user)
-  ) {
-    return res.status(403).json({
-      error:
-        "Administrator access required."
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const field = file.fieldname || "";
+
+    if (
+      field === "profilePicture" ||
+      field === "profileImage" ||
+      field === "avatar"
+    ) {
+      return cb(null, PROFILE_UPLOADS);
+    }
+
+    if (
+      field === "coverPhoto" ||
+      field === "coverImage" ||
+      field === "cover"
+    ) {
+      return cb(null, COVER_UPLOADS);
+    }
+
+    if (
+      field === "video" ||
+      file.mimetype.startsWith("video/")
+    ) {
+      return cb(null, POST_UPLOADS);
+    }
+
+    if (
+      field === "image" ||
+      field === "postImage" ||
+      file.mimetype.startsWith("image/")
+    ) {
+      return cb(null, POST_UPLOADS);
+    }
+
+    if (field === "messageImage") {
+      return cb(null, MESSAGE_UPLOADS);
+    }
+
+    cb(null, POST_UPLOADS);
+  },
+
+  filename: function (req, file, cb) {
+    const ext = path.extname(file.originalname || "");
+
+    cb(
+      null,
+      `${Date.now()}-${crypto.randomBytes(6).toString("hex")}${ext}`
+    );
+  }
+});
+
+const upload = multer({
+  storage,
+
+  limits: {
+    fileSize: 100 * 1024 * 1024
+  },
+
+  fileFilter: function (req, file, cb) {
+    const allowed =
+      file.mimetype.startsWith("image/") ||
+      file.mimetype.startsWith("video/");
+
+    if (!allowed) {
+      return cb(
+        new Error("Only image and video files are allowed.")
+      );
+    }
+
+    cb(null, true);
+  }
+});
+
+/* =========================================================
+   HEALTH
+========================================================= */
+
+app.get("/api/health", (req, res) => {
+  res.json({
+    success: true,
+    status: "ok",
+    version: "facebook-style-1.0.0",
+    storageRoot: STORAGE_ROOT,
+    features: [
+      "authentication",
+      "facebook-feed",
+      "profiles",
+      "posts",
+      "images",
+      "videos",
+      "likes",
+      "comments",
+      "follows",
+      "notifications",
+      "messages",
+      "verification",
+      "admin"
+    ]
+  });
+});
+
+/* =========================================================
+   AUTH ROUTES
+========================================================= */
+
+app.post("/api/register", async (req, res) => {
+  try {
+    const {
+      name,
+      username,
+      email,
+      password
+    } = req.body;
+
+    if (!name || !username || !email || !password) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Name, username, email and password are required."
+      });
+    }
+
+    if (String(password).length < 6) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Password must be at least 6 characters."
+      });
+    }
+
+    const allUsers = users();
+
+    const normalizedUsername =
+      String(username)
+        .trim()
+        .toLowerCase()
+        .replace(/^@/, "")
+        .replace(/[^a-z0-9_]/g, "");
+
+    const normalizedEmail =
+      String(email).trim().toLowerCase();
+
+    if (!normalizedUsername) {
+      return res.status(400).json({
+        success: false,
+        message: "Choose a valid username."
+      });
+    }
+
+    if (
+      allUsers.some(
+        (u) =>
+          String(u.username || "").toLowerCase() ===
+          normalizedUsername
+      )
+    ) {
+      return res.status(409).json({
+        success: false,
+        message: "Username already exists."
+      });
+    }
+
+    if (
+      allUsers.some(
+        (u) =>
+          String(u.email || "").toLowerCase() ===
+          normalizedEmail
+      )
+    ) {
+      return res.status(409).json({
+        success: false,
+        message: "Email already exists."
+      });
+    }
+
+    const passwordHash = await bcrypt.hash(
+      String(password),
+      12
+    );
+
+    const user = {
+      id: makeId("user"),
+      name: String(name).trim(),
+      displayName: String(name).trim(),
+      username: normalizedUsername,
+      email: normalizedEmail,
+      passwordHash,
+      bio: "",
+      website: "",
+      profilePicture:
+        "/images/default-avatar.png",
+      profileImage:
+        "/images/default-avatar.png",
+      avatar:
+        "/images/default-avatar.png",
+      coverPhoto: "",
+      coverImage: "",
+      cover: "",
+      role: "user",
+      verified: false,
+      isVerified: false,
+      verificationStatus: "none",
+      createdAt: now()
+    };
+
+    allUsers.push(user);
+
+    writeJson(FILES.users, allUsers);
+
+    req.session.userId = user.id;
+
+    res.json({
+      success: true,
+      user: safeUser(user, user.id)
+    });
+  } catch (error) {
+    console.error("REGISTER ERROR:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Unable to create account."
+    });
+  }
+});
+
+app.post("/api/signup", async (req, res) => {
+  req.url = "/api/register";
+  return app._router.handle(req, res, () => {});
+});
+
+app.post("/api/login", async (req, res) => {
+  try {
+    const {
+      identifier,
+      email,
+      username,
+      password
+    } = req.body;
+
+    const loginIdentifier =
+      String(
+        identifier ||
+        email ||
+        username ||
+        ""
+      )
+        .trim()
+        .toLowerCase();
+
+    if (!loginIdentifier || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Enter your login details."
+      });
+    }
+
+    const allUsers = users();
+
+    const user = allUsers.find(
+      (u) =>
+        String(u.email || "").toLowerCase() ===
+          loginIdentifier ||
+        String(u.username || "").toLowerCase() ===
+          loginIdentifier
+    );
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid email/username or password."
+      });
+    }
+
+    if (!user.passwordHash) {
+      return res.status(500).json({
+        success: false,
+        message:
+          "This account has no valid password. Please create the account again."
+      });
+    }
+
+    const valid = await bcrypt.compare(
+      String(password),
+      String(user.passwordHash)
+    );
+
+    if (!valid) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid email/username or password."
+      });
+    }
+
+    req.session.userId = user.id;
+
+    res.json({
+      success: true,
+      user: safeUser(user, user.id)
+    });
+  } catch (error) {
+    console.error("LOGIN ERROR:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Unable to sign in."
+    });
+  }
+});
+
+app.post("/api/logout", (req, res) => {
+  req.session.destroy(() => {
+    res.json({
+      success: true
+    });
+  });
+});
+
+app.get("/api/me", (req, res) => {
+  const user = getUserById(req.session.userId);
+
+  if (!user) {
+    return res.json({
+      success: true,
+      authenticated: false,
+      user: null
     });
   }
 
-  next();
-}
+  res.json({
+    success: true,
+    authenticated: true,
+    user: safeUser(user, user.id)
+  });
+});
+
+/* =========================================================
+   PROFILE
+========================================================= */
+
+app.get("/api/users/:username", (req, res) => {
+  const user = getUserByUsername(
+    req.params.username
+  );
+
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      message: "User not found."
+    });
+  }
+
+  res.json({
+    success: true,
+    user: safeUser(user, req.session.userId)
+  });
+});
+
+app.put("/api/profile", requireAuth, (req, res) => {
+  const allUsers = users();
+
+  const index = allUsers.findIndex(
+    (u) =>
+      String(u.id) ===
+      String(req.session.userId)
+  );
+
+  if (index === -1) {
+    return res.status(404).json({
+      success: false,
+      message: "User not found."
+    });
+  }
+
+  const user = allUsers[index];
+
+  const {
+    name,
+    displayName,
+    bio,
+    website
+  } = req.body;
+
+  if (name !== undefined) {
+    user.name = String(name).trim();
+  }
+
+  if (displayName !== undefined) {
+    user.displayName =
+      String(displayName).trim();
+  }
+
+  if (bio !== undefined) {
+    user.bio = String(bio).trim();
+  }
+
+  if (website !== undefined) {
+    user.website =
+      String(website).trim();
+  }
+
+  user.updatedAt = now();
+
+  writeJson(FILES.users, allUsers);
+
+  res.json({
+    success: true,
+    user: safeUser(
+      user,
+      req.session.userId
+    )
+  });
+});
+
+app.post(
+  "/api/profile/picture",
+  requireAuth,
+  upload.single("profilePicture"),
+  (req, res) => {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "Choose a profile picture."
+      });
+    }
+
+    const allUsers = users();
+
+    const index = allUsers.findIndex(
+      (u) =>
+        String(u.id) ===
+        String(req.session.userId)
+    );
+
+    if (index === -1) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found."
+      });
+    }
+
+    const url =
+      `/uploads/profiles/${req.file.filename}`;
+
+    allUsers[index].profilePicture = url;
+    allUsers[index].profileImage = url;
+    allUsers[index].avatar = url;
+
+    writeJson(FILES.users, allUsers);
+
+    res.json({
+      success: true,
+      user: safeUser(
+        allUsers[index],
+        req.session.userId
+      )
+    });
+  }
+);
+
+app.post(
+  "/api/profile/cover",
+  requireAuth,
+  upload.single("coverPhoto"),
+  (req, res) => {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "Choose a cover photo."
+      });
+    }
+
+    const allUsers = users();
+
+    const index = allUsers.findIndex(
+      (u) =>
+        String(u.id) ===
+        String(req.session.userId)
+    );
+
+    if (index === -1) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found."
+      });
+    }
+
+    const url =
+      `/uploads/covers/${req.file.filename}`;
+
+    allUsers[index].coverPhoto = url;
+    allUsers[index].coverImage = url;
+    allUsers[index].cover = url;
+
+    writeJson(FILES.users, allUsers);
+
+    res.json({
+      success: true,
+      user: safeUser(
+        allUsers[index],
+        req.session.userId
+      )
+    });
+  }
+);
+
+app.post(
+  "/api/profile/cover-photo",
+  requireAuth,
+  upload.single("coverPhoto"),
+  (req, res) => {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "Choose a cover photo."
+      });
+    }
+
+    const allUsers = users();
+
+    const index = allUsers.findIndex(
+      (u) =>
+        String(u.id) ===
+        String(req.session.userId)
+    );
+
+    if (index === -1) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found."
+      });
+    }
+
+    const url =
+      `/uploads/covers/${req.file.filename}`;
+
+    allUsers[index].coverPhoto = url;
+    allUsers[index].coverImage = url;
+    allUsers[index].cover = url;
+
+    writeJson(FILES.users, allUsers);
+
+    res.json({
+      success: true,
+      user: safeUser(
+        allUsers[index],
+        req.session.userId
+      )
+    });
+  }
+);
+
+app.delete(
+  "/api/profile/cover",
+  requireAuth,
+  (req, res) => {
+    const allUsers = users();
+
+    const index = allUsers.findIndex(
+      (u) =>
+        String(u.id) ===
+        String(req.session.userId)
+    );
+
+    if (index === -1) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found."
+      });
+    }
+
+    allUsers[index].coverPhoto = "";
+    allUsers[index].coverImage = "";
+    allUsers[index].cover = "";
+
+    writeJson(FILES.users, allUsers);
+
+    res.json({
+      success: true,
+      user: safeUser(
+        allUsers[index],
+        req.session.userId
+      )
+    });
+  }
+);
+
+/* =========================================================
+   USER POSTS
+========================================================= */
+
+app.get(
+  "/api/users/:username/posts",
+  (req, res) => {
+    const user = getUserByUsername(
+      req.params.username
+    );
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found."
+      });
+    }
+
+    const userPosts = posts()
+      .filter(
+        (p) =>
+          String(p.userId) ===
+          String(user.id)
+      )
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt) -
+          new Date(a.createdAt)
+      )
+      .map((p) =>
+        safePost(
+          p,
+          req.session.userId
+        )
+      );
+
+    res.json({
+      success: true,
+      posts: userPosts
+    });
+  }
+);
+
+/* =========================================================
+   CREATE POST
+========================================================= */
+
+app.post(
+  "/api/posts",
+  requireAuth,
+  upload.fields([
+    { name: "image", maxCount: 1 },
+    { name: "video", maxCount: 1 }
+  ]),
+  (req, res) => {
+    try {
+      const user = getUserById(
+        req.session.userId
+      );
+
+      if (!user) {
+        return res.status(401).json({
+          success: false,
+          message: "User not found."
+        });
+      }
+
+      const content =
+        String(
+          req.body.content ||
+          req.body.caption ||
+          req.body.text ||
+          ""
+        ).trim();
+
+      const imageFile =
+        req.files?.image?.[0];
+
+      const videoFile =
+        req.files?.video?.[0];
+
+      if (
+        !content &&
+        !imageFile &&
+        !videoFile
+      ) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Write something or add a photo/video."
+        });
+      }
+
+      let image = null;
+      let video = null;
+
+      if (imageFile) {
+        image =
+          `/uploads/posts/${imageFile.filename}`;
+      }
+
+      if (videoFile) {
+        video =
+          `/uploads/posts/${videoFile.filename}`;
+      }
+
+      const allPosts = posts();
+
+      const post = {
+        id: makeId("post"),
+        userId: user.id,
+        content,
+        caption: content,
+        image,
+        imageUrl: image,
+        video,
+        videoUrl: video,
+        mediaType: video
+          ? "video"
+          : image
+          ? "image"
+          : "text",
+        visibility:
+          req.body.visibility ||
+          "public",
+        createdAt: now(),
+        updatedAt: now()
+      };
+
+      allPosts.push(post);
+
+      writeJson(
+        FILES.posts,
+        allPosts
+      );
+
+      res.json({
+        success: true,
+        post: safePost(
+          post,
+          user.id
+        )
+      });
+    } catch (error) {
+      console.error(
+        "CREATE POST ERROR:",
+        error
+      );
+
+      res.status(500).json({
+        success: false,
+        message:
+          "Unable to publish post."
+      });
+    }
+  }
+);
+
+/* =========================================================
+   FEED
+========================================================= */
+
+app.get(
+  "/api/feed",
+  requireAuth,
+  (req, res) => {
+    const viewerId =
+      req.session.userId;
+
+    const mode =
+      String(
+        req.query.mode || "all"
+      ).toLowerCase();
+
+    const allPosts = posts();
+
+    let feedPosts = allPosts.filter(
+      (post) => {
+        if (
+          post.visibility &&
+          post.visibility === "private"
+        ) {
+          return (
+            String(post.userId) ===
+            String(viewerId)
+          );
+        }
+
+        return true;
+      }
+    );
+
+    if (mode === "following") {
+      const followingIds =
+        follows()
+          .filter(
+            (f) =>
+              String(f.followerId) ===
+              String(viewerId)
+          )
+          .map((f) =>
+            String(f.followingId)
+          );
+
+      followingIds.push(
+        String(viewerId)
+      );
+
+      feedPosts =
+        feedPosts.filter((p) =>
+          followingIds.includes(
+            String(p.userId)
+          )
+        );
+    }
+
+    feedPosts = feedPosts
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt) -
+          new Date(a.createdAt)
+      )
+      .map((p) =>
+        safePost(
+          p,
+          viewerId
+        )
+      );
+
+    res.json({
+      success: true,
+      mode,
+      posts: feedPosts
+    });
+  }
+);
+
+/* =========================================================
+   SINGLE POST
+========================================================= */
+
+app.get(
+  "/api/posts/:id",
+  (req, res) => {
+    const post =
+      getPostById(req.params.id);
+
+    if (!post) {
+      return res.status(404).json({
+        success: false,
+        message: "Post not found."
+      });
+    }
+
+    res.json({
+      success: true,
+      post: safePost(
+        post,
+        req.session.userId
+      )
+    });
+  }
+);
+
+app.delete(
+  "/api/posts/:id",
+  requireAuth,
+  (req, res) => {
+    const allPosts = posts();
+
+    const post =
+      allPosts.find(
+        (p) =>
+          String(p.id) ===
+          String(req.params.id)
+      );
+
+    if (!post) {
+      return res.status(404).json({
+        success: false,
+        message: "Post not found."
+      });
+    }
+
+    const user =
+      getUserById(req.session.userId);
+
+    if (
+      String(post.userId) !==
+        String(req.session.userId) &&
+      !isAdminUser(user)
+    ) {
+      return res.status(403).json({
+        success: false,
+        message:
+          "You cannot delete this post."
+      });
+    }
+
+    writeJson(
+      FILES.posts,
+      allPosts.filter(
+        (p) =>
+          String(p.id) !==
+          String(req.params.id)
+      )
+    );
+
+    writeJson(
+      FILES.likes,
+      likes().filter(
+        (l) =>
+          String(l.postId) !==
+          String(req.params.id)
+      )
+    );
+
+    writeJson(
+      FILES.comments,
+      comments().filter(
+        (c) =>
+          String(c.postId) !==
+          String(req.params.id)
+      )
+    );
+
+    res.json({
+      success: true
+    });
+  }
+);
+
+/* =========================================================
+   LIKES
+========================================================= */
+
+app.post(
+  "/api/posts/:id/like",
+  requireAuth,
+  (req, res) => {
+    const post =
+      getPostById(req.params.id);
+
+    if (!post) {
+      return res.status(404).json({
+        success: false,
+        message: "Post not found."
+      });
+    }
+
+    const allLikes = likes();
+
+    const existing =
+      allLikes.findIndex(
+        (l) =>
+          String(l.postId) ===
+            String(post.id) &&
+          String(l.userId) ===
+            String(req.session.userId)
+      );
+
+    let liked = false;
+
+    if (existing >= 0) {
+      allLikes.splice(
+        existing,
+        1
+      );
+    } else {
+      allLikes.push({
+        id: makeId("like"),
+        postId: post.id,
+        userId: req.session.userId,
+        createdAt: now()
+      });
+
+      liked = true;
+
+      if (
+        String(post.userId) !==
+        String(req.session.userId)
+      ) {
+        createNotification({
+          userId: post.userId,
+          actorId: req.session.userId,
+          type: "like",
+          postId: post.id
+        });
+      }
+    }
+
+    writeJson(
+      FILES.likes,
+      allLikes
+    );
+
+    res.json({
+      success: true,
+      liked,
+      likesCount:
+        allLikes.filter(
+          (l) =>
+            String(l.postId) ===
+            String(post.id)
+        ).length
+    });
+  }
+);
+
+/* =========================================================
+   COMMENTS
+========================================================= */
+
+app.get(
+  "/api/posts/:id/comments",
+  (req, res) => {
+    const post =
+      getPostById(req.params.id);
+
+    if (!post) {
+      return res.status(404).json({
+        success: false,
+        message: "Post not found."
+      });
+    }
+
+    const result =
+      comments()
+        .filter(
+          (c) =>
+            String(c.postId) ===
+            String(post.id)
+        )
+        .sort(
+          (a, b) =>
+            new Date(a.createdAt) -
+            new Date(b.createdAt)
+        )
+        .map((comment) => ({
+          ...comment,
+          user: safeUser(
+            getUserById(
+              comment.userId
+            ),
+            req.session.userId
+          )
+        }));
+
+    res.json({
+      success: true,
+      comments: result
+    });
+  }
+);
+
+app.post(
+  "/api/posts/:id/comments",
+  requireAuth,
+  (req, res) => {
+    const post =
+      getPostById(req.params.id);
+
+    if (!post) {
+      return res.status(404).json({
+        success: false,
+        message: "Post not found."
+      });
+    }
+
+    const text =
+      String(
+        req.body.text ||
+        req.body.comment ||
+        req.body.content ||
+        ""
+      ).trim();
+
+    if (!text) {
+      return res.status(400).json({
+        success: false,
+        message: "Write a comment."
+      });
+    }
+
+    const allComments = comments();
+
+    const comment = {
+      id: makeId("comment"),
+      postId: post.id,
+      userId: req.session.userId,
+      text,
+      content: text,
+      createdAt: now()
+    };
+
+    allComments.push(comment);
+
+    writeJson(
+      FILES.comments,
+      allComments
+    );
+
+    if (
+      String(post.userId) !==
+      String(req.session.userId)
+    ) {
+      createNotification({
+        userId: post.userId,
+        actorId: req.session.userId,
+        type: "comment",
+        postId: post.id
+      });
+    }
+
+    res.json({
+      success: true,
+      comment: {
+        ...comment,
+        user: safeUser(
+          getUserById(
+            req.session.userId
+          ),
+          req.session.userId
+        )
+      }
+    });
+  }
+);
+
+app.delete(
+  "/api/comments/:id",
+  requireAuth,
+  (req, res) => {
+    const allComments =
+      comments();
+
+    const comment =
+      allComments.find(
+        (c) =>
+          String(c.id) ===
+          String(req.params.id)
+      );
+
+    if (!comment) {
+      return res.status(404).json({
+        success: false,
+        message: "Comment not found."
+      });
+    }
+
+    const user =
+      getUserById(req.session.userId);
+
+    if (
+      String(comment.userId) !==
+        String(req.session.userId) &&
+      !isAdminUser(user)
+    ) {
+      return res.status(403).json({
+        success: false,
+        message:
+          "You cannot delete this comment."
+      });
+    }
+
+    writeJson(
+      FILES.comments,
+      allComments.filter(
+        (c) =>
+          String(c.id) !==
+          String(req.params.id)
+      )
+    );
+
+    res.json({
+      success: true
+    });
+  }
+);
+
+/* =========================================================
+   FOLLOWS
+========================================================= */
+
+app.post(
+  "/api/users/:id/follow",
+  requireAuth,
+  (req, res) => {
+    const target =
+      getUserById(req.params.id);
+
+    if (!target) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found."
+      });
+    }
+
+    if (
+      String(target.id) ===
+      String(req.session.userId)
+    ) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "You cannot follow yourself."
+      });
+    }
+
+    const allFollows = follows();
+
+    const index =
+      allFollows.findIndex(
+        (f) =>
+          String(f.followerId) ===
+            String(req.session.userId) &&
+          String(f.followingId) ===
+            String(target.id)
+      );
+
+    let following = false;
+
+    if (index >= 0) {
+      allFollows.splice(
+        index,
+        1
+      );
+    } else {
+      allFollows.push({
+        id: makeId("follow"),
+        followerId:
+          req.session.userId,
+        followingId: target.id,
+        createdAt: now()
+      });
+
+      following = true;
+
+      createNotification({
+        userId: target.id,
+        actorId:
+          req.session.userId,
+        type: "follow"
+      });
+    }
+
+    writeJson(
+      FILES.follows,
+      allFollows
+    );
+
+    res.json({
+      success: true,
+      following,
+      followersCount:
+        followerCount(target.id)
+    });
+  }
+);
+
+app.get(
+  "/api/users/:id/followers",
+  (req, res) => {
+    const target =
+      getUserById(req.params.id);
+
+    if (!target) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found."
+      });
+    }
+
+    const result =
+      follows()
+        .filter(
+          (f) =>
+            String(f.followingId) ===
+            String(target.id)
+        )
+        .map((f) =>
+          safeUser(
+            getUserById(
+              f.followerId
+            ),
+            req.session.userId
+          )
+        )
+        .filter(Boolean);
+
+    res.json({
+      success: true,
+      users: result
+    });
+  }
+);
+
+app.get(
+  "/api/users/:id/following",
+  (req, res) => {
+    const target =
+      getUserById(req.params.id);
+
+    if (!target) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found."
+      });
+    }
+
+    const result =
+      follows()
+        .filter(
+          (f) =>
+            String(f.followerId) ===
+            String(target.id)
+        )
+        .map((f) =>
+          safeUser(
+            getUserById(
+              f.followingId
+            ),
+            req.session.userId
+          )
+        )
+        .filter(Boolean);
+
+    res.json({
+      success: true,
+      users: result
+    });
+  }
+);
+
+/* =========================================================
+   SEARCH
+========================================================= */
+
+app.get(
+  "/api/search",
+  requireAuth,
+  (req, res) => {
+    const q =
+      String(
+        req.query.q || ""
+      )
+        .trim()
+        .toLowerCase();
+
+    if (!q) {
+      return res.json({
+        success: true,
+        users: [],
+        posts: []
+      });
+    }
+
+    const foundUsers =
+      users()
+        .filter(
+          (u) =>
+            String(
+              u.name || ""
+            )
+              .toLowerCase()
+              .includes(q) ||
+            String(
+              u.username || ""
+            )
+              .toLowerCase()
+              .includes(q)
+        )
+        .slice(0, 20)
+        .map((u) =>
+          safeUser(
+            u,
+            req.session.userId
+          )
+        );
+
+    const foundPosts =
+      posts()
+        .filter(
+          (p) =>
+            String(
+              p.content || ""
+            )
+              .toLowerCase()
+              .includes(q)
+        )
+        .slice(0, 30)
+        .map((p) =>
+          safePost(
+            p,
+            req.session.userId
+          )
+        );
+
+    res.json({
+      success: true,
+      users: foundUsers,
+      posts: foundPosts
+    });
+  }
+);
 
 /* =========================================================
    NOTIFICATIONS
@@ -838,703 +1880,608 @@ function requireAdmin(
 
 function createNotification({
   userId,
-  fromUserId,
+  actorId,
   type,
-  postId = null,
-  message = ""
+  postId = null
 }) {
+  const all =
+    notifications();
 
-  if (
-    !userId ||
-    !fromUserId ||
-    String(userId) ===
-      String(fromUserId)
-  ) {
-    return;
-  }
-
-  const notifications =
-    getNotifications();
-
-  notifications.unshift({
-    id: makeId("notification_"),
-
+  all.push({
+    id: makeId("notification"),
     userId,
-
-    fromUserId,
-
+    actorId,
     type,
-
     postId,
-
-    message,
-
     read: false,
-
     createdAt: now()
   });
 
-  saveNotifications(
-    notifications.slice(0, 5000)
+  writeJson(
+    FILES.notifications,
+    all
   );
 }
 
-/* =========================================================
-   EXPRESS MIDDLEWARE
-========================================================= */
+app.get(
+  "/api/notifications",
+  requireAuth,
+  (req, res) => {
+    const result =
+      notifications()
+        .filter(
+          (n) =>
+            String(n.userId) ===
+            String(req.session.userId)
+        )
+        .sort(
+          (a, b) =>
+            new Date(b.createdAt) -
+            new Date(a.createdAt)
+        )
+        .map((n) => ({
+          ...n,
+          actor: safeUser(
+            getUserById(
+              n.actorId
+            ),
+            req.session.userId
+          )
+        }));
 
-app.use(
-  express.json({
-    limit: "10mb"
-  })
+    res.json({
+      success: true,
+      notifications: result
+    });
+  }
 );
 
-app.use(
-  express.urlencoded({
-    extended: true,
-    limit: "10mb"
-  })
+app.post(
+  "/api/notifications/read",
+  requireAuth,
+  (req, res) => {
+    const all =
+      notifications();
+
+    all.forEach((n) => {
+      if (
+        String(n.userId) ===
+        String(req.session.userId)
+      ) {
+        n.read = true;
+      }
+    });
+
+    writeJson(
+      FILES.notifications,
+      all
+    );
+
+    res.json({
+      success: true
+    });
+  }
 );
 
 /* =========================================================
-   SESSION STORE
+   MESSAGES
 ========================================================= */
 
-class FileSessionStore
-  extends session.Store {
+app.get(
+  "/api/messages/conversations",
+  requireAuth,
+  (req, res) => {
+    const all =
+      messages();
 
-  constructor(file) {
-    super();
-
-    this.file = file;
-
-    ensureJsonFile(
-      this.file,
-      []
-    );
-
-    this.sessions =
-      readJson(
-        this.file,
-        []
+    const mine =
+      all.filter(
+        (m) =>
+          String(m.senderId) ===
+            String(req.session.userId) ||
+          String(m.receiverId) ===
+            String(req.session.userId)
       );
+
+    const ids = [];
+
+    mine.forEach((m) => {
+      const other =
+        String(m.senderId) ===
+        String(req.session.userId)
+          ? m.receiverId
+          : m.senderId;
+
+      if (!ids.includes(String(other))) {
+        ids.push(String(other));
+      }
+    });
+
+    const conversations =
+      ids.map((id) => {
+        const relevant =
+          mine
+            .filter(
+              (m) =>
+                String(m.senderId) ===
+                  String(id) ||
+                String(m.receiverId) ===
+                  String(id)
+            )
+            .sort(
+              (a, b) =>
+                new Date(b.createdAt) -
+                new Date(a.createdAt)
+            );
+
+        return {
+          user: safeUser(
+            getUserById(id),
+            req.session.userId
+          ),
+          lastMessage:
+            relevant[0] || null
+        };
+      });
+
+    res.json({
+      success: true,
+      conversations
+    });
   }
+);
 
-  saveFile() {
-    try {
-
-      writeJson(
-        this.file,
-        this.sessions
+app.get(
+  "/api/messages/:userId",
+  requireAuth,
+  (req, res) => {
+    const other =
+      getUserById(
+        req.params.userId
       );
 
-    } catch (error) {
-
-      console.error(
-        "SESSION SAVE ERROR:",
-        error.message
-      );
-
+    if (!other) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found."
+      });
     }
+
+    const result =
+      messages()
+        .filter(
+          (m) =>
+            (
+              String(m.senderId) ===
+                String(req.session.userId) &&
+              String(m.receiverId) ===
+                String(other.id)
+            ) ||
+            (
+              String(m.senderId) ===
+                String(other.id) &&
+              String(m.receiverId) ===
+                String(req.session.userId)
+            )
+        )
+        .sort(
+          (a, b) =>
+            new Date(a.createdAt) -
+            new Date(b.createdAt)
+        )
+        .map((m) => ({
+          ...m,
+          sender: safeUser(
+            getUserById(
+              m.senderId
+            ),
+            req.session.userId
+          )
+        }));
+
+    res.json({
+      success: true,
+      user: safeUser(
+        other,
+        req.session.userId
+      ),
+      messages: result
+    });
   }
+);
 
-  get(
-    sid,
-    callback
-  ) {
+app.post(
+  "/api/messages",
+  requireAuth,
+  (req, res) => {
+    const receiverId =
+      req.body.receiverId ||
+      req.body.userId;
 
-    const item =
-      this.sessions.find(
-        session =>
-          session.sid === sid
-      );
+    const text =
+      String(
+        req.body.text ||
+        req.body.message ||
+        ""
+      ).trim();
 
-    if (!item) {
-      return callback(
-        null,
-        null
-      );
+    const receiver =
+      getUserById(receiverId);
+
+    if (!receiver) {
+      return res.status(404).json({
+        success: false,
+        message: "Receiver not found."
+      });
     }
 
-    if (
-      item.expiresAt &&
-      Date.now() >
-        item.expiresAt
-    ) {
-
-      this.destroy(
-        sid,
-        () => {}
-      );
-
-      return callback(
-        null,
-        null
-      );
+    if (!text) {
+      return res.status(400).json({
+        success: false,
+        message: "Message is empty."
+      });
     }
 
-    callback(
-      null,
-      item.session
-    );
-  }
+    const all =
+      messages();
 
-  set(
-    sid,
-    sess,
-    callback
-  ) {
-
-    const cookie =
-      sess.cookie || {};
-
-    let maxAge =
-      cookie.maxAge;
-
-    if (
-      typeof maxAge !==
-      "number"
-    ) {
-      maxAge =
-        7 * 24 * 60 * 60 * 1000;
-    }
-
-    const expiresAt =
-      Date.now() + maxAge;
-
-    const existing =
-      this.sessions.findIndex(
-        item =>
-          item.sid === sid
-      );
-
-    const record = {
-      sid,
-      session: sess,
-      expiresAt
+    const message = {
+      id: makeId("message"),
+      senderId:
+        req.session.userId,
+      receiverId:
+        receiver.id,
+      text,
+      createdAt: now(),
+      read: false
     };
 
-    if (existing >= 0) {
-      this.sessions[existing] =
-        record;
-    } else {
-      this.sessions.push(
-        record
-      );
-    }
+    all.push(message);
 
-    this.saveFile();
-
-    if (callback) {
-      callback(null);
-    }
-  }
-
-  destroy(
-    sid,
-    callback
-  ) {
-
-    this.sessions =
-      this.sessions.filter(
-        item =>
-          item.sid !== sid
-      );
-
-    this.saveFile();
-
-    if (callback) {
-      callback(null);
-    }
-  }
-
-  touch(
-    sid,
-    sess,
-    callback
-  ) {
-
-    const item =
-      this.sessions.find(
-        record =>
-          record.sid === sid
-      );
-
-    if (item) {
-
-      item.session = sess;
-
-      const cookie =
-        sess.cookie || {};
-
-      const maxAge =
-        typeof cookie.maxAge ===
-        "number"
-          ? cookie.maxAge
-          : 7 *
-            24 *
-            60 *
-            60 *
-            1000;
-
-      item.expiresAt =
-        Date.now() + maxAge;
-
-      this.saveFile();
-
-    }
-
-    if (callback) {
-      callback(null);
-    }
-  }
-}
-
-const sessionStore =
-  new FileSessionStore(
-    SESSION_FILE
-  );
-
-/* =========================================================
-   SESSION
-========================================================= */
-
-app.use(
-  session({
-    store: sessionStore,
-
-    secret:
-      process.env.SESSION_SECRET ||
-      "pulse-social-change-this-secret",
-
-    resave: false,
-
-    saveUninitialized: false,
-
-    rolling: true,
-
-    cookie: {
-      maxAge:
-        7 *
-        24 *
-        60 *
-        60 *
-        1000,
-
-      httpOnly: true,
-
-      sameSite: "lax",
-
-      secure:
-        IS_PRODUCTION
-    }
-  })
-);
-
-/* =========================================================
-   UPLOAD CONFIGURATION
-========================================================= */
-
-const imageMimeTypes =
-  new Set([
-    "image/jpeg",
-    "image/png",
-    "image/webp",
-    "image/gif"
-  ]);
-
-const videoMimeTypes =
-  new Set([
-    "video/mp4",
-    "video/webm",
-    "video/quicktime",
-    "video/x-matroska",
-    "video/ogg"
-  ]);
-
-const allowedMediaMimeTypes =
-  new Set([
-    ...imageMimeTypes,
-    ...videoMimeTypes
-  ]);
-
-const extensionMap = {
-  "image/jpeg": ".jpg",
-  "image/png": ".png",
-  "image/webp": ".webp",
-  "image/gif": ".gif",
-
-  "video/mp4": ".mp4",
-  "video/webm": ".webm",
-  "video/quicktime": ".mov",
-  "video/x-matroska": ".mkv",
-  "video/ogg": ".ogv"
-};
-
-const storage = multer.diskStorage({
-
-  destination: function(
-    req,
-    file,
-    cb
-  ) {
-
-    const mime =
-      file.mimetype;
-
-    if (
-      videoMimeTypes.has(
-        mime
-      )
-    ) {
-
-      return cb(
-        null,
-        VIDEO_UPLOADS_DIR
-      );
-
-    }
-
-    if (
-      imageMimeTypes.has(
-        mime
-      )
-    ) {
-
-      return cb(
-        null,
-        POST_UPLOADS_DIR
-      );
-
-    }
-
-    cb(
-      new Error(
-        "Unsupported file type."
-      )
+    writeJson(
+      FILES.messages,
+      all
     );
-
-  },
-
-  filename: function(
-    req,
-    file,
-    cb
-  ) {
-
-    const extension =
-      extensionMap[
-        file.mimetype
-      ] ||
-      path.extname(
-        file.originalname
-      ) ||
-      "";
-
-    const filename =
-      `${Date.now()}-${crypto.randomBytes(8).toString("hex")}${extension}`;
-
-    cb(
-      null,
-      filename
-    );
-
-  }
-});
-
-const upload =
-  multer({
-
-    storage,
-
-    limits: {
-      fileSize:
-        20 *
-        1024 *
-        1024,
-
-      files: 1
-    },
-
-    fileFilter:
-      function(
-        req,
-        file,
-        cb
-      ) {
-
-        if (
-          allowedMediaMimeTypes.has(
-            file.mimetype
-          )
-        ) {
-
-          cb(
-            null,
-            true
-          );
-
-        } else {
-
-          cb(
-            new Error(
-              "Only JPG, PNG, WEBP, GIF, MP4, WEBM, MOV, MKV and OGG files are allowed."
-            )
-          );
-
-        }
-
-      }
-
-  });
-
-const profileUpload =
-  multer({
-
-    dest:
-      PROFILE_UPLOADS_DIR,
-
-    limits: {
-      fileSize:
-        10 *
-        1024 *
-        1024,
-
-      files: 1
-    },
-
-    fileFilter:
-      function(
-        req,
-        file,
-        cb
-      ) {
-
-        if (
-          imageMimeTypes.has(
-            file.mimetype
-          )
-        ) {
-
-          cb(
-            null,
-            true
-          );
-
-        } else {
-
-          cb(
-            new Error(
-              "Profile picture must be an image."
-            )
-          );
-
-        }
-
-      }
-
-  });
-
-const coverUpload =
-  multer({
-
-    dest:
-      COVER_UPLOADS_DIR,
-
-    limits: {
-      fileSize:
-        10 *
-        1024 *
-        1024,
-
-      files: 1
-    },
-
-    fileFilter:
-      function(
-        req,
-        file,
-        cb
-      ) {
-
-        if (
-          imageMimeTypes.has(
-            file.mimetype
-          )
-        ) {
-
-          cb(
-            null,
-            true
-          );
-
-        } else {
-
-          cb(
-            new Error(
-              "Cover photo must be an image."
-            )
-          );
-
-        }
-
-      }
-
-  });
-
-const messageUpload =
-  multer({
-
-    dest:
-      MESSAGE_UPLOADS_DIR,
-
-    limits: {
-      fileSize:
-        10 *
-        1024 *
-        1024,
-
-      files: 1
-    },
-
-    fileFilter:
-      function(
-        req,
-        file,
-        cb
-      ) {
-
-        if (
-          imageMimeTypes.has(
-            file.mimetype
-          )
-        ) {
-
-          cb(
-            null,
-            true
-          );
-
-        } else {
-
-          cb(
-            new Error(
-              "Message attachment must be an image."
-            )
-          );
-
-        }
-
-      }
-
-  });
-
-/* =========================================================
-   STATIC FILES
-========================================================= */
-
-app.use(
-  express.static(
-    path.join(
-      ROOT_DIR,
-      "public"
-    )
-  )
-);
-
-app.use(
-  "/uploads",
-  express.static(
-    UPLOADS_DIR
-  )
-);
-
-/* =========================================================
-   BASIC ROUTES
-========================================================= */
-
-app.get(
-  "/",
-  function(req, res) {
-
-    res.sendFile(
-      path.join(
-        ROOT_DIR,
-        "public",
-        "index.html"
-      )
-    );
-
-  }
-);
-
-app.get(
-  "/health",
-  function(req, res) {
 
     res.json({
-      ok: true,
-      service: "Pulse Social",
-      version: "4.0.0",
-      time: now()
+      success: true,
+      message
     });
+  }
+);
 
+app.get(
+  "/api/messages/unread-count",
+  requireAuth,
+  (req, res) => {
+    const count =
+      messages().filter(
+        (m) =>
+          String(m.receiverId) ===
+            String(req.session.userId) &&
+          !m.read
+      ).length;
+
+    res.json({
+      success: true,
+      count
+    });
   }
 );
 
 /* =========================================================
-   API HEALTH
+   VERIFICATION
 ========================================================= */
 
 app.get(
-  "/api/health",
-  function(req, res) {
+  "/api/verification/me",
+  requireAuth,
+  (req, res) => {
+    const requests =
+      verificationRequests();
 
-    res.json({
-
-      ok: true,
-
-      service:
-        "Pulse Social",
-
-      version:
-        "4.0.0",
-
-      storageRoot:
-        STORAGE_ROOT,
-
-      persistentStorage:
-        Boolean(
-          process.env.STORAGE_ROOT
-        ),
-
-      features: {
-        authentication: true,
-        profiles: true,
-        coverPhotos: true,
-        posts: true,
-        imagePosts: true,
-        videoPosts: true,
-        tiktokFeed: true,
-        forYouFeed: true,
-        followingFeed: true,
-        likes: true,
-        comments: true,
-        follows: true,
-        verifiedUsers: true,
-        notifications: true,
-        messages: true,
-        verification: true,
-        admin: true,
-        railwayStorage: Boolean(
-          process.env.STORAGE_ROOT
+    const request =
+      requests
+        .filter(
+          (r) =>
+            String(r.userId) ===
+            String(req.session.userId)
         )
-      },
+        .sort(
+          (a, b) =>
+            new Date(b.createdAt) -
+            new Date(a.createdAt)
+        )[0];
 
-      time: now()
+    const user =
+      getUserById(
+        req.session.userId
+      );
 
+    res.json({
+      success: true,
+      verified: Boolean(
+        user?.verified ||
+        user?.isVerified
+      ),
+      status:
+        request?.status ||
+        user?.verificationStatus ||
+        "none",
+      request:
+        request || null
     });
+  }
+);
 
+app.post(
+  "/api/verification/request",
+  requireAuth,
+  (req, res) => {
+    const all =
+      verificationRequests();
+
+    const existing =
+      all.find(
+        (r) =>
+          String(r.userId) ===
+            String(req.session.userId) &&
+          r.status === "pending"
+      );
+
+    if (existing) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "You already have a pending verification request."
+      });
+    }
+
+    const request = {
+      id: makeId("verification"),
+      userId:
+        req.session.userId,
+      reason:
+        String(
+          req.body.reason || ""
+        ).trim(),
+      status: "pending",
+      createdAt: now()
+    };
+
+    all.push(request);
+
+    writeJson(
+      FILES.verification,
+      all
+    );
+
+    const allUsers = users();
+
+    const index =
+      allUsers.findIndex(
+        (u) =>
+          String(u.id) ===
+          String(req.session.userId)
+      );
+
+    if (index >= 0) {
+      allUsers[index].verificationStatus =
+        "pending";
+
+      writeJson(
+        FILES.users,
+        allUsers
+      );
+    }
+
+    res.json({
+      success: true,
+      request
+    });
+  }
+);
+
+/* =========================================================
+   ADMIN
+========================================================= */
+
+app.get(
+  "/api/admin/me",
+  requireAuth,
+  requireAdmin,
+  (req, res) => {
+    res.json({
+      success: true,
+      admin: true
+    });
+  }
+);
+
+app.get(
+  "/api/admin/stats",
+  requireAuth,
+  requireAdmin,
+  (req, res) => {
+    res.json({
+      success: true,
+      stats: {
+        users: users().length,
+        posts: posts().length,
+        comments: comments().length,
+        likes: likes().length,
+        follows: follows().length,
+        messages: messages().length,
+        verificationRequests:
+          verificationRequests().length
+      }
+    });
+  }
+);
+
+app.get(
+  "/api/admin/users",
+  requireAuth,
+  requireAdmin,
+  (req, res) => {
+    res.json({
+      success: true,
+      users: users().map((u) =>
+        safeUser(
+          u,
+          req.session.userId
+        )
+      )
+    });
+  }
+);
+
+app.get(
+  "/api/admin/verification/requests",
+  requireAuth,
+  requireAdmin,
+  (req, res) => {
+    res.json({
+      success: true,
+      requests:
+        verificationRequests().map(
+          (r) => ({
+            ...r,
+            user: safeUser(
+              getUserById(
+                r.userId
+              ),
+              req.session.userId
+            )
+          })
+        )
+    });
+  }
+);
+
+app.post(
+  "/api/admin/verification/:id/approve",
+  requireAuth,
+  requireAdmin,
+  (req, res) => {
+    const all =
+      verificationRequests();
+
+    const index =
+      all.findIndex(
+        (r) =>
+          String(r.id) ===
+          String(req.params.id)
+      );
+
+    if (index === -1) {
+      return res.status(404).json({
+        success: false,
+        message:
+          "Verification request not found."
+      });
+    }
+
+    all[index].status =
+      "approved";
+
+    all[index].updatedAt =
+      now();
+
+    writeJson(
+      FILES.verification,
+      all
+    );
+
+    const allUsers =
+      users();
+
+    const userIndex =
+      allUsers.findIndex(
+        (u) =>
+          String(u.id) ===
+          String(all[index].userId)
+      );
+
+    if (userIndex >= 0) {
+      allUsers[userIndex].verified =
+        true;
+
+      allUsers[userIndex].isVerified =
+        true;
+
+      allUsers[userIndex].verificationStatus =
+        "approved";
+
+      writeJson(
+        FILES.users,
+        allUsers
+      );
+    }
+
+    res.json({
+      success: true
+    });
+  }
+);
+
+app.post(
+  "/api/admin/verification/:id/reject",
+  requireAuth,
+  requireAdmin,
+  (req, res) => {
+    const all =
+      verificationRequests();
+
+    const index =
+      all.findIndex(
+        (r) =>
+          String(r.id) ===
+          String(req.params.id)
+      );
+
+    if (index === -1) {
+      return res.status(404).json({
+        success: false,
+        message:
+          "Verification request not found."
+      });
+    }
+
+    all[index].status =
+      "rejected";
+
+    all[index].updatedAt =
+      now();
+
+    writeJson(
+      FILES.verification,
+      all
+    );
+
+    const allUsers =
+      users();
+
+    const userIndex =
+      allUsers.findIndex(
+        (u) =>
+          String(u.id) ===
+          String(all[index].userId)
+      );
+
+    if (userIndex >= 0) {
+      allUsers[userIndex].verificationStatus =
+        "rejected";
+
+      writeJson(
+        FILES.users,
+        allUsers
+      );
+    }
+
+    res.json({
+      success: true
+    });
   }
 );
 
@@ -1546,3510 +2493,108 @@ app.get(
   "/api/storage-info",
   requireAuth,
   requireAdmin,
-  function(req, res) {
-
+  (req, res) => {
     res.json({
-
-      storageRoot:
-        STORAGE_ROOT,
-
-      dataDirectory:
-        DATA_DIR,
-
+      success: true,
+      storageRoot: STORAGE_ROOT,
+      dataDirectory: DATA_DIR,
       uploadsDirectory:
-        UPLOADS_DIR,
-
-      videoDirectory:
-        VIDEO_UPLOADS_DIR,
-
-      persistent:
-        Boolean(
-          process.env.STORAGE_ROOT
-        )
-
+        UPLOADS_DIR
     });
-
   }
 );
 
 /* =========================================================
-   REGISTER
-========================================================= */
-
-async function registerHandler(
-  req,
-  res
-) {
-
-  try {
-
-    const name =
-      cleanText(
-        req.body.name,
-        100
-      );
-
-    const username =
-      normalizeUsername(
-        req.body.username
-      );
-
-    const email =
-      cleanText(
-        req.body.email,
-        200
-      ).toLowerCase();
-
-    const password =
-      String(
-        req.body.password ||
-        ""
-      );
-
-    if (
-      !name ||
-      !username ||
-      !email ||
-      !password
-    ) {
-
-      return res.status(400).json({
-        error:
-          "Name, username, email and password are required."
-      });
-
-    }
-
-    if (
-      !/^[a-zA-Z0-9_.-]{3,50}$/.test(
-        username
-      )
-    ) {
-
-      return res.status(400).json({
-        error:
-          "Username must be 3-50 characters and may contain letters, numbers, underscores, dots or hyphens."
-      });
-
-    }
-
-    if (
-      password.length < 6
-    ) {
-
-      return res.status(400).json({
-        error:
-          "Password must be at least 6 characters."
-      });
-
-    }
-
-    const users =
-      getUsers();
-
-    const usernameExists =
-      users.some(
-        user =>
-          normalizeUsername(
-            user.username
-          ) === username
-      );
-
-    if (usernameExists) {
-
-      return res.status(409).json({
-        error:
-          "Username is already taken."
-      });
-
-    }
-
-    const emailExists =
-      users.some(
-        user =>
-          String(
-            user.email || ""
-          ).toLowerCase() ===
-          email
-      );
-
-    if (emailExists) {
-
-      return res.status(409).json({
-        error:
-          "Email is already registered."
-      });
-
-    }
-
-    const passwordHash =
-      await bcrypt.hash(
-        password,
-        12
-      );
-
-    const user = {
-
-      id:
-        makeId("user_"),
-
-      name,
-
-      username,
-
-      email,
-
-      passwordHash,
-
-      bio: "",
-
-      profilePicture:
-        "/images/default-avatar.png",
-
-      profileImage:
-        "/images/default-avatar.png",
-
-      avatar:
-        "/images/default-avatar.png",
-
-      coverPhoto: "",
-
-      coverImage: "",
-
-      cover: "",
-
-      role:
-        "user",
-
-      verified: false,
-
-      isVerified: false,
-
-      verificationStatus:
-        "none",
-
-      createdAt:
-        now()
-
-    };
-
-    users.push(user);
-
-    saveUsers(users);
-
-    req.session.userId =
-      user.id;
-
-    req.session.save(
-      function() {
-
-        return res.status(201).json({
-          success: true,
-          user:
-            safeUser(
-              user,
-              user
-            )
-        });
-
-      }
-    );
-
-  } catch (error) {
-
-    console.error(
-      "REGISTER ERROR:",
-      error
-    );
-
-    res.status(500).json({
-      error:
-        "Unable to create account."
-    });
-
-  }
-
-}
-
-app.post(
-  "/api/register",
-  registerHandler
-);
-
-app.post(
-  "/api/signup",
-  registerHandler
-);
-
-/* =========================================================
-   LOGIN
-========================================================= */
-
-app.post(
-  "/api/login",
-  async function(req, res) {
-
-    try {
-
-      const login =
-        cleanText(
-          req.body.login ||
-          req.body.username ||
-          req.body.email,
-          200
-        );
-
-      const password =
-        String(
-          req.body.password ||
-          ""
-        );
-
-      if (
-        !login ||
-        !password
-      ) {
-
-        return res.status(400).json({
-          error:
-            "Username/email and password are required."
-        });
-
-      }
-
-      const users =
-        getUsers();
-
-      const normalizedLogin =
-        login.toLowerCase();
-
-      const user =
-        users.find(
-          candidate =>
-            String(
-              candidate.username ||
-              ""
-            ).toLowerCase() ===
-              normalizedLogin ||
-
-            String(
-              candidate.email ||
-              ""
-            ).toLowerCase() ===
-              normalizedLogin
-        );
-
-      if (!user) {
-
-        return res.status(401).json({
-          error:
-            "Invalid username/email or password."
-        });
-
-      }
-
-      /*
-        IMPORTANT:
-        Prevents bcryptjs:
-        "Illegal arguments: string, undefined"
-      */
-
-      if (
-        typeof user.passwordHash !==
-        "string" ||
-        !user.passwordHash
-      ) {
-
-        return res.status(401).json({
-          error:
-            "This account does not have a valid password. Please create a new account or reset the password."
-        });
-
-      }
-
-      const valid =
-        await bcrypt.compare(
-          password,
-          user.passwordHash
-        );
-
-      if (!valid) {
-
-        return res.status(401).json({
-          error:
-            "Invalid username/email or password."
-        });
-
-      }
-
-      req.session.userId =
-        user.id;
-
-      req.session.save(
-        function(error) {
-
-          if (error) {
-
-            console.error(
-              "SESSION SAVE ERROR:",
-              error
-            );
-
-            return res.status(500).json({
-              error:
-                "Unable to create login session."
-            });
-
-          }
-
-          return res.json({
-            success: true,
-
-            user:
-              safeUser(
-                user,
-                user
-              )
-          });
-
-        }
-      );
-
-    } catch (error) {
-
-      console.error(
-        "LOGIN ERROR:",
-        error
-      );
-
-      res.status(500).json({
-        error:
-          "Unable to sign in."
-      });
-
-    }
-
-  }
-);
-
-/* =========================================================
-   LOGOUT
-========================================================= */
-
-app.post(
-  "/api/logout",
-  function(req, res) {
-
-    if (!req.session) {
-      return res.json({
-        success: true
-      });
-    }
-
-    req.session.destroy(
-      function(error) {
-
-        if (error) {
-
-          console.error(
-            "LOGOUT ERROR:",
-            error
-          );
-
-          return res.status(500).json({
-            error:
-              "Unable to log out."
-          });
-
-        }
-
-        res.clearCookie(
-          "connect.sid"
-        );
-
-        res.json({
-          success: true
-        });
-
-      }
-    );
-
-  }
-);
-
-/* =========================================================
-   CURRENT USER
-========================================================= */
-
-app.get(
-  "/api/me",
-  function(req, res) {
-
-    if (
-      !req.session ||
-      !req.session.userId
-    ) {
-
-      return res.json({
-        loggedIn: false,
-        user: null
-      });
-
-    }
-
-    const user =
-      findUserById(
-        req.session.userId
-      );
-
-    if (!user) {
-
-      return res.json({
-        loggedIn: false,
-        user: null
-      });
-
-    }
-
-    res.json({
-      loggedIn: true,
-
-      user:
-        safeUser(
-          user,
-          user
-        )
-    });
-
-  }
-);
-
-/* =========================================================
-   GET USER PROFILE
-========================================================= */
-
-app.get(
-  "/api/users/:username",
-  function(req, res) {
-
-    const user =
-      findUserByUsername(
-        req.params.username
-      );
-
-    if (!user) {
-
-      return res.status(404).json({
-        error:
-          "User not found."
-      });
-
-    }
-
-    const viewer =
-      req.session &&
-      req.session.userId
-        ? findUserById(
-            req.session.userId
-          )
-        : null;
-
-    res.json({
-      user:
-        safeUser(
-          user,
-          viewer
-        )
-    });
-
-  }
-);
-
-/* =========================================================
-   UPDATE PROFILE
-========================================================= */
-
-app.put(
-  "/api/profile",
-  requireAuth,
-  function(req, res) {
-
-    const users =
-      getUsers();
-
-    const index =
-      users.findIndex(
-        user =>
-          String(user.id) ===
-          String(req.user.id)
-      );
-
-    if (index < 0) {
-
-      return res.status(404).json({
-        error:
-          "User not found."
-      });
-
-    }
-
-    const name =
-      cleanText(
-        req.body.name,
-        100
-      );
-
-    const bio =
-      cleanText(
-        req.body.bio,
-        500
-      );
-
-    if (name) {
-      users[index].name =
-        name;
-    }
-
-    users[index].bio =
-      bio;
-
-    saveUsers(users);
-
-    req.user =
-      users[index];
-
-    res.json({
-      success: true,
-
-      user:
-        safeUser(
-          users[index],
-          users[index]
-        )
-    });
-
-  }
-);
-
-/* =========================================================
-   PROFILE PICTURE
-========================================================= */
-
-app.post(
-  "/api/profile/picture",
-  requireAuth,
-  profileUpload.single(
-    "profilePicture"
-  ),
-  function(req, res) {
-
-    try {
-
-      if (!req.file) {
-
-        return res.status(400).json({
-          error:
-            "Profile picture is required."
-        });
-
-      }
-
-      const users =
-        getUsers();
-
-      const index =
-        users.findIndex(
-          user =>
-            String(user.id) ===
-            String(req.user.id)
-        );
-
-      if (index < 0) {
-
-        return res.status(404).json({
-          error:
-            "User not found."
-        });
-
-      }
-
-      const extension =
-        extensionMap[
-          req.file.mimetype
-        ] || ".jpg";
-
-      const filename =
-        `${Date.now()}-${crypto.randomBytes(8).toString("hex")}${extension}`;
-
-      const finalPath =
-        path.join(
-          PROFILE_UPLOADS_DIR,
-          filename
-        );
-
-      fs.renameSync(
-        req.file.path,
-        finalPath
-      );
-
-      const relativePath =
-        `/uploads/profiles/${filename}`;
-
-      const oldImage =
-        users[index].profilePicture;
-
-      users[index].profilePicture =
-        relativePath;
-
-      users[index].profileImage =
-        relativePath;
-
-      users[index].avatar =
-        relativePath;
-
-      saveUsers(users);
-
-      deleteUploadFile(
-        oldImage
-      );
-
-      res.json({
-        success: true,
-
-        profilePicture:
-          relativePath,
-
-        profileImage:
-          relativePath,
-
-        avatar:
-          relativePath,
-
-        user:
-          safeUser(
-            users[index],
-            users[index]
-          )
-      });
-
-    } catch (error) {
-
-      console.error(
-        "PROFILE PICTURE ERROR:",
-        error
-      );
-
-      if (req.file) {
-        safeDelete(
-          req.file.path
-        );
-      }
-
-      res.status(500).json({
-        error:
-          "Unable to upload profile picture."
-      });
-
-    }
-
-  }
-);
-
-/* =========================================================
-   COVER PHOTO
-========================================================= */
-
-function coverUploadHandler(
-  req,
-  res
-) {
-
-  try {
-
-    if (!req.file) {
-
-      return res.status(400).json({
-        error:
-          "Cover photo is required."
-      });
-
-    }
-
-    const users =
-      getUsers();
-
-    const index =
-      users.findIndex(
-        user =>
-          String(user.id) ===
-          String(req.user.id)
-      );
-
-    if (index < 0) {
-
-      safeDelete(
-        req.file.path
-      );
-
-      return res.status(404).json({
-        error:
-          "User not found."
-      });
-
-    }
-
-    const extension =
-      extensionMap[
-        req.file.mimetype
-      ] || ".jpg";
-
-    const filename =
-      `${Date.now()}-${crypto.randomBytes(8).toString("hex")}${extension}`;
-
-    const finalPath =
-      path.join(
-        COVER_UPLOADS_DIR,
-        filename
-      );
-
-    fs.renameSync(
-      req.file.path,
-      finalPath
-    );
-
-    const relativePath =
-      `/uploads/covers/${filename}`;
-
-    const oldCover =
-      users[index].coverPhoto ||
-      users[index].coverImage ||
-      users[index].cover;
-
-    users[index].coverPhoto =
-      relativePath;
-
-    users[index].coverImage =
-      relativePath;
-
-    users[index].cover =
-      relativePath;
-
-    saveUsers(users);
-
-    deleteUploadFile(
-      oldCover
-    );
-
-    res.json({
-      success: true,
-
-      coverPhoto:
-        relativePath,
-
-      coverImage:
-        relativePath,
-
-      cover:
-        relativePath,
-
-      user:
-        safeUser(
-          users[index],
-          users[index]
-        )
-    });
-
-  } catch (error) {
-
-    console.error(
-      "COVER ERROR:",
-      error
-    );
-
-    if (req.file) {
-      safeDelete(
-        req.file.path
-      );
-    }
-
-    res.status(500).json({
-      error:
-        "Unable to upload cover photo."
-    });
-
-  }
-
-}
-
-app.post(
-  "/api/profile/cover",
-  requireAuth,
-  coverUpload.single(
-    "coverPhoto"
-  ),
-  coverUploadHandler
-);
-
-app.post(
-  "/api/profile/cover-photo",
-  requireAuth,
-  coverUpload.single(
-    "coverPhoto"
-  ),
-  coverUploadHandler
-);
-
-/* =========================================================
-   DELETE COVER
-========================================================= */
-
-app.delete(
-  "/api/profile/cover",
-  requireAuth,
-  function(req, res) {
-
-    const users =
-      getUsers();
-
-    const index =
-      users.findIndex(
-        user =>
-          String(user.id) ===
-          String(req.user.id)
-      );
-
-    if (index < 0) {
-
-      return res.status(404).json({
-        error:
-          "User not found."
-      });
-
-    }
-
-    const oldCover =
-      users[index].coverPhoto ||
-      users[index].coverImage ||
-      users[index].cover;
-
-    users[index].coverPhoto =
-      "";
-
-    users[index].coverImage =
-      "";
-
-    users[index].cover =
-      "";
-
-    saveUsers(users);
-
-    deleteUploadFile(
-      oldCover
-    );
-
-    res.json({
-      success: true
-    });
-
-  }
-);
-
-/* =========================================================
-   CREATE POST
-========================================================= */
-
-app.post(
-  "/api/posts",
-  requireAuth,
-  upload.single("image"),
-  function(req, res) {
-
-    try {
-
-      const text =
-        cleanText(
-          req.body.text ||
-          req.body.caption,
-          5000
-        );
-
-      const hashtags =
-        extractHashtags(
-          text
-        );
-
-      if (
-        !text &&
-        !req.file
-      ) {
-
-        return res.status(400).json({
-          error:
-            "Post must contain text or media."
-        });
-
-      }
-
-      let mediaUrl = null;
-      let mediaType = null;
-
-      if (req.file) {
-
-        if (
-          videoMimeTypes.has(
-            req.file.mimetype
-          )
-        ) {
-
-          mediaUrl =
-            `/uploads/videos/${req.file.filename}`;
-
-          mediaType =
-            "video";
-
-        } else {
-
-          mediaUrl =
-            `/uploads/posts/${req.file.filename}`;
-
-          mediaType =
-            "image";
-
-        }
-
-      }
-
-      const posts =
-        getPosts();
-
-      const post = {
-
-        id:
-          makeId("post_"),
-
-        userId:
-          req.user.id,
-
-        text,
-
-        caption:
-          text,
-
-        image:
-          mediaType === "image"
-            ? mediaUrl
-            : null,
-
-        imageUrl:
-          mediaType === "image"
-            ? mediaUrl
-            : null,
-
-        video:
-          mediaType === "video"
-            ? mediaUrl
-            : null,
-
-        videoUrl:
-          mediaType === "video"
-            ? mediaUrl
-            : null,
-
-        mediaUrl,
-
-        mediaType,
-
-        sound:
-          cleanText(
-            req.body.sound,
-            200
-          ) || null,
-
-        hashtags,
-
-        createdAt:
-          now(),
-
-        updatedAt:
-          now()
-      };
-
-      posts.unshift(post);
-
-      savePosts(posts);
-
-      res.status(201).json({
-        success: true,
-
-        post:
-          safePost(
-            post,
-            req.user
-          )
-      });
-
-    } catch (error) {
-
-      console.error(
-        "CREATE POST ERROR:",
-        error
-      );
-
-      if (req.file) {
-        safeDelete(
-          req.file.path
-        );
-      }
-
-      res.status(500).json({
-        error:
-          "Unable to create post."
-      });
-
-    }
-
-  }
-);
-
-/* =========================================================
-   FEED
-========================================================= */
-
-app.get(
-  "/api/feed",
-  requireAuth,
-  function(req, res) {
-
-    try {
-
-      const mode =
-        String(
-          req.query.mode ||
-          req.query.type ||
-          "foryou"
-        ).toLowerCase();
-
-      const limit =
-        Math.min(
-          Math.max(
-            Number(
-              req.query.limit || 100
-            ),
-            1
-          ),
-          200
-        );
-
-      const posts =
-        getPosts();
-
-      let visiblePosts =
-        [...posts];
-
-      /*
-        FOLLOWING FEED
-        Only posts from accounts
-        the current user follows.
-      */
-
-      if (
-        mode === "following" ||
-        mode === "follow"
-      ) {
-
-        const followingIds =
-          new Set(
-            getFollows()
-              .filter(
-                follow =>
-                  String(
-                    follow.followerId
-                  ) ===
-                  String(
-                    req.user.id
-                  )
-              )
-              .map(
-                follow =>
-                  String(
-                    follow.followingId
-                  )
-              )
-          );
-
-        visiblePosts =
-          visiblePosts.filter(
-            post =>
-              followingIds.has(
-                String(
-                  post.userId
-                )
-              )
-          );
-
-      }
-
-      /*
-        FOR YOU
-        Broad feed containing posts
-        from all users.
-
-        Newest posts first.
-      */
-
-      visiblePosts =
-        visiblePosts
-          .sort(
-            (a, b) =>
-              new Date(
-                b.createdAt || 0
-              ) -
-              new Date(
-                a.createdAt || 0
-              )
-          )
-          .slice(
-            0,
-            limit
-          );
-
-      res.json({
-
-        mode,
-
-        posts:
-          visiblePosts.map(
-            post =>
-              safePost(
-                post,
-                req.user
-              )
-          )
-
-      });
-
-    } catch (error) {
-
-      console.error(
-        "FEED ERROR:",
-        error
-      );
-
-      res.status(500).json({
-        error:
-          "Unable to load feed."
-      });
-
-    }
-
-  }
-);
-
-/* =========================================================
-   USER POSTS
-========================================================= */
-
-app.get(
-  "/api/users/:username/posts",
-  function(req, res) {
-
-    const user =
-      findUserByUsername(
-        req.params.username
-      );
-
-    if (!user) {
-
-      return res.status(404).json({
-        error:
-          "User not found."
-      });
-
-    }
-
-    const viewer =
-      req.session &&
-      req.session.userId
-        ? findUserById(
-            req.session.userId
-          )
-        : null;
-
-    const posts =
-      getPosts()
-        .filter(
-          post =>
-            String(
-              post.userId
-            ) ===
-            String(
-              user.id
-            )
-        )
-        .sort(
-          (a, b) =>
-            new Date(
-              b.createdAt || 0
-            ) -
-            new Date(
-              a.createdAt || 0
-            )
-        );
-
-    res.json({
-      posts:
-        posts.map(
-          post =>
-            safePost(
-              post,
-              viewer
-            )
-        )
-    });
-
-  }
-);
-
-/* =========================================================
-   LIKE POST
-========================================================= */
-
-app.post(
-  "/api/posts/:id/like",
-  requireAuth,
-  function(req, res) {
-
-    const postId =
-      req.params.id;
-
-    const posts =
-      getPosts();
-
-    const post =
-      posts.find(
-        item =>
-          String(item.id) ===
-          String(postId)
-      );
-
-    if (!post) {
-
-      return res.status(404).json({
-        error:
-          "Post not found."
-      });
-
-    }
-
-    const likes =
-      getLikes();
-
-    const existingIndex =
-      likes.findIndex(
-        like =>
-          String(
-            like.postId
-          ) ===
-            String(postId) &&
-          String(
-            like.userId
-          ) ===
-            String(req.user.id)
-      );
-
-    let liked;
-
-    if (
-      existingIndex >= 0
-    ) {
-
-      likes.splice(
-        existingIndex,
-        1
-      );
-
-      liked = false;
-
-    } else {
-
-      likes.push({
-        id:
-          makeId("like_"),
-
-        postId,
-
-        userId:
-          req.user.id,
-
-        createdAt:
-          now()
-      });
-
-      liked = true;
-
-      createNotification({
-        userId:
-          post.userId,
-
-        fromUserId:
-          req.user.id,
-
-        type:
-          "like",
-
-        postId,
-
-        message:
-          `${req.user.username} liked your post.`
-      });
-
-    }
-
-    saveLikes(likes);
-
-    const count =
-      likes.filter(
-        like =>
-          String(
-            like.postId
-          ) ===
-          String(postId)
-      ).length;
-
-    res.json({
-      success: true,
-
-      liked,
-
-      isLiked:
-        liked,
-
-      likesCount:
-        count,
-
-      likeCount:
-        count
-    });
-
-  }
-);
-
-/* =========================================================
-   GET COMMENTS
-========================================================= */
-
-app.get(
-  "/api/posts/:id/comments",
-  requireAuth,
-  function(req, res) {
-
-    const postId =
-      req.params.id;
-
-    const post =
-      getPosts().find(
-        item =>
-          String(item.id) ===
-          String(postId)
-      );
-
-    if (!post) {
-
-      return res.status(404).json({
-        error:
-          "Post not found."
-      });
-
-    }
-
-    const comments =
-      getComments()
-        .filter(
-          comment =>
-            String(
-              comment.postId
-            ) ===
-            String(postId)
-        )
-        .sort(
-          (a, b) =>
-            new Date(
-              a.createdAt || 0
-            ) -
-            new Date(
-              b.createdAt || 0
-            )
-        );
-
-    res.json({
-      comments:
-        comments.map(
-          comment => {
-
-            const user =
-              findUserById(
-                comment.userId
-              );
-
-            return {
-              id:
-                comment.id,
-
-              postId:
-                comment.postId,
-
-              userId:
-                comment.userId,
-
-              user:
-                safeUser(
-                  user,
-                  req.user
-                ),
-
-              text:
-                comment.text,
-
-              content:
-                comment.text,
-
-              createdAt:
-                comment.createdAt
-            };
-
-          }
-        )
-    });
-
-  }
-);
-
-/* =========================================================
-   ADD COMMENT
-========================================================= */
-
-app.post(
-  "/api/posts/:id/comments",
-  requireAuth,
-  function(req, res) {
-
-    const postId =
-      req.params.id;
-
-    const post =
-      getPosts().find(
-        item =>
-          String(item.id) ===
-          String(postId)
-      );
-
-    if (!post) {
-
-      return res.status(404).json({
-        error:
-          "Post not found."
-      });
-
-    }
-
-    const text =
-      cleanText(
-        req.body.text ||
-        req.body.content,
-        1000
-      );
-
-    if (!text) {
-
-      return res.status(400).json({
-        error:
-          "Comment cannot be empty."
-      });
-
-    }
-
-    const comments =
-      getComments();
-
-    const comment = {
-
-      id:
-        makeId("comment_"),
-
-      postId,
-
-      userId:
-        req.user.id,
-
-      text,
-
-      createdAt:
-        now()
-
-    };
-
-    comments.push(
-      comment
-    );
-
-    saveComments(
-      comments
-    );
-
-    createNotification({
-      userId:
-        post.userId,
-
-      fromUserId:
-        req.user.id,
-
-      type:
-        "comment",
-
-      postId,
-
-      message:
-        `${req.user.username} commented on your post.`
-    });
-
-    res.status(201).json({
-      success: true,
-
-      comment: {
-        id:
-          comment.id,
-
-        postId,
-
-        userId:
-          req.user.id,
-
-        user:
-          safeUser(
-            req.user,
-            req.user
-          ),
-
-        text,
-
-        content:
-          text,
-
-        createdAt:
-          comment.createdAt
-      }
-    });
-
-  }
-);
-
-/* =========================================================
-   DELETE COMMENT
-========================================================= */
-
-app.delete(
-  "/api/comments/:id",
-  requireAuth,
-  function(req, res) {
-
-    const comments =
-      getComments();
-
-    const index =
-      comments.findIndex(
-        comment =>
-          String(
-            comment.id
-          ) ===
-          String(
-            req.params.id
-          )
-      );
-
-    if (index < 0) {
-
-      return res.status(404).json({
-        error:
-          "Comment not found."
-      });
-
-    }
-
-    const comment =
-      comments[index];
-
-    if (
-      String(
-        comment.userId
-      ) !==
-        String(
-          req.user.id
-        ) &&
-      !isAdmin(req.user)
-    ) {
-
-      return res.status(403).json({
-        error:
-          "You cannot delete this comment."
-      });
-
-    }
-
-    comments.splice(
-      index,
-      1
-    );
-
-    saveComments(
-      comments
-    );
-
-    res.json({
-      success: true
-    });
-
-  }
-);
-
-/* =========================================================
-   DELETE POST
-========================================================= */
-
-app.delete(
-  "/api/posts/:id",
-  requireAuth,
-  function(req, res) {
-
-    const posts =
-      getPosts();
-
-    const index =
-      posts.findIndex(
-        post =>
-          String(
-            post.id
-          ) ===
-          String(
-            req.params.id
-          )
-      );
-
-    if (index < 0) {
-
-      return res.status(404).json({
-        error:
-          "Post not found."
-      });
-
-    }
-
-    const post =
-      posts[index];
-
-    if (
-      String(
-        post.userId
-      ) !==
-        String(
-          req.user.id
-        ) &&
-      !isAdmin(req.user)
-    ) {
-
-      return res.status(403).json({
-        error:
-          "You cannot delete this post."
-      });
-
-    }
-
-    posts.splice(
-      index,
-      1
-    );
-
-    savePosts(
-      posts
-    );
-
-    const likes =
-      getLikes().filter(
-        like =>
-          String(
-            like.postId
-          ) !==
-          String(
-            post.id
-          )
-      );
-
-    saveLikes(
-      likes
-    );
-
-    const comments =
-      getComments().filter(
-        comment =>
-          String(
-            comment.postId
-          ) !==
-          String(
-            post.id
-          )
-      );
-
-    saveComments(
-      comments
-    );
-
-    deleteUploadFile(
-      post.image
-    );
-
-    deleteUploadFile(
-      post.imageUrl
-    );
-
-    deleteUploadFile(
-      post.video
-    );
-
-    deleteUploadFile(
-      post.videoUrl
-    );
-
-    res.json({
-      success: true
-    });
-
-  }
-);
-
-/* =========================================================
-   FOLLOW / UNFOLLOW
-========================================================= */
-
-app.post(
-  "/api/users/:id/follow",
-  requireAuth,
-  function(req, res) {
-
-    const targetId =
-      req.params.id;
-
-    if (
-      String(targetId) ===
-      String(req.user.id)
-    ) {
-
-      return res.status(400).json({
-        error:
-          "You cannot follow yourself."
-      });
-
-    }
-
-    const target =
-      findUserById(
-        targetId
-      );
-
-    if (!target) {
-
-      return res.status(404).json({
-        error:
-          "User not found."
-      });
-
-    }
-
-    const follows =
-      getFollows();
-
-    const existingIndex =
-      follows.findIndex(
-        follow =>
-          String(
-            follow.followerId
-          ) ===
-            String(
-              req.user.id
-            ) &&
-          String(
-            follow.followingId
-          ) ===
-            String(
-              targetId
-            )
-      );
-
-    let following;
-
-    if (
-      existingIndex >= 0
-    ) {
-
-      follows.splice(
-        existingIndex,
-        1
-      );
-
-      following = false;
-
-    } else {
-
-      follows.push({
-
-        id:
-          makeId("follow_"),
-
-        followerId:
-          req.user.id,
-
-        followingId:
-          targetId,
-
-        createdAt:
-          now()
-
-      });
-
-      following = true;
-
-      createNotification({
-        userId:
-          target.id,
-
-        fromUserId:
-          req.user.id,
-
-        type:
-          "follow",
-
-        message:
-          `${req.user.username} started following you.`
-      });
-
-    }
-
-    saveFollows(
-      follows
-    );
-
-    res.json({
-
-      success: true,
-
-      following,
-
-      isFollowing:
-        following,
-
-      followersCount:
-        getFollowerCount(
-          target.id
-        ),
-
-      followingCount:
-        getFollowingCount(
-          target.id
-        )
-
-    });
-
-  }
-);
-
-/* =========================================================
-   FOLLOWERS
-========================================================= */
-
-app.get(
-  "/api/users/:id/followers",
-  function(req, res) {
-
-    const user =
-      findUserById(
-        req.params.id
-      );
-
-    if (!user) {
-
-      return res.status(404).json({
-        error:
-          "User not found."
-      });
-
-    }
-
-    const viewer =
-      req.session &&
-      req.session.userId
-        ? findUserById(
-            req.session.userId
-          )
-        : null;
-
-    const followers =
-      getFollows()
-        .filter(
-          follow =>
-            String(
-              follow.followingId
-            ) ===
-            String(
-              user.id
-            )
-        )
-        .map(
-          follow =>
-            findUserById(
-              follow.followerId
-            )
-        )
-        .filter(Boolean);
-
-    res.json({
-      users:
-        followers.map(
-          follower =>
-            safeUser(
-              follower,
-              viewer
-            )
-        )
-    });
-
-  }
-);
-
-/* =========================================================
-   FOLLOWING
-========================================================= */
-
-app.get(
-  "/api/users/:id/following",
-  function(req, res) {
-
-    const user =
-      findUserById(
-        req.params.id
-      );
-
-    if (!user) {
-
-      return res.status(404).json({
-        error:
-          "User not found."
-      });
-
-    }
-
-    const viewer =
-      req.session &&
-      req.session.userId
-        ? findUserById(
-            req.session.userId
-          )
-        : null;
-
-    const following =
-      getFollows()
-        .filter(
-          follow =>
-            String(
-              follow.followerId
-            ) ===
-            String(
-              user.id
-            )
-        )
-        .map(
-          follow =>
-            findUserById(
-              follow.followingId
-            )
-        )
-        .filter(Boolean);
-
-    res.json({
-      users:
-        following.map(
-          target =>
-            safeUser(
-              target,
-              viewer
-            )
-        )
-    });
-
-  }
-);
-
-/* =========================================================
-   SEARCH
-========================================================= */
-
-app.get(
-  "/api/search",
-  requireAuth,
-  function(req, res) {
-
-    const query =
-      cleanText(
-        req.query.q,
-        100
-      ).toLowerCase();
-
-    if (!query) {
-
-      return res.json({
-        users: [],
-        posts: []
-      });
-
-    }
-
-    const users =
-      getUsers()
-        .filter(
-          user =>
-            String(
-              user.username || ""
-            )
-              .toLowerCase()
-              .includes(query) ||
-
-            String(
-              user.name || ""
-            )
-              .toLowerCase()
-              .includes(query)
-        )
-        .slice(
-          0,
-          50
-        );
-
-    const posts =
-      getPosts()
-        .filter(
-          post =>
-            String(
-              post.text || ""
-            )
-              .toLowerCase()
-              .includes(query)
-        )
-        .slice(
-          0,
-          50
-        );
-
-    res.json({
-
-      users:
-        users.map(
-          user =>
-            safeUser(
-              user,
-              req.user
-            )
-        ),
-
-      posts:
-        posts.map(
-          post =>
-            safePost(
-              post,
-              req.user
-            )
-        )
-
-    });
-
-  }
-);
-
-/* =========================================================
-   NOTIFICATIONS
-========================================================= */
-
-app.get(
-  "/api/notifications",
-  requireAuth,
-  function(req, res) {
-
-    const notifications =
-      getNotifications()
-        .filter(
-          notification =>
-            String(
-              notification.userId
-            ) ===
-            String(
-              req.user.id
-            )
-        )
-        .sort(
-          (a, b) =>
-            new Date(
-              b.createdAt || 0
-            ) -
-            new Date(
-              a.createdAt || 0
-            )
-        )
-        .slice(
-          0,
-          100
-        );
-
-    res.json({
-
-      notifications:
-        notifications.map(
-          notification => {
-
-            const fromUser =
-              findUserById(
-                notification.fromUserId
-              );
-
-            return {
-              ...notification,
-
-              fromUser:
-                safeUser(
-                  fromUser,
-                  req.user
-                )
-            };
-
-          }
-        ),
-
-      unreadCount:
-        notifications.filter(
-          item =>
-            !item.read
-        ).length
-
-    });
-
-  }
-);
-
-/* =========================================================
-   MARK NOTIFICATIONS READ
-========================================================= */
-
-app.post(
-  "/api/notifications/read",
-  requireAuth,
-  function(req, res) {
-
-    const notifications =
-      getNotifications();
-
-    notifications.forEach(
-      notification => {
-
-        if (
-          String(
-            notification.userId
-          ) ===
-          String(
-            req.user.id
-          )
-        ) {
-
-          notification.read =
-            true;
-
-        }
-
-      }
-    );
-
-    saveNotifications(
-      notifications
-    );
-
-    res.json({
-      success: true
-    });
-
-  }
-);
-
-/* =========================================================
-   MESSAGE CONVERSATIONS
-========================================================= */
-
-app.get(
-  "/api/messages/conversations",
-  requireAuth,
-  function(req, res) {
-
-    const messages =
-      getMessages();
-
-    const map =
-      new Map();
-
-    messages
-      .filter(
-        message =>
-          String(
-            message.senderId
-          ) ===
-            String(
-              req.user.id
-            ) ||
-          String(
-            message.receiverId
-          ) ===
-            String(
-              req.user.id
-            )
-      )
-      .sort(
-        (a, b) =>
-          new Date(
-            b.createdAt || 0
-          ) -
-          new Date(
-            a.createdAt || 0
-          )
-      )
-      .forEach(
-        message => {
-
-          const otherId =
-            String(
-              message.senderId
-            ) ===
-            String(
-              req.user.id
-            )
-              ? message.receiverId
-              : message.senderId;
-
-          if (
-            !map.has(
-              String(otherId)
-            )
-          ) {
-
-            map.set(
-              String(otherId),
-              message
-            );
-
-          }
-
-        }
-      );
-
-    const conversations =
-      Array.from(
-        map.entries()
-      ).map(
-        ([otherId, message]) => {
-
-          const user =
-            findUserById(
-              otherId
-            );
-
-          return {
-            user:
-              safeUser(
-                user,
-                req.user
-              ),
-
-            lastMessage:
-              message.text ||
-              "",
-
-            createdAt:
-              message.createdAt,
-
-            messageId:
-              message.id
-          };
-
-        }
-      );
-
-    res.json({
-      conversations
-    });
-
-  }
-);
-
-/* =========================================================
-   GET MESSAGES
-========================================================= */
-
-app.get(
-  "/api/messages/:userId",
-  requireAuth,
-  function(req, res) {
-
-    const otherUser =
-      findUserById(
-        req.params.userId
-      );
-
-    if (!otherUser) {
-
-      return res.status(404).json({
-        error:
-          "User not found."
-      });
-
-    }
-
-    const messages =
-      getMessages()
-        .filter(
-          message =>
-            (
-              String(
-                message.senderId
-              ) ===
-                String(
-                  req.user.id
-                ) &&
-              String(
-                message.receiverId
-              ) ===
-                String(
-                  otherUser.id
-                )
-            ) ||
-            (
-              String(
-                message.senderId
-              ) ===
-                String(
-                  otherUser.id
-                ) &&
-              String(
-                message.receiverId
-              ) ===
-                String(
-                  req.user.id
-                )
-            )
-        )
-        .sort(
-          (a, b) =>
-            new Date(
-              a.createdAt || 0
-            ) -
-            new Date(
-              b.createdAt || 0
-            )
-        );
-
-    res.json({
-
-      user:
-        safeUser(
-          otherUser,
-          req.user
-        ),
-
-      messages
-
-    });
-
-  }
-);
-
-/* =========================================================
-   SEND MESSAGE
-========================================================= */
-
-app.post(
-  "/api/messages",
-  requireAuth,
-  messageUpload.single(
-    "attachment"
-  ),
-  function(req, res) {
-
-    try {
-
-      const receiverId =
-        cleanText(
-          req.body.receiverId,
-          100
-        );
-
-      const text =
-        cleanText(
-          req.body.text,
-          5000
-        );
-
-      const receiver =
-        findUserById(
-          receiverId
-        );
-
-      if (!receiver) {
-
-        if (req.file) {
-          safeDelete(
-            req.file.path
-          );
-        }
-
-        return res.status(404).json({
-          error:
-            "Recipient not found."
-        });
-
-      }
-
-      if (
-        String(
-          receiver.id
-        ) ===
-        String(
-          req.user.id
-        )
-      ) {
-
-        if (req.file) {
-          safeDelete(
-            req.file.path
-          );
-        }
-
-        return res.status(400).json({
-          error:
-            "You cannot message yourself."
-        });
-
-      }
-
-      if (
-        !text &&
-        !req.file
-      ) {
-
-        return res.status(400).json({
-          error:
-            "Message cannot be empty."
-        });
-
-      }
-
-      let attachment = null;
-
-      if (req.file) {
-
-        const extension =
-          extensionMap[
-            req.file.mimetype
-          ] || ".jpg";
-
-        const filename =
-          `${Date.now()}-${crypto.randomBytes(8).toString("hex")}${extension}`;
-
-        const finalPath =
-          path.join(
-            MESSAGE_UPLOADS_DIR,
-            filename
-          );
-
-        fs.renameSync(
-          req.file.path,
-          finalPath
-        );
-
-        attachment =
-          `/uploads/messages/${filename}`;
-
-      }
-
-      const messages =
-        getMessages();
-
-      const message = {
-
-        id:
-          makeId("message_"),
-
-        senderId:
-          req.user.id,
-
-        receiverId:
-          receiver.id,
-
-        text,
-
-        attachment,
-
-        read: false,
-
-        createdAt:
-          now()
-
-      };
-
-      messages.push(
-        message
-      );
-
-      saveMessages(
-        messages
-      );
-
-      createNotification({
-        userId:
-          receiver.id,
-
-        fromUserId:
-          req.user.id,
-
-        type:
-          "message",
-
-        message:
-          `${req.user.username} sent you a message.`
-      });
-
-      res.status(201).json({
-
-        success: true,
-
-        message: {
-          ...message,
-
-          sender:
-            safeUser(
-              req.user,
-              req.user
-            ),
-
-          receiver:
-            safeUser(
-              receiver,
-              req.user
-            )
-        }
-
-      });
-
-    } catch (error) {
-
-      console.error(
-        "MESSAGE ERROR:",
-        error
-      );
-
-      if (req.file) {
-        safeDelete(
-          req.file.path
-        );
-      }
-
-      res.status(500).json({
-        error:
-          "Unable to send message."
-      });
-
-    }
-
-  }
-);
-
-/* =========================================================
-   UNREAD MESSAGES
-========================================================= */
-
-app.get(
-  "/api/messages/unread-count",
-  requireAuth,
-  function(req, res) {
-
-    const count =
-      getMessages()
-        .filter(
-          message =>
-            String(
-              message.receiverId
-            ) ===
-              String(
-                req.user.id
-              ) &&
-            !message.read
-        )
-        .length;
-
-    res.json({
-      count
-    });
-
-  }
-);
-
-/* =========================================================
-   VERIFICATION STATUS
-========================================================= */
-
-app.get(
-  "/api/verification/me",
-  requireAuth,
-  function(req, res) {
-
-    const requests =
-      getVerificationRequests();
-
-    const request =
-      requests
-        .filter(
-          item =>
-            String(
-              item.userId
-            ) ===
-            String(
-              req.user.id
-            )
-        )
-        .sort(
-          (a, b) =>
-            new Date(
-              b.createdAt || 0
-            ) -
-            new Date(
-              a.createdAt || 0
-            )
-        )[0] ||
-      null;
-
-    res.json({
-      verified:
-        Boolean(
-          req.user.verified ||
-          req.user.isVerified
-        ),
-
-      status:
-        req.user.verificationStatus ||
-        "none",
-
-      request
-
-    });
-
-  }
-);
-
-/* =========================================================
-   REQUEST VERIFICATION
-========================================================= */
-
-app.post(
-  "/api/verification/request",
-  requireAuth,
-  function(req, res) {
-
-    if (
-      req.user.verified ||
-      req.user.isVerified
-    ) {
-
-      return res.status(400).json({
-        error:
-          "Your account is already verified."
-      });
-
-    }
-
-    const requests =
-      getVerificationRequests();
-
-    const pending =
-      requests.find(
-        request =>
-          String(
-            request.userId
-          ) ===
-            String(
-              req.user.id
-            ) &&
-          request.status ===
-            "pending"
-      );
-
-    if (pending) {
-
-      return res.status(409).json({
-        error:
-          "You already have a pending verification request."
-      });
-
-    }
-
-    const reason =
-      cleanText(
-        req.body.reason,
-        2000
-      );
-
-    const request = {
-
-      id:
-        makeId("verification_"),
-
-      userId:
-        req.user.id,
-
-      reason,
-
-      status:
-        "pending",
-
-      createdAt:
-        now(),
-
-      updatedAt:
-        now()
-
-    };
-
-    requests.push(
-      request
-    );
-
-    saveVerificationRequests(
-      requests
-    );
-
-    res.status(201).json({
-      success: true,
-      request
-    });
-
-  }
-);
-
-/* =========================================================
-   ADMIN ME
-========================================================= */
-
-app.get(
-  "/api/admin/me",
-  requireAuth,
-  requireAdmin,
-  function(req, res) {
-
-    res.json({
-
-      isAdmin: true,
-
-      user:
-        safeUser(
-          req.user,
-          req.user
-        )
-
-    });
-
-  }
-);
-
-/* =========================================================
-   ADMIN STATS
-========================================================= */
-
-app.get(
-  "/api/admin/stats",
-  requireAuth,
-  requireAdmin,
-  function(req, res) {
-
-    const users =
-      getUsers();
-
-    const posts =
-      getPosts();
-
-    const comments =
-      getComments();
-
-    const likes =
-      getLikes();
-
-    const follows =
-      getFollows();
-
-    const messages =
-      getMessages();
-
-    const verificationRequests =
-      getVerificationRequests();
-
-    res.json({
-
-      users:
-        users.length,
-
-      posts:
-        posts.length,
-
-      comments:
-        comments.length,
-
-      likes:
-        likes.length,
-
-      follows:
-        follows.length,
-
-      messages:
-        messages.length,
-
-      verifiedUsers:
-        users.filter(
-          user =>
-            user.verified ||
-            user.isVerified
-        ).length,
-
-      pendingVerification:
-        verificationRequests.filter(
-          request =>
-            request.status ===
-            "pending"
-        ).length
-
-    });
-
-  }
-);
-
-/* =========================================================
-   ADMIN USERS
-========================================================= */
-
-app.get(
-  "/api/admin/users",
-  requireAuth,
-  requireAdmin,
-  function(req, res) {
-
-    const users =
-      getUsers();
-
-    res.json({
-
-      users:
-        users.map(
-          user =>
-            safeUser(
-              user,
-              req.user
-            )
-        )
-
-    });
-
-  }
-);
-
-/* =========================================================
-   ADMIN VERIFICATION REQUESTS
-========================================================= */
-
-app.get(
-  "/api/admin/verification/requests",
-  requireAuth,
-  requireAdmin,
-  function(req, res) {
-
-    const requests =
-      getVerificationRequests();
-
-    res.json({
-
-      requests:
-        requests
-          .sort(
-            (a, b) =>
-              new Date(
-                b.createdAt || 0
-              ) -
-              new Date(
-                a.createdAt || 0
-              )
-          )
-          .map(
-            request => {
-
-              const user =
-                findUserById(
-                  request.userId
-                );
-
-              return {
-                ...request,
-
-                user:
-                  safeUser(
-                    user,
-                    req.user
-                  )
-              };
-
-            }
-          )
-
-    });
-
-  }
-);
-
-/* =========================================================
-   ADMIN APPROVE VERIFICATION
-========================================================= */
-
-app.post(
-  "/api/admin/verification/:id/approve",
-  requireAuth,
-  requireAdmin,
-  function(req, res) {
-
-    const requests =
-      getVerificationRequests();
-
-    const index =
-      requests.findIndex(
-        request =>
-          String(
-            request.id
-          ) ===
-          String(
-            req.params.id
-          )
-      );
-
-    if (index < 0) {
-
-      return res.status(404).json({
-        error:
-          "Verification request not found."
-      });
-
-    }
-
-    const request =
-      requests[index];
-
-    const users =
-      getUsers();
-
-    const userIndex =
-      users.findIndex(
-        user =>
-          String(
-            user.id
-          ) ===
-          String(
-            request.userId
-          )
-      );
-
-    if (userIndex < 0) {
-
-      return res.status(404).json({
-        error:
-          "User no longer exists."
-      });
-
-    }
-
-    users[userIndex].verified =
-      true;
-
-    users[userIndex].isVerified =
-      true;
-
-    users[userIndex].verificationStatus =
-      "approved";
-
-    request.status =
-      "approved";
-
-    request.updatedAt =
-      now();
-
-    saveUsers(
-      users
-    );
-
-    saveVerificationRequests(
-      requests
-    );
-
-    createNotification({
-      userId:
-        users[userIndex].id,
-
-      fromUserId:
-        req.user.id,
-
-      type:
-        "verification",
-
-      message:
-        "Your account has been verified."
-    });
-
-    res.json({
-      success: true,
-
-      user:
-        safeUser(
-          users[userIndex],
-          req.user
-        )
-    });
-
-  }
-);
-
-/* =========================================================
-   ADMIN REJECT VERIFICATION
-========================================================= */
-
-app.post(
-  "/api/admin/verification/:id/reject",
-  requireAuth,
-  requireAdmin,
-  function(req, res) {
-
-    const requests =
-      getVerificationRequests();
-
-    const index =
-      requests.findIndex(
-        request =>
-          String(
-            request.id
-          ) ===
-          String(
-            req.params.id
-          )
-      );
-
-    if (index < 0) {
-
-      return res.status(404).json({
-        error:
-          "Verification request not found."
-      });
-
-    }
-
-    const request =
-      requests[index];
-
-    request.status =
-      "rejected";
-
-    request.updatedAt =
-      now();
-
-    saveVerificationRequests(
-      requests
-    );
-
-    const users =
-      getUsers();
-
-    const userIndex =
-      users.findIndex(
-        user =>
-          String(
-            user.id
-          ) ===
-          String(
-            request.userId
-          )
-      );
-
-    if (userIndex >= 0) {
-
-      users[userIndex].verificationStatus =
-        "rejected";
-
-      saveUsers(
-        users
-      );
-
-      createNotification({
-        userId:
-          users[userIndex].id,
-
-        fromUserId:
-          req.user.id,
-
-        type:
-          "verification",
-
-        message:
-          "Your verification request was rejected."
-      });
-
-    }
-
-    res.json({
-      success: true,
-      request
-    });
-
-  }
-);
-
-/* =========================================================
-   ADMIN DELETE USER
-========================================================= */
-
-app.delete(
-  "/api/admin/users/:id",
-  requireAuth,
-  requireAdmin,
-  function(req, res) {
-
-    const userId =
-      req.params.id;
-
-    if (
-      String(userId) ===
-      String(req.user.id)
-    ) {
-
-      return res.status(400).json({
-        error:
-          "You cannot delete your own admin account."
-      });
-
-    }
-
-    const users =
-      getUsers();
-
-    const user =
-      users.find(
-        item =>
-          String(
-            item.id
-          ) ===
-          String(
-            userId
-          )
-      );
-
-    if (!user) {
-
-      return res.status(404).json({
-        error:
-          "User not found."
-      });
-
-    }
-
-    saveUsers(
-      users.filter(
-        item =>
-          String(
-            item.id
-          ) !==
-          String(
-            userId
-          )
-      )
-    );
-
-    savePosts(
-      getPosts().filter(
-        post =>
-          String(
-            post.userId
-          ) !==
-          String(
-            userId
-          )
-      )
-    );
-
-    saveComments(
-      getComments().filter(
-        comment =>
-          String(
-            comment.userId
-          ) !==
-          String(
-            userId
-          )
-      )
-    );
-
-    saveLikes(
-      getLikes().filter(
-        like =>
-          String(
-            like.userId
-          ) !==
-          String(
-            userId
-          )
-      )
-    );
-
-    saveFollows(
-      getFollows().filter(
-        follow =>
-          String(
-            follow.followerId
-          ) !==
-            String(
-              userId
-            ) &&
-          String(
-            follow.followingId
-          ) !==
-            String(
-              userId
-            )
-      )
-    );
-
-    res.json({
-      success: true
-    });
-
-  }
-);
-
-/* =========================================================
-   HELPERS FOR FILE DELETION
-========================================================= */
-
-function safeDelete(filePath) {
-
-  if (!filePath) {
-    return;
-  }
-
-  try {
-
-    if (
-      fs.existsSync(
-        filePath
-      )
-    ) {
-
-      fs.unlinkSync(
-        filePath
-      );
-
-    }
-
-  } catch (error) {
-
-    console.error(
-      "FILE DELETE ERROR:",
-      error.message
-    );
-
-  }
-
-}
-
-function deleteUploadFile(
-  urlPath
-) {
-
-  if (
-    !urlPath ||
-    typeof urlPath !==
-      "string"
-  ) {
-    return;
-  }
-
-  if (
-    !urlPath.startsWith(
-      "/uploads/"
-    )
-  ) {
-    return;
-  }
-
-  const relative =
-    urlPath.replace(
-      /^\/uploads\//,
-      ""
-    );
-
-  const fullPath =
-    path.resolve(
-      UPLOADS_DIR,
-      relative
-    );
-
-  const uploadsRoot =
-    path.resolve(
-      UPLOADS_DIR
-    );
-
-  if (
-    !fullPath.startsWith(
-      uploadsRoot
-    )
-  ) {
-    return;
-  }
-
-  safeDelete(
-    fullPath
-  );
-
-}
-
-/* =========================================================
-   HASHTAGS
-========================================================= */
-
-function extractHashtags(
-  text
-) {
-
-  const matches =
-    String(text || "")
-      .match(
-        /#[a-zA-Z0-9_]+/g
-      );
-
-  if (!matches) {
-    return [];
-  }
-
-  return [
-    ...new Set(
-      matches.map(
-        tag =>
-          tag.toLowerCase()
-      )
-    )
-  ].slice(
-    0,
-    50
-  );
-
-}
-
-/* =========================================================
-   MULTER ERROR HANDLER
+   STATIC FILES
 ========================================================= */
 
 app.use(
-  function(
-    error,
-    req,
-    res,
-    next
-  ) {
+  "/uploads",
+  express.static(UPLOADS_DIR)
+);
 
+app.use(
+  express.static(
+    path.join(ROOT, "public")
+  )
+);
+
+/* =========================================================
+   SPA / HTML FALLBACK
+========================================================= */
+
+app.get("/", (req, res) => {
+  res.sendFile(
+    path.join(
+      ROOT,
+      "public",
+      "index.html"
+    )
+  );
+});
+
+app.use(
+  (req, res, next) => {
     if (
-      error instanceof
-      multer.MulterError
+      req.path.startsWith("/api/")
     ) {
-
-      if (
-        error.code ===
-        "LIMIT_FILE_SIZE"
-      ) {
-
-        return res.status(400).json({
-          error:
-            "File is too large. Maximum size is 20MB."
-        });
-
-      }
-
-      return res.status(400).json({
-        error:
-          error.message
+      return res.status(404).json({
+        success: false,
+        message: "API route not found."
       });
-
-    }
-
-    if (error) {
-
-      console.error(
-        "SERVER ERROR:",
-        error
-      );
-
-      return res.status(400).json({
-        error:
-          error.message ||
-          "Request failed."
-      });
-
     }
 
     next();
-
   }
 );
 
 /* =========================================================
-   404 API HANDLER
+   ERROR HANDLER
 ========================================================= */
 
 app.use(
-  "/api",
-  function(req, res) {
+  (error, req, res, next) => {
+    console.error(
+      "SERVER ERROR:",
+      error
+    );
 
-    res.status(404).json({
-      error:
-        "API endpoint not found."
+    if (
+      error instanceof multer.MulterError
+    ) {
+      return res.status(400).json({
+        success: false,
+        message:
+          `Upload error: ${error.message}`
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message:
+        error.message ||
+        "Internal server error."
     });
-
   }
 );
 
 /* =========================================================
-   START SERVER
+   START
 ========================================================= */
 
 app.listen(
   PORT,
   HOST,
-  function() {
-
+  () => {
     console.log("");
     console.log(
-      "=============================================="
+      "========================================"
     );
     console.log(
-      "        PULSE SOCIAL SERVER"
+      "          PULSE SOCIAL SERVER"
     );
     console.log(
-      "=============================================="
+      "========================================"
     );
     console.log(
       `Server: http://${HOST}:${PORT}`
@@ -5058,36 +2603,17 @@ app.listen(
       `Storage: ${STORAGE_ROOT}`
     );
     console.log(
-      `Persistent: ${Boolean(process.env.STORAGE_ROOT)}`
+      `Environment: ${
+        process.env.NODE_ENV ||
+        "development"
+      }`
     );
     console.log(
-      "Video uploads: ENABLED"
+      "Facebook-style social platform ready."
     );
     console.log(
-      "For You feed: ENABLED"
-    );
-    console.log(
-      "Following feed: ENABLED"
-    );
-    console.log(
-      "Likes: ENABLED"
-    );
-    console.log(
-      "Comments: ENABLED"
-    );
-    console.log(
-      "Follow system: ENABLED"
-    );
-    console.log(
-      "Verified accounts: ENABLED"
-    );
-    console.log(
-      "Messages: ENABLED"
-    );
-    console.log(
-      "=============================================="
+      "========================================"
     );
     console.log("");
-
   }
 );
