@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Verification Admin - Pulse Social</title>
+
+  <title>Admin Dashboard • Pulse Social</title>
 
   <style>
     * {
@@ -18,794 +19,1950 @@
       color: #1c1e21;
     }
 
-    .topbar {
-      height: 64px;
-      background: #1877f2;
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 25px;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      box-shadow: 0 2px 8px rgba(0,0,0,.15);
+    button,
+    input {
+      font: inherit;
     }
 
-    .brand {
-      font-size: 23px;
+    button {
+      cursor: pointer;
+    }
+
+    /* =========================
+       TOPBAR
+    ========================= */
+
+    .topbar {
+      height: 64px;
+      background: #fff;
+      border-bottom: 1px solid #dddfe2;
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .logo {
+      color: #1877f2;
+      font-size: 28px;
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    .admin-label {
+      margin-left: 12px;
+      padding: 6px 10px;
+      background: #e7f3ff;
+      color: #1877f2;
+      border-radius: 6px;
+      font-size: 13px;
       font-weight: 700;
     }
 
     .top-actions {
+      margin-left: auto;
       display: flex;
-      gap: 10px;
       align-items: center;
+      gap: 8px;
     }
 
     .top-btn {
       border: none;
-      background: rgba(255,255,255,.15);
-      color: white;
-      padding: 9px 14px;
+      background: #e4e6eb;
+      color: #1c1e21;
+      padding: 9px 13px;
       border-radius: 7px;
-      cursor: pointer;
-      font-weight: 600;
+      font-weight: 700;
     }
 
     .top-btn:hover {
-      background: rgba(255,255,255,.25);
+      background: #d8dadf;
     }
 
-    .container {
-      width: min(1100px, calc(100% - 30px));
-      margin: 30px auto;
+    /* =========================
+       LAYOUT
+    ========================= */
+
+    .layout {
+      display: flex;
+      min-height: calc(100vh - 64px);
     }
 
-    .page-header {
-      background: white;
-      border-radius: 12px;
-      padding: 25px;
-      margin-bottom: 20px;
-      box-shadow: 0 1px 3px rgba(0,0,0,.08);
+    .sidebar {
+      width: 240px;
+      background: #fff;
+      border-right: 1px solid #dddfe2;
+      padding: 18px 12px;
+      position: fixed;
+      top: 64px;
+      bottom: 0;
+      left: 0;
     }
 
-    .page-header h1 {
-      font-size: 28px;
-      margin-bottom: 7px;
-    }
-
-    .page-header p {
+    .side-title {
       color: #65676b;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 10px 12px;
+      text-transform: uppercase;
     }
+
+    .side-btn {
+      width: 100%;
+      border: none;
+      background: transparent;
+      text-align: left;
+      padding: 12px;
+      border-radius: 8px;
+      font-weight: 700;
+      color: #444;
+      margin-bottom: 3px;
+    }
+
+    .side-btn:hover,
+    .side-btn.active {
+      background: #e7f3ff;
+      color: #1877f2;
+    }
+
+    .main {
+      margin-left: 240px;
+      width: calc(100% - 240px);
+      padding: 25px;
+    }
+
+    /* =========================
+       PAGE
+    ========================= */
+
+    .page-title {
+      font-size: 28px;
+      margin-bottom: 5px;
+    }
+
+    .page-subtitle {
+      color: #65676b;
+      margin-bottom: 25px;
+    }
+
+    .section {
+      display: none;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    /* =========================
+       STAT CARDS
+    ========================= */
 
     .stats {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 15px;
-      margin-bottom: 20px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 22px;
     }
 
     .stat {
-      background: white;
-      border-radius: 12px;
+      background: #fff;
+      border-radius: 10px;
       padding: 20px;
-      box-shadow: 0 1px 3px rgba(0,0,0,.08);
+      box-shadow: 0 1px 3px rgba(0,0,0,.15);
+    }
+
+    .stat-icon {
+      font-size: 25px;
+      margin-bottom: 12px;
+    }
+
+    .stat-number {
+      font-size: 27px;
+      font-weight: 800;
     }
 
     .stat-label {
       color: #65676b;
-      font-size: 14px;
-      margin-bottom: 8px;
+      margin-top: 5px;
     }
 
-    .stat-number {
-      font-size: 30px;
-      font-weight: 700;
+    /* =========================
+       CARDS
+    ========================= */
+
+    .card {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.15);
+      padding: 20px;
+      margin-bottom: 20px;
     }
 
-    .requests {
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .card-title {
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    /* =========================
+       VERIFICATION
+    ========================= */
+
+    .verification-list {
       display: flex;
       flex-direction: column;
-      gap: 15px;
+      gap: 12px;
     }
 
-    .request-card {
-      background: white;
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 1px 3px rgba(0,0,0,.08);
-    }
-
-    .request-top {
+    .verification-item {
+      border: 1px solid #dddfe2;
+      border-radius: 10px;
+      padding: 16px;
       display: flex;
       align-items: center;
-      gap: 15px;
+      gap: 14px;
     }
 
     .avatar {
-      width: 58px;
-      height: 58px;
+      width: 52px;
+      height: 52px;
       border-radius: 50%;
       object-fit: cover;
-      background: #e4e6eb;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 22px;
-      font-weight: 700;
-      color: #65676b;
+      background: #ddd;
       flex-shrink: 0;
     }
 
-    .user-info {
+    .verification-info {
       flex: 1;
       min-width: 0;
     }
 
-    .user-name {
-      font-size: 18px;
-      font-weight: 700;
+    .verification-name {
+      font-weight: 800;
+      font-size: 16px;
     }
 
     .username {
       color: #65676b;
+      font-size: 14px;
       margin-top: 3px;
     }
 
-    .verified-badge {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 19px;
-      height: 19px;
-      border-radius: 50%;
-      background: #1877f2;
-      color: white;
-      font-size: 12px;
-      font-weight: bold;
-      margin-left: 5px;
-    }
-
-    .status {
-      padding: 6px 11px;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: 700;
-      text-transform: capitalize;
-    }
-
-    .status.pending {
-      background: #fff4cc;
-      color: #8a6500;
-    }
-
-    .status.approved {
-      background: #d9f7df;
-      color: #188038;
-    }
-
-    .status.rejected {
-      background: #ffe0e0;
-      color: #c5221f;
-    }
-
-    .reason-box {
-      background: #f5f6f7;
-      border-radius: 9px;
-      padding: 15px;
-      margin: 18px 0;
-    }
-
-    .reason-title {
-      font-size: 13px;
-      color: #65676b;
-      margin-bottom: 7px;
-      font-weight: 700;
-    }
-
     .reason {
-      line-height: 1.5;
-      white-space: pre-wrap;
+      margin-top: 9px;
+      line-height: 1.45;
+      color: #444;
       word-break: break-word;
     }
 
     .request-date {
       color: #65676b;
-      font-size: 13px;
-      margin-bottom: 15px;
+      font-size: 12px;
+      margin-top: 7px;
     }
 
-    .actions {
+    .verification-actions {
       display: flex;
-      gap: 10px;
-      border-top: 1px solid #e4e6eb;
-      padding-top: 15px;
+      gap: 7px;
+      flex-shrink: 0;
     }
 
-    .btn {
+    .approve {
       border: none;
+      background: #16a34a;
+      color: #fff;
+      padding: 9px 13px;
       border-radius: 7px;
-      padding: 10px 18px;
-      cursor: pointer;
       font-weight: 700;
-      font-size: 14px;
     }
 
-    .btn-approve {
-      background: #42b72a;
-      color: white;
+    .approve:hover {
+      background: #15803d;
     }
 
-    .btn-approve:hover {
-      background: #36a420;
+    .reject {
+      border: none;
+      background: #dc2626;
+      color: #fff;
+      padding: 9px 13px;
+      border-radius: 7px;
+      font-weight: 700;
     }
 
-    .btn-reject {
-      background: #e41e3f;
-      color: white;
+    .reject:hover {
+      background: #b91c1c;
     }
 
-    .btn-reject:hover {
-      background: #c91835;
+    .status-badge {
+      display: inline-block;
+      padding: 5px 9px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
     }
 
-    .btn-profile {
-      background: #e4e6eb;
-      color: #1c1e21;
+    .status-pending {
+      background: #fff4cc;
+      color: #795600;
     }
 
-    .btn-profile:hover {
-      background: #d8dadf;
+    .status-approved {
+      background: #e7f7ed;
+      color: #187a3d;
     }
 
+    .status-rejected {
+      background: #ffebe9;
+      color: #b42318;
+    }
+
+    /* =========================
+       USERS
+    ========================= */
+
+    .search-box {
+      width: 100%;
+      max-width: 420px;
+      border: 1px solid #ccd0d5;
+      border-radius: 8px;
+      padding: 11px 13px;
+      outline: none;
+      margin-bottom: 16px;
+    }
+
+    .search-box:focus {
+      border-color: #1877f2;
+    }
+
+    .users-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .users-table th {
+      text-align: left;
+      padding: 12px;
+      color: #65676b;
+      font-size: 13px;
+      border-bottom: 1px solid #dddfe2;
+    }
+
+    .users-table td {
+      padding: 12px;
+      border-bottom: 1px solid #eee;
+      vertical-align: middle;
+    }
+
+    .user-cell {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .small-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .verified {
+      width: 18px;
+      height: 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: #1877f2;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      vertical-align: middle;
+      margin-left: 3px;
+    }
+
+    /* =========================
+       LOADING / EMPTY
+    ========================= */
+
+    .loading,
     .empty {
-      background: white;
-      border-radius: 12px;
-      padding: 50px 20px;
       text-align: center;
       color: #65676b;
-      box-shadow: 0 1px 3px rgba(0,0,0,.08);
-    }
-
-    .empty-icon {
-      font-size: 45px;
-      margin-bottom: 12px;
-    }
-
-    .loading {
-      background: white;
-      border-radius: 12px;
-      padding: 40px;
-      text-align: center;
-      color: #65676b;
+      padding: 35px 15px;
     }
 
     .error {
-      background: #ffe0e0;
-      color: #b42318;
-      padding: 15px;
-      border-radius: 10px;
-      margin-bottom: 15px;
-      display: none;
+      color: #dc2626;
     }
 
-    .toast {
-      position: fixed;
-      right: 20px;
-      bottom: 20px;
-      background: #1c1e21;
-      color: white;
-      padding: 13px 18px;
-      border-radius: 9px;
-      display: none;
-      z-index: 999;
-      box-shadow: 0 5px 20px rgba(0,0,0,.2);
-    }
+    /* =========================
+       MOBILE
+    ========================= */
 
-    .toast.success {
-      background: #188038;
-    }
+    @media (max-width: 900px) {
 
-    .toast.error {
-      background: #d93025;
-    }
-
-    @media (max-width: 700px) {
-      .topbar {
-        padding: 0 15px;
+      .sidebar {
+        width: 70px;
       }
 
-      .brand {
-        font-size: 19px;
+      .side-title {
+        display: none;
       }
 
-      .container {
-        width: calc(100% - 20px);
-        margin: 15px auto;
+      .side-btn {
+        text-align: center;
+        font-size: 20px;
+        padding: 13px 5px;
+      }
+
+      .side-btn span {
+        display: none;
+      }
+
+      .main {
+        margin-left: 70px;
+        width: calc(100% - 70px);
       }
 
       .stats {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
       }
 
-      .request-top {
-        align-items: flex-start;
+    }
+
+    @media (max-width: 650px) {
+
+      .topbar {
+        padding: 0 12px;
       }
 
-      .status {
-        margin-left: auto;
-      }
-
-      .actions {
-        flex-direction: column;
-      }
-
-      .btn {
-        width: 100%;
-      }
-
-      .top-btn span {
+      .admin-label {
         display: none;
       }
+
+      .top-btn {
+        padding: 8px;
+        font-size: 13px;
+      }
+
+      .main {
+        padding: 15px;
+      }
+
+      .page-title {
+        font-size: 23px;
+      }
+
+      .stats {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .stat {
+        padding: 15px;
+      }
+
+      .stat-number {
+        font-size: 22px;
+      }
+
+      .verification-item {
+        align-items: flex-start;
+        flex-wrap: wrap;
+      }
+
+      .verification-info {
+        width: calc(100% - 70px);
+      }
+
+      .verification-actions {
+        width: 100%;
+        margin-left: 66px;
+      }
+
+      .verification-actions button {
+        flex: 1;
+      }
+
+      .users-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+      }
+
     }
   </style>
 </head>
 
 <body>
 
-  <header class="topbar">
-    <div class="brand">Pulse Social</div>
+<header class="topbar">
 
-    <div class="top-actions">
-      <button class="top-btn" onclick="goToFeed()">🏠 <span>Feed</span></button>
-      <button class="top-btn" onclick="logout()">Logout</button>
+  <a href="/feed.html" class="logo">
+    Pulse
+  </a>
+
+  <span class="admin-label">
+    ADMIN DASHBOARD
+  </span>
+
+  <div class="top-actions">
+
+    <button
+      class="top-btn"
+      onclick="window.location.href='/feed.html'"
+    >
+      View Site
+    </button>
+
+    <button
+      class="top-btn"
+      onclick="logout()"
+    >
+      Logout
+    </button>
+
+  </div>
+
+</header>
+
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+
+  <aside class="sidebar">
+
+    <div class="side-title">
+      Administration
     </div>
-  </header>
 
-  <main class="container">
+    <button
+      class="side-btn active"
+      data-section="dashboard"
+    >
+      📊 <span>Dashboard</span>
+    </button>
 
-    <section class="page-header">
-      <h1>Verification Requests</h1>
-      <p>Review and manage user verification requests.</p>
+    <button
+      class="side-btn"
+      data-section="verification"
+    >
+      ✓ <span>Verification</span>
+    </button>
+
+    <button
+      class="side-btn"
+      data-section="users"
+    >
+      👥 <span>Users</span>
+    </button>
+
+  </aside>
+
+
+  <!-- MAIN -->
+
+  <main class="main">
+
+    <!-- DASHBOARD -->
+
+    <section
+      id="dashboard"
+      class="section active"
+    >
+
+      <h1 class="page-title">
+        Admin Dashboard
+      </h1>
+
+      <p class="page-subtitle">
+        Manage Pulse Social users and verification.
+      </p>
+
+
+      <div class="stats">
+
+        <div class="stat">
+          <div class="stat-icon">👥</div>
+          <div
+            id="totalUsers"
+            class="stat-number"
+          >
+            0
+          </div>
+          <div class="stat-label">
+            Total Users
+          </div>
+        </div>
+
+
+        <div class="stat">
+          <div class="stat-icon">✓</div>
+          <div
+            id="verifiedUsers"
+            class="stat-number"
+          >
+            0
+          </div>
+          <div class="stat-label">
+            Verified Users
+          </div>
+        </div>
+
+
+        <div class="stat">
+          <div class="stat-icon">⏳</div>
+          <div
+            id="pendingVerification"
+            class="stat-number"
+          >
+            0
+          </div>
+          <div class="stat-label">
+            Pending Verification
+          </div>
+        </div>
+
+
+        <div class="stat">
+          <div class="stat-icon">📝</div>
+          <div
+            id="totalPosts"
+            class="stat-number"
+          >
+            0
+          </div>
+          <div class="stat-label">
+            Total Posts
+          </div>
+        </div>
+
+      </div>
+
+
+      <div class="card">
+
+        <div class="card-header">
+
+          <div class="card-title">
+            Verification Requests
+          </div>
+
+          <button
+            class="top-btn"
+            onclick="showSection('verification')"
+          >
+            View All
+          </button>
+
+        </div>
+
+        <div id="dashboardVerification">
+          <div class="loading">
+            Loading...
+          </div>
+        </div>
+
+      </div>
+
     </section>
 
-    <div id="errorBox" class="error"></div>
 
-    <section class="stats">
-      <div class="stat">
-        <div class="stat-label">Pending</div>
-        <div class="stat-number" id="pendingCount">0</div>
+    <!-- VERIFICATION -->
+
+    <section
+      id="verification"
+      class="section"
+    >
+
+      <h1 class="page-title">
+        Verification
+      </h1>
+
+      <p class="page-subtitle">
+        Review requests and manage verified accounts.
+      </p>
+
+
+      <div class="card">
+
+        <div class="card-header">
+
+          <div class="card-title">
+            Verification Requests
+          </div>
+
+          <button
+            class="top-btn"
+            onclick="loadVerificationRequests()"
+          >
+            Refresh
+          </button>
+
+        </div>
+
+
+        <div
+          id="verificationList"
+          class="verification-list"
+        >
+          <div class="loading">
+            Loading verification requests...
+          </div>
+        </div>
+
       </div>
 
-      <div class="stat">
-        <div class="stat-label">Approved</div>
-        <div class="stat-number" id="approvedCount">0</div>
-      </div>
-
-      <div class="stat">
-        <div class="stat-label">Rejected</div>
-        <div class="stat-number" id="rejectedCount">0</div>
-      </div>
     </section>
 
-    <section id="requests" class="requests">
-      <div class="loading">Loading verification requests...</div>
+
+    <!-- USERS -->
+
+    <section
+      id="users"
+      class="section"
+    >
+
+      <h1 class="page-title">
+        Users
+      </h1>
+
+      <p class="page-subtitle">
+        View Pulse Social accounts.
+      </p>
+
+
+      <div class="card">
+
+        <input
+          id="userSearch"
+          class="search-box"
+          placeholder="Search users..."
+        >
+
+
+        <div style="overflow-x:auto;">
+
+          <table class="users-table">
+
+            <thead>
+
+              <tr>
+                <th>User</th>
+                <th>Username</th>
+                <th>Status</th>
+                <th>Role</th>
+                <th>Joined</th>
+              </tr>
+
+            </thead>
+
+            <tbody id="usersTable">
+
+              <tr>
+                <td
+                  colspan="5"
+                  class="loading"
+                >
+                  Loading users...
+                </td>
+              </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
     </section>
 
   </main>
 
-  <div id="toast" class="toast"></div>
+</div>
 
-  <script>
-    let requests = [];
 
-    function showToast(message, type = "") {
-      const toast = document.getElementById("toast");
+<script>
 
-      toast.textContent = message;
-      toast.className = "toast " + type;
-      toast.style.display = "block";
+  let allUsers = [];
+  let verificationRequests = [];
 
-      setTimeout(() => {
-        toast.style.display = "none";
-      }, 3000);
+
+  const DEFAULT_AVATAR =
+    "/images/default-avatar.png";
+
+
+  /* =========================
+     HELPERS
+  ========================= */
+
+  function escapeHtml(value) {
+
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+
+  }
+
+
+  function avatarOf(user) {
+
+    return (
+      user?.profilePicture ||
+      user?.profileImage ||
+      user?.avatar ||
+      DEFAULT_AVATAR
+    );
+
+  }
+
+
+  function verifiedOf(user) {
+
+    return (
+      user?.verified === true ||
+      user?.isVerified === true ||
+      user?.verificationStatus === "approved"
+    );
+
+  }
+
+
+  function formatDate(value) {
+
+    if (!value) return "—";
+
+    const date =
+      new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+      return "—";
     }
 
-    function showError(message) {
-      const box = document.getElementById("errorBox");
+    return date.toLocaleDateString([], {
+      year: "numeric",
+      month: "short",
+      day: "numeric"
+    });
 
-      box.textContent = message;
-      box.style.display = "block";
+  }
+
+
+  function normalizeArray(data, key) {
+
+    if (Array.isArray(data)) {
+      return data;
     }
 
-    function hideError() {
-      document.getElementById("errorBox").style.display = "none";
+    if (Array.isArray(data?.[key])) {
+      return data[key];
     }
 
-    function escapeHTML(value) {
-      return String(value ?? "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+    if (Array.isArray(data?.data)) {
+      return data.data;
     }
 
-    function formatDate(date) {
-      if (!date) return "Unknown date";
+    return [];
 
-      const d = new Date(date);
+  }
 
-      if (Number.isNaN(d.getTime())) {
-        return "Unknown date";
-      }
 
-      return d.toLocaleString();
-    }
+  /* =========================
+     API
+  ========================= */
 
-    function getUser(request) {
-      return request.user || request.applicant || request.account || {};
-    }
+  async function api(url, options = {}) {
 
-    function getStatus(request) {
-      return String(request.status || "pending").toLowerCase();
-    }
-
-    function getAvatar(user) {
-      if (user.profilePicture) {
-        return `<img class="avatar" src="${escapeHTML(user.profilePicture)}" alt="Profile picture">`;
-      }
-
-      const name = user.name || user.username || "U";
-      const letter = name.charAt(0).toUpperCase();
-
-      return `<div class="avatar">${escapeHTML(letter)}</div>`;
-    }
-
-    function renderStats() {
-      let pending = 0;
-      let approved = 0;
-      let rejected = 0;
-
-      requests.forEach(request => {
-        const status = getStatus(request);
-
-        if (status === "pending") pending++;
-        if (status === "approved") approved++;
-        if (status === "rejected") rejected++;
+    const response =
+      await fetch(url, {
+        credentials: "same-origin",
+        ...options
       });
 
-      document.getElementById("pendingCount").textContent = pending;
-      document.getElementById("approvedCount").textContent = approved;
-      document.getElementById("rejectedCount").textContent = rejected;
+
+    const data =
+      await response.json().catch(() => ({}));
+
+
+    if (response.status === 401) {
+
+      window.location.href =
+        "/login.html";
+
+      throw new Error(
+        "Authentication required."
+      );
+
     }
 
-    function renderRequests() {
-      const container = document.getElementById("requests");
 
-      if (!requests.length) {
-        container.innerHTML = `
-          <div class="empty">
-            <div class="empty-icon">✓</div>
-            <h2>No verification requests</h2>
-            <p>There are currently no verification requests to review.</p>
-          </div>
-        `;
+    if (response.status === 403) {
 
-        return;
+      throw new Error(
+        data.message ||
+        data.error ||
+        "Administrator access required."
+      );
+
+    }
+
+
+    if (!response.ok) {
+
+      throw new Error(
+        data.message ||
+        data.error ||
+        "Request failed."
+      );
+
+    }
+
+
+    return data;
+
+  }
+
+
+  /* =========================
+     ADMIN CHECK
+  ========================= */
+
+  async function checkAdmin() {
+
+    try {
+
+      const data =
+        await api("/api/admin/me");
+
+
+      if (
+        data.admin !== true &&
+        data.success !== true
+      ) {
+
+        throw new Error(
+          "Administrator access required."
+        );
+
       }
 
-      container.innerHTML = requests.map(request => {
-        const user = getUser(request);
-        const status = getStatus(request);
+    } catch (error) {
 
-        const name = user.name || user.username || "Unknown user";
-        const username = user.username ? "@" + user.username : "";
-        const reason = request.reason || request.message || "No reason provided.";
+      document.body.innerHTML = `
+        <div style="
+          min-height:100vh;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          background:#f0f2f5;
+          padding:20px;
+          font-family:Arial;
+        ">
 
-        const userId = user.id || request.userId || "";
-        const profileUrl = user.username
-          ? `/profile.html?username=${encodeURIComponent(user.username)}`
-          : "#";
+          <div style="
+            background:#fff;
+            padding:35px;
+            border-radius:12px;
+            text-align:center;
+            max-width:430px;
+            box-shadow:0 1px 5px rgba(0,0,0,.2);
+          ">
 
-        let actions = "";
+            <h2 style="margin-bottom:10px;">
+              Admin Access Required
+            </h2>
 
-        if (status === "pending") {
-          actions = `
-            <div class="actions">
-              <button class="btn btn-approve"
-                onclick="approveRequest('${escapeHTML(request.id)}')">
-                ✓ Approve Verification
-              </button>
+            <p style="
+              color:#65676b;
+              margin-bottom:20px;
+            ">
+              ${escapeHtml(error.message)}
+            </p>
 
-              <button class="btn btn-reject"
-                onclick="rejectRequest('${escapeHTML(request.id)}')">
-                ✕ Reject
-              </button>
+            <button
+              onclick="window.location.href='/login.html'"
+              style="
+                border:none;
+                background:#1877f2;
+                color:#fff;
+                padding:11px 20px;
+                border-radius:7px;
+                font-weight:bold;
+                cursor:pointer;
+              "
+            >
+              Go to Login
+            </button>
 
-              ${
-                user.username
-                  ? `<button class="btn btn-profile" onclick="window.location.href='${profileUrl}'">
-                       View Profile
-                     </button>`
-                  : ""
-              }
-            </div>
-          `;
-        } else {
-          actions = `
-            <div class="actions">
-              ${
-                user.username
-                  ? `<button class="btn btn-profile" onclick="window.location.href='${profileUrl}'">
-                       View Profile
-                     </button>`
-                  : ""
-              }
-            </div>
-          `;
-        }
+          </div>
 
-        return `
-          <article class="request-card">
+        </div>
+      `;
 
-            <div class="request-top">
+      throw error;
 
-              ${getAvatar(user)}
+    }
 
-              <div class="user-info">
-                <div class="user-name">
-                  ${escapeHTML(name)}
+  }
+
+
+  /* =========================
+     STATS
+  ========================= */
+
+  async function loadStats() {
+
+    try {
+
+      const data =
+        await api("/api/admin/stats");
+
+
+      const stats =
+        data.stats ||
+        data.data ||
+        data;
+
+
+      document.getElementById(
+        "totalUsers"
+      ).textContent =
+        stats.totalUsers ??
+        stats.users ??
+        0;
+
+
+      document.getElementById(
+        "verifiedUsers"
+      ).textContent =
+        stats.verifiedUsers ??
+        stats.verified ??
+        0;
+
+
+      document.getElementById(
+        "totalPosts"
+      ).textContent =
+        stats.totalPosts ??
+        stats.posts ??
+        0;
+
+
+      await loadVerificationRequests();
+
+      document.getElementById(
+        "pendingVerification"
+      ).textContent =
+        verificationRequests.filter(
+          request =>
+            String(
+              request.status ||
+              request.verificationStatus ||
+              ""
+            ).toLowerCase() === "pending"
+        ).length;
+
+    } catch (error) {
+
+      console.error(
+        "Stats error:",
+        error
+      );
+
+    }
+
+  }
+
+
+  /* =========================
+     VERIFICATION REQUESTS
+  ========================= */
+
+  async function loadVerificationRequests() {
+
+    const list =
+      document.getElementById(
+        "verificationList"
+      );
+
+    try {
+
+      const data =
+        await api(
+          "/api/admin/verification/requests"
+        );
+
+
+      verificationRequests =
+        normalizeArray(
+          data,
+          "requests"
+        );
+
+
+      renderVerificationRequests();
+
+      renderDashboardVerification();
+
+
+      document.getElementById(
+        "pendingVerification"
+      ).textContent =
+        verificationRequests.filter(
+          request =>
+            String(
+              request.status ||
+              request.verificationStatus ||
+              ""
+            ).toLowerCase() === "pending"
+        ).length;
+
+
+    } catch (error) {
+
+      console.error(
+        "Verification error:",
+        error
+      );
+
+
+      list.innerHTML = `
+        <div class="empty error">
+          ${escapeHtml(error.message)}
+        </div>
+      `;
+
+    }
+
+  }
+
+
+  function renderVerificationRequests() {
+
+    const list =
+      document.getElementById(
+        "verificationList"
+      );
+
+
+    if (!verificationRequests.length) {
+
+      list.innerHTML = `
+        <div class="empty">
+          No verification requests found.
+        </div>
+      `;
+
+      return;
+
+    }
+
+
+    list.innerHTML =
+      verificationRequests.map(
+        request => {
+
+          const user =
+            request.user ||
+            request.account ||
+            {};
+
+
+          const status =
+            String(
+              request.status ||
+              request.verificationStatus ||
+              "pending"
+            ).toLowerCase();
+
+
+          const reason =
+            request.reason ||
+            request.message ||
+            request.details ||
+            "No reason provided.";
+
+
+          const requestId =
+            request.id ||
+            request._id;
+
+
+          const username =
+            user.username ||
+            request.username ||
+            "unknown";
+
+
+          return `
+
+            <div class="verification-item">
+
+              <img
+                class="avatar"
+                src="${escapeHtml(avatarOf(user))}"
+                onerror="this.src='${DEFAULT_AVATAR}'"
+              >
+
+
+              <div class="verification-info">
+
+                <div class="verification-name">
+
+                  ${escapeHtml(
+                    user.name ||
+                    user.displayName ||
+                    username
+                  )}
 
                   ${
-                    user.verified === true || user.isVerified === true
-                      ? `<span class="verified-badge">✓</span>`
+                    verifiedOf(user)
+                      ? `<span class="verified">✓</span>`
                       : ""
                   }
+
                 </div>
+
 
                 <div class="username">
-                  ${escapeHTML(username)}
+                  @${escapeHtml(username)}
                 </div>
+
+
+                <div class="reason">
+                  ${escapeHtml(reason)}
+                </div>
+
+
+                <div class="request-date">
+                  Submitted:
+                  ${escapeHtml(
+                    formatDate(
+                      request.createdAt ||
+                      request.submittedAt ||
+                      request.date
+                    )
+                  )}
+                </div>
+
+
+                <div style="margin-top:8px;">
+
+                  <span class="
+                    status-badge
+                    ${
+                      status === "approved"
+                        ? "status-approved"
+                        : status === "rejected"
+                        ? "status-rejected"
+                        : "status-pending"
+                    }
+                  ">
+                    ${escapeHtml(
+                      status.toUpperCase()
+                    )}
+                  </span>
+
+                </div>
+
               </div>
 
-              <span class="status ${escapeHTML(status)}">
-                ${escapeHTML(status)}
+
+              ${
+                status === "pending"
+                  ? `
+                    <div class="verification-actions">
+
+                      <button
+                        class="approve"
+                        onclick="
+                          approveVerification(
+                            '${escapeHtml(requestId)}'
+                          )
+                        "
+                      >
+                        Approve
+                      </button>
+
+                      <button
+                        class="reject"
+                        onclick="
+                          rejectVerification(
+                            '${escapeHtml(requestId)}'
+                          )
+                        "
+                      >
+                        Reject
+                      </button>
+
+                    </div>
+                  `
+                  : ""
+              }
+
+            </div>
+
+          `;
+
+        }
+      ).join("");
+
+  }
+
+
+  /* =========================
+     DASHBOARD VERIFICATION
+  ========================= */
+
+  function renderDashboardVerification() {
+
+    const container =
+      document.getElementById(
+        "dashboardVerification"
+      );
+
+
+    const pending =
+      verificationRequests.filter(
+        request =>
+          String(
+            request.status ||
+            request.verificationStatus ||
+            ""
+          ).toLowerCase() === "pending"
+      );
+
+
+    if (!pending.length) {
+
+      container.innerHTML = `
+        <div class="empty">
+          No pending verification requests.
+        </div>
+      `;
+
+      return;
+
+    }
+
+
+    container.innerHTML =
+      pending.slice(0, 5).map(
+        request => {
+
+          const user =
+            request.user ||
+            {};
+
+
+          return `
+
+            <div style="
+              display:flex;
+              align-items:center;
+              gap:12px;
+              padding:12px 0;
+              border-bottom:1px solid #eee;
+            ">
+
+              <img
+                src="${escapeHtml(avatarOf(user))}"
+                style="
+                  width:45px;
+                  height:45px;
+                  border-radius:50%;
+                  object-fit:cover;
+                "
+                onerror="this.src='${DEFAULT_AVATAR}'"
+              >
+
+
+              <div style="flex:1;">
+
+                <strong>
+                  ${escapeHtml(
+                    user.name ||
+                    user.username ||
+                    "User"
+                  )}
+                </strong>
+
+                <div style="
+                  color:#65676b;
+                  font-size:13px;
+                  margin-top:3px;
+                ">
+                  @${escapeHtml(
+                    user.username || ""
+                  )}
+                </div>
+
+              </div>
+
+
+              <span class="
+                status-badge
+                status-pending
+              ">
+                PENDING
               </span>
 
             </div>
 
-            <div class="reason-box">
-              <div class="reason-title">Verification Request</div>
-              <div class="reason">${escapeHTML(reason)}</div>
-            </div>
+          `;
 
-            <div class="request-date">
-              Requested: ${escapeHTML(formatDate(request.createdAt))}
-            </div>
+        }
+      ).join("");
 
-            ${actions}
+  }
 
-          </article>
-        `;
-      }).join("");
+
+  /* =========================
+     APPROVE
+  ========================= */
+
+  async function approveVerification(
+    requestId
+  ) {
+
+    if (!requestId) {
+
+      alert(
+        "Verification request ID is missing."
+      );
+
+      return;
+
     }
 
-    async function loadRequests() {
-      hideError();
 
-      const container = document.getElementById("requests");
+    const confirmed =
+      confirm(
+        "Approve this verification request?"
+      );
 
-      container.innerHTML = `
-        <div class="loading">
-          Loading verification requests...
-        </div>
+
+    if (!confirmed) return;
+
+
+    try {
+
+      await api(
+        "/api/admin/verification/" +
+        encodeURIComponent(requestId) +
+        "/approve",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json"
+          }
+        }
+      );
+
+
+      alert(
+        "Verification approved successfully."
+      );
+
+
+      await loadVerificationRequests();
+
+      await loadUsers();
+
+      await loadStats();
+
+
+    } catch (error) {
+
+      alert(
+        error.message ||
+        "Unable to approve verification."
+      );
+
+    }
+
+  }
+
+
+  /* =========================
+     REJECT
+  ========================= */
+
+  async function rejectVerification(
+    requestId
+  ) {
+
+    if (!requestId) {
+
+      alert(
+        "Verification request ID is missing."
+      );
+
+      return;
+
+    }
+
+
+    const reason =
+      prompt(
+        "Reason for rejecting this request (optional):"
+      );
+
+
+    if (reason === null) return;
+
+
+    try {
+
+      await api(
+        "/api/admin/verification/" +
+        encodeURIComponent(requestId) +
+        "/reject",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+          body: JSON.stringify({
+            reason,
+            message: reason
+          })
+        }
+      );
+
+
+      alert(
+        "Verification request rejected."
+      );
+
+
+      await loadVerificationRequests();
+
+      await loadStats();
+
+
+    } catch (error) {
+
+      alert(
+        error.message ||
+        "Unable to reject verification."
+      );
+
+    }
+
+  }
+
+
+  /* =========================
+     USERS
+  ========================= */
+
+  async function loadUsers() {
+
+    const tbody =
+      document.getElementById(
+        "usersTable"
+      );
+
+
+    try {
+
+      const data =
+        await api(
+          "/api/admin/users"
+        );
+
+
+      allUsers =
+        normalizeArray(
+          data,
+          "users"
+        );
+
+
+      renderUsers(
+        allUsers
+      );
+
+
+    } catch (error) {
+
+      console.error(
+        "Users error:",
+        error
+      );
+
+
+      tbody.innerHTML = `
+        <tr>
+          <td
+            colspan="5"
+            class="loading error"
+          >
+            ${escapeHtml(error.message)}
+          </td>
+        </tr>
       `;
 
-      try {
-        const response = await fetch("/api/admin/verification/requests", {
-          credentials: "include"
-        });
+    }
 
-        const data = await response.json().catch(() => ({}));
+  }
 
-        if (!response.ok) {
-          throw new Error(
-            data.message ||
-            data.error ||
-            "Unable to load verification requests."
-          );
-        }
 
-        /*
-          Supports:
+  function renderUsers(users) {
 
-          {
-            success: true,
-            requests: [...]
-          }
+    const tbody =
+      document.getElementById(
+        "usersTable"
+      );
 
-          or
 
-          {
-            success: true,
-            data: [...]
-          }
-        */
+    if (!users.length) {
 
-        if (Array.isArray(data.requests)) {
-          requests = data.requests;
-        } else if (Array.isArray(data.data)) {
-          requests = data.data;
-        } else if (data.data && Array.isArray(data.data.requests)) {
-          requests = data.data.requests;
-        } else {
-          requests = [];
-        }
+      tbody.innerHTML = `
+        <tr>
+          <td
+            colspan="5"
+            class="empty"
+          >
+            No users found.
+          </td>
+        </tr>
+      `;
 
-        renderStats();
-        renderRequests();
+      return;
 
-      } catch (error) {
-        console.error("Verification load error:", error);
+    }
 
-        container.innerHTML = `
-          <div class="empty">
-            <div class="empty-icon">⚠️</div>
-            <h2>Unable to load requests</h2>
-            <p>${escapeHTML(error.message)}</p>
-          </div>
+
+    tbody.innerHTML =
+      users.map(user => {
+
+        const name =
+          user.name ||
+          user.displayName ||
+          user.username ||
+          "User";
+
+
+        const role =
+          user.role ||
+          "user";
+
+
+        return `
+
+          <tr>
+
+            <td>
+
+              <div class="user-cell">
+
+                <img
+                  class="small-avatar"
+                  src="${escapeHtml(
+                    avatarOf(user)
+                  )}"
+                  onerror="
+                    this.src='${DEFAULT_AVATAR}'
+                  "
+                >
+
+
+                <div>
+
+                  <strong>
+                    ${escapeHtml(name)}
+                  </strong>
+
+                  ${
+                    verifiedOf(user)
+                      ? `
+                        <span class="verified">
+                          ✓
+                        </span>
+                      `
+                      : ""
+                  }
+
+                </div>
+
+              </div>
+
+            </td>
+
+
+            <td>
+              @${escapeHtml(
+                user.username || ""
+              )}
+            </td>
+
+
+            <td>
+
+              ${
+                verifiedOf(user)
+                  ? `
+                    <span class="
+                      status-badge
+                      status-approved
+                    ">
+                      VERIFIED
+                    </span>
+                  `
+                  : `
+                    <span style="
+                      color:#65676b;
+                      font-size:13px;
+                    ">
+                      Not verified
+                    </span>
+                  `
+              }
+
+            </td>
+
+
+            <td>
+              ${escapeHtml(role)}
+            </td>
+
+
+            <td>
+              ${escapeHtml(
+                formatDate(
+                  user.createdAt
+                )
+              )}
+            </td>
+
+          </tr>
+
         `;
 
-        showError(error.message);
-      }
-    }
+      }).join("");
 
-    async function approveRequest(requestId) {
-      if (!requestId) return;
+  }
 
-      const confirmed = confirm(
-        "Approve this user for verification?"
-      );
 
-      if (!confirmed) return;
+  /* =========================
+     USER SEARCH
+  ========================= */
 
-      try {
-        const response = await fetch(
-          `/api/admin/verification/${encodeURIComponent(requestId)}/approve`,
-          {
-            method: "POST",
-            credentials: "include",
-            headers: {
-              "Content-Type": "application/json"
+  document
+    .getElementById("userSearch")
+    .addEventListener(
+      "input",
+      function() {
+
+        const query =
+          this.value
+            .trim()
+            .toLowerCase();
+
+
+        if (!query) {
+
+          renderUsers(
+            allUsers
+          );
+
+          return;
+
+        }
+
+
+        const filtered =
+          allUsers.filter(
+            user => {
+
+              const name =
+                String(
+                  user.name ||
+                  user.displayName ||
+                  ""
+                ).toLowerCase();
+
+
+              const username =
+                String(
+                  user.username ||
+                  ""
+                ).toLowerCase();
+
+
+              const email =
+                String(
+                  user.email ||
+                  ""
+                ).toLowerCase();
+
+
+              return (
+                name.includes(query) ||
+                username.includes(query) ||
+                email.includes(query)
+              );
+
             }
-          }
-        );
-
-        const data = await response.json().catch(() => ({}));
-
-        if (!response.ok) {
-          throw new Error(
-            data.message ||
-            data.error ||
-            "Unable to approve verification."
           );
-        }
 
-        showToast(
-          data.message || "User has been verified.",
-          "success"
+
+        renderUsers(
+          filtered
         );
 
-        await loadRequests();
-
-      } catch (error) {
-        console.error("Approve verification error:", error);
-        showToast(error.message, "error");
       }
+    );
+
+
+  /* =========================
+     NAVIGATION
+  ========================= */
+
+  function showSection(
+    sectionName
+  ) {
+
+    document
+      .querySelectorAll(".section")
+      .forEach(section => {
+
+        section.classList.remove(
+          "active"
+        );
+
+      });
+
+
+    document
+      .getElementById(sectionName)
+      .classList.add("active");
+
+
+    document
+      .querySelectorAll(".side-btn")
+      .forEach(button => {
+
+        button.classList.toggle(
+          "active",
+          button.dataset.section ===
+          sectionName
+        );
+
+      });
+
+
+    if (sectionName === "users") {
+      loadUsers();
     }
 
-    async function rejectRequest(requestId) {
-      if (!requestId) return;
 
-      const reason = prompt(
-        "Optional rejection reason:"
+    if (sectionName === "verification") {
+      loadVerificationRequests();
+    }
+
+
+    if (sectionName === "dashboard") {
+      loadStats();
+    }
+
+  }
+
+
+  document
+    .querySelectorAll(".side-btn")
+    .forEach(button => {
+
+      button.addEventListener(
+        "click",
+        () => {
+
+          showSection(
+            button.dataset.section
+          );
+
+        }
       );
 
-      if (reason === null) {
-        return;
-      }
+    });
 
-      try {
-        const response = await fetch(
-          `/api/admin/verification/${encodeURIComponent(requestId)}/reject`,
-          {
-            method: "POST",
-            credentials: "include",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              reason: reason.trim()
-            })
-          }
-        );
 
-        const data = await response.json().catch(() => ({}));
+  /* =========================
+     LOGOUT
+  ========================= */
 
-        if (!response.ok) {
-          throw new Error(
-            data.message ||
-            data.error ||
-            "Unable to reject verification."
-          );
-        }
+  async function logout() {
 
-        showToast(
-          data.message || "Verification request rejected.",
-          "success"
-        );
+    try {
 
-        await loadRequests();
-
-      } catch (error) {
-        console.error("Reject verification error:", error);
-        showToast(error.message, "error");
-      }
-    }
-
-    function goToFeed() {
-      window.location.href = "/feed.html";
-    }
-
-    async function logout() {
-      try {
-        await fetch("/api/logout", {
+      await fetch(
+        "/api/logout",
+        {
           method: "POST",
-          credentials: "include"
-        });
-      } catch (error) {
-        console.error(error);
-      }
-
-      window.location.href = "/login.html";
-    }
-
-    async function checkAdmin() {
-      try {
-        const response = await fetch("/api/me", {
-          credentials: "include"
-        });
-
-        const data = await response.json().catch(() => ({}));
-
-        if (!response.ok || data.loggedIn === false) {
-          window.location.href = "/login.html";
-          return false;
+          credentials: "same-origin"
         }
+      );
 
-        return true;
+    } catch (error) {
 
-      } catch (error) {
-        console.error("Session check error:", error);
-        window.location.href = "/login.html";
-        return false;
-      }
+      console.error(error);
+
     }
 
-    async function init() {
-      const loggedIn = await checkAdmin();
 
-      if (!loggedIn) {
-        return;
-      }
+    window.location.href =
+      "/login.html";
 
-      await loadRequests();
+  }
+
+
+  /* =========================
+     INITIALIZE
+  ========================= */
+
+  async function init() {
+
+    try {
+
+      await checkAdmin();
+
+      await loadUsers();
+
+      await loadStats();
+
+    } catch (error) {
+
+      console.error(
+        "Admin initialization error:",
+        error
+      );
+
     }
 
-    init();
-  </script>
+  }
+
+
+  init();
+
+</script>
 
 </body>
 </html>
